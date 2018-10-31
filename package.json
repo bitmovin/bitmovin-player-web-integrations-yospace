@@ -1,0 +1,30 @@
+{
+  "name": "bitmovin-player-web-integration-yospace",
+  "version": "1.0.0",
+  "description": "Yospace integration for the Bitmovin Player",
+  "author": "Bitmovin",
+  "license": "ISC",
+  "devDependencies": {
+    "bitmovin-player": "^8.0.0",
+    "browser-sync": "^2.18.8",
+    "browserify": "^14.1.0",
+    "del": "^2.2.2",
+    "gulp": "^3.9.1",
+    "gulp-rename": "^1.4.0",
+    "gulp-sourcemaps": "^2.4.1",
+    "gulp-tslint": "^7.1.0",
+    "gulp-typescript": "^3.1.5",
+    "gulp-uglify": "^2.0.1",
+    "merge2": "^1.0.3",
+    "run-sequence": "^1.2.2",
+    "tsify": "^3.0.1",
+    "tslint": "^4.5.0",
+    "typescript": "^2.2.1",
+    "vinyl-buffer": "^1.0.0",
+    "vinyl-source-stream": "^1.1.0",
+    "watchify": "^3.9.0"
+  },
+  "dependencies": {
+    "natives": "^1.1.6"
+  }
+}
