@@ -29,7 +29,6 @@ var paths = {
     target: {
         html: './dist',
         js: './dist/js',
-        jsframework: './dist/js/framework',
     }
 };
 
@@ -38,7 +37,8 @@ var browserifyInstance = browserify({
     debug: true,
     entries: paths.source.tsmain,
     cache: {},
-    packageCache: {}
+    packageCache: {},
+    standalone: 'bitmovin.player.ads.yospace'
 }).plugin(tsify);
 
 var catchBrowserifyErrors = false;
