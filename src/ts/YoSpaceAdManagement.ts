@@ -46,8 +46,11 @@ interface YospaceSourceConfig extends SourceConfig {
 export class BitmovinYospacePlayer implements PlayerAPI {
   // Bitmovin Player
   private player: PlayerAPI;
-  private manager: YSSessionManager;
   private yospaceListener: YospaceAdListener;
+
+  // Yospace fields
+  private manager: YSSessionManager;
+  private playerPolicy: YSPlayerPolicy;
 
   // TODO: override ads module
   readonly ads: PlayerAdvertisingAPI;
@@ -88,7 +91,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     };
 
     let onPause = () => {
-      this.manager.reportPlayerEvent(YSPlayerEvents.START);
+      this.manager.reportPlayerEvent(YSPlayerEvents.PAUSE);
     };
 
     this.player.on(PlayerEvent.Playing, onPlay);
@@ -119,6 +122,9 @@ export class BitmovinYospacePlayer implements PlayerAPI {
           if (this.manager.isYospaceStream()) {
             this.yospaceListener = new YospaceAdListener(this);
             this.manager.registerPlayer(this.yospaceListener);
+
+            // Initialize policy
+            this.playerPolicy = new YSPlayerPolicy(this.manager.session);
           } else {
             // TODO: error or just continue with the url?
             console.log("Shutting down SDK on non-yospace stream");
@@ -170,6 +176,64 @@ export class BitmovinYospacePlayer implements PlayerAPI {
       this.eventHandlers[eventType] = [];
     }
     this.eventHandlers[eventType].push(callback);
+  }
+
+  play(issuer?: string): Promise<void> {
+    if (this.playerPolicy.canStart()) {
+      if (this.isAdActive() && this.player.isPaused()) {
+        this.getCurrentAd().adResumed();
+      }
+      return this.player.play(issuer);
+    }
+
+    // TODO: reason
+    return Promise.reject()
+  }
+
+  pause(issuer?: string): void {
+    if (this.playerPolicy.canPause()) {
+      if (this.isAdActive() && this.player.isPlaying()) {
+        this.getCurrentAd().adPaused();
+      }
+      this.player.pause();
+    }
+  }
+
+  mute(issuer?: string): void {
+    if (this.playerPolicy.canMute()) {
+      this.player.mute();
+    }
+  }
+
+  seek(time: number, issuer?: string): boolean {
+    if (this.playerPolicy.canSeek()) {
+      let allowedSeekTarget = this.playerPolicy.canSeekTo(time);
+
+      return this.player.seek(allowedSeekTarget, issuer);
+    } else {
+      // TODO: feedback handling (all policy checks)
+      console.log('[policy] seeking not allowed')
+    }
+  }
+
+  setViewMode(viewMode: ViewMode, options?: ViewModeOptions): void {
+    // enter or exit fullscreen
+    if (viewMode === ViewMode.Fullscreen || viewMode === ViewMode.Inline) {
+      if (this.playerPolicy.canChangeFullScreen(viewMode === ViewMode.Fullscreen)) {
+        this.player.setViewMode(viewMode, options);
+      }
+    } else {
+      this.player.setViewMode(viewMode, options);
+    }
+  }
+
+  // Helper
+  private isAdActive(): boolean {
+    return !!this.getCurrentAd();
+  }
+
+  private getCurrentAd(): YSAdvert | null {
+    return this.manager.session.currentAdvert;
   }
 
   // Default PlayerAPI implementation
@@ -381,24 +445,8 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     return this.player.isViewModeAvailable(viewMode);
   }
 
-  mute(issuer?: string): void {
-    this.player.mute();
-  }
-
-  pause(issuer?: string): void {
-    this.player.pause();
-  }
-
-  play(issuer?: string): Promise<void> {
-    return this.player.play(issuer);
-  }
-
   preload(): void {
     this.player.preload();
-  }
-
-  seek(time: number, issuer?: string): boolean {
-    return this.player.seek(time, issuer);
   }
 
   setAudio(trackID: string): void {
@@ -435,10 +483,6 @@ export class BitmovinYospacePlayer implements PlayerAPI {
 
   setVideoQuality(videoQualityID: string): void {
     this.player.setVideoQuality(videoQualityID);
-  }
-
-  setViewMode(viewMode: ViewMode, options?: ViewModeOptions): void {
-    this.player.setViewMode(viewMode, options);
   }
 
   setVolume(volume: number, issuer?: string): void {
