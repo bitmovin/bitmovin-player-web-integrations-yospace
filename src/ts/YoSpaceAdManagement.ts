@@ -1,5 +1,6 @@
 ///<reference path="Yospace.d.ts"/>
 import {
+  AdBreakEvent, AdEvent,
   AudioQuality,
   AudioTrack,
   DownloadedAudioData,
@@ -31,7 +32,7 @@ import {
   ViewModeOptions
 } from 'bitmovin-player';
 import { ArrayUtils, UIFactory } from 'bitmovin-player-ui';
-import { YospaceAdListener } from "./YospaceListener";
+import { BYSAdBreakEvent, BYSAdEvent, BYSListenerEvent, YospaceAdListenerAdapter } from "./YospaceListenerAdapter";
 
 enum YospaceAssetType {
   LINEAR,
@@ -47,7 +48,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
   // Bitmovin Player
   private player: PlayerAPI;
   private manager: YSSessionManager;
-  private yospaceListener: YospaceAdListener;
+  private yospaceListenerAdapter: YospaceAdListenerAdapter;
 
   // TODO: override ads module
   readonly ads: PlayerAdvertisingAPI;
@@ -88,12 +89,12 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     };
 
     let onPause = () => {
-      this.manager.reportPlayerEvent(YSPlayerEvents.START);
+      this.manager.reportPlayerEvent(YSPlayerEvents.PAUSE);
     };
 
     this.player.on(PlayerEvent.Playing, onPlay);
-    this.player.on(PlayerEvent.Paused, onPause);
     this.player.on(PlayerEvent.TimeChanged, onTimeChanged);
+    this.player.on(PlayerEvent.Paused, onPause);
 
     // TODO: Yospace Validator
   }
@@ -117,8 +118,9 @@ export class BitmovinYospacePlayer implements PlayerAPI {
           source.hls = this.manager.masterPlaylist();
 
           if (this.manager.isYospaceStream()) {
-            this.yospaceListener = new YospaceAdListener(this);
-            this.manager.registerPlayer(this.yospaceListener);
+            this.yospaceListenerAdapter = new YospaceAdListenerAdapter(this);
+            this.bindYospaceEvent();
+            this.manager.registerPlayer(this.yospaceListenerAdapter);
           } else {
             // TODO: error or just continue with the url?
             console.log("Shutting down SDK on non-yospace stream");
@@ -149,16 +151,6 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     }));
   }
 
-  fireEvent(event: PlayerEventBase): void {
-    if (this.eventHandlers[event.type] === undefined) {
-      return;
-    }
-
-    for (let callback of this.eventHandlers[event.type]) {
-      callback(event);
-    }
-  }
-
   off(eventType: PlayerEvent, callback: PlayerEventCallback): void {
     this.player.off(eventType, callback);
     ArrayUtils.remove(this.eventHandlers[eventType], callback);
@@ -171,6 +163,49 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     }
     this.eventHandlers[eventType].push(callback);
   }
+
+  // Helper
+  private fireEvent(event: PlayerEventBase): void {
+    if (this.eventHandlers[event.type]) {
+      for (let callback of this.eventHandlers[event.type]) {
+        callback(event);
+      }
+    }
+  }
+
+  private bindYospaceEvent() {
+    if (!this.yospaceListenerAdapter) {
+      return;
+    }
+
+    this.yospaceListenerAdapter.addListener(BYSListenerEvent.AD_BREAK_START, this.onAdBreakStart);
+    this.yospaceListenerAdapter.addListener(BYSListenerEvent.ADVERT_START, this.onAdStart);
+    this.yospaceListenerAdapter.addListener(BYSListenerEvent.ADVERT_END, this.onAdFinished);
+    this.yospaceListenerAdapter.addListener(BYSListenerEvent.AD_BREAK_END, this.onAdBreakFinished);
+  }
+
+  private onAdBreakStart = (event: BYSAdBreakEvent) => {
+    let adBreak = event.adBreak;
+    console.log("this", event);
+    let playerEvent = AdEventsFactory.createAdBreakEvent(this.player, adBreak, PlayerEvent.AdBreakStarted);
+    this.fireEvent(playerEvent);
+  };
+
+  private onAdStart = (event: BYSAdEvent) => {
+    let playerEvent = AdEventsFactory.createAdEvent(this.player, PlayerEvent.AdStarted);
+    this.fireEvent(playerEvent);
+  };
+
+  private onAdFinished = (event: BYSAdEvent) => {
+    let playerEvent = AdEventsFactory.createAdEvent(this.player, PlayerEvent.AdFinished);
+    this.fireEvent(playerEvent);
+  };
+
+  private onAdBreakFinished = (event: BYSAdBreakEvent) => {
+    let adBreak = event.adBreak;
+    let playerEvent = AdEventsFactory.createAdBreakEvent(this.player, adBreak, PlayerEvent.AdBreakFinished);
+    this.fireEvent(playerEvent);
+  };
 
   // Default PlayerAPI implementation
   addMetadata(metadataType: MetadataType.CAST, metadata: any): boolean {
@@ -459,5 +494,27 @@ export class BitmovinYospacePlayer implements PlayerAPI {
 
   unmute(issuer?: string): void {
     this.player.unmute(issuer);
+  }
+}
+
+class AdEventsFactory {
+  static createAdBreakEvent(player: PlayerAPI, adBreak: YSAdBreak, type: PlayerEvent): AdBreakEvent {
+    return {
+      timestamp: Date.now(),
+      type: type,
+      adBreak: {
+        scheduleTime: adBreak.startPosition
+      }
+    };
+  }
+
+  static createAdEvent(player: PlayerAPI, type: PlayerEvent): AdEvent {
+    return {
+      timestamp: Date.now(),
+      type: type,
+      ad: {
+        isLinear: true,
+      }
+    };
   }
 }

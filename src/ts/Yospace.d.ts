@@ -44,9 +44,25 @@ declare class YSSessionManager {
   shutdown(): void;
 }
 
-declare class YSPlayerEvents {
-  static START: string;
-  static POSITION: string;
+declare enum YSPlayerEvents {
+  CLICK = "click",
+  CONTINUE = "continue",
+  END = "complete",
+  ERROR = "error",
+  FULLSCREEN = "fullscreen",
+  LINEAR_EVENT = "linear",
+  METADATA = "id3",
+  MUTE = "mute",
+  NONLINEAR = "non_linear",
+  NONLINEAR_EVENT = "nonlinear",
+  PAUSE = "pause",
+  POSITION = "position",
+  READY = "ready",
+  RESUME = "resume",
+  SEEK_END = "seek_end",
+  SEEK_START = "seek_begin",
+  STALL = "buffer",
+  START = "start"
 }
 
 declare class YSAdvert {
@@ -59,4 +75,8 @@ declare class YSAdBreak {
   adBreakStart: number;
   adverts: YSAdvert[];
   startPosition: number;
+}
+
+declare class YSTimeline {
+
 }
