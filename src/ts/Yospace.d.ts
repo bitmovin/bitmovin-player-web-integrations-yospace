@@ -102,6 +102,7 @@ declare class YSSession {
 
 declare class YSPlayerPolicy {
   constructor(_session: YSSession);
+
   /**
    * New fullscreen state requested (true to enter fullscreen, false to leave fullscreen)
    * @param newState
@@ -132,4 +133,8 @@ declare class YSPlayerPolicy {
    */
   canSkip(): number;
   canStart(): boolean;
+}
+
+declare class YSTimeline {
+
 }
