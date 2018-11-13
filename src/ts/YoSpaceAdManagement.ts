@@ -503,6 +503,7 @@ class AdEventsFactory {
       timestamp: Date.now(),
       type: type,
       adBreak: {
+        id: 'someId', // TODO: find id (or generate some)
         scheduleTime: adBreak.startPosition
       }
     };
@@ -514,6 +515,7 @@ class AdEventsFactory {
       type: type,
       ad: {
         isLinear: true,
+        requiresUi: true
       }
     };
   }
