@@ -67,7 +67,7 @@ declare enum YSPlayerEvents {
 }
 
 declare class VASTLinear {
-
+  skipOffset: number;
 }
 
 declare class VASTAd {
@@ -75,15 +75,17 @@ declare class VASTAd {
    * The linear creative contained within this Ad, or null where the ad does not contain a linear creative.
    */
   linear: VASTLinear;
-  duration: number;
-  skipOffset: number;
 }
 
 declare class YSAdvert {
   advert: VASTAd;
+  duration: number;
+  adBreak: YSAdBreak;
+  isActive: boolean;
 
   adPaused(): void;
   adResumed(): void;
+  setActive(active: boolean): void;
 }
 
 declare class YSAdBreak {
@@ -92,10 +94,13 @@ declare class YSAdBreak {
   adBreakStart: number;
   adverts: YSAdvert[];
   startPosition: number;
+
+  getDuration(): number;
 }
 
 declare class YSSession {
   currentAdvert: YSAdvert;
+  timeline: YSTimeline;
 
   getLinearClickthrough(): string;
 }
@@ -135,6 +140,22 @@ declare class YSPlayerPolicy {
   canStart(): boolean;
 }
 
-declare class YSTimeline {
+declare class YSTimelineElement {
+  static ADVERT: string;
+  static VOD: string;
+  static LIVE: string;
 
+  offset: number;
+  duration: number;
+  type: string;
+  adBreak: YSAdBreak;
+
+  getType(): string;
+  getAdverts(): YSAdBreak;
 }
+
+declare class YSTimeline {
+  getAllElements(): YSTimelineElement[];
+}
+
+
