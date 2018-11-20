@@ -6,7 +6,7 @@
     "noImplicitAny": true,
     "target": "es5",
     "declaration": true,
-    "outDir": "dist/js/framework",
+    "outDir": "dist/js",
     "lib": ["es2016", "es2015.promise", "dom"]
   }
 }
