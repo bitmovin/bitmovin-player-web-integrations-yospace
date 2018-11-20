@@ -20,6 +20,16 @@ interface YospaceSourceConfig extends SourceConfig {
   type: YospaceAssetType;
 }
 
+interface StreamPart {
+  start: number;
+  end: number;
+}
+
+interface StreamPartMapping {
+  magic: StreamPart;
+  original: StreamPart;
+}
+
 export class BitmovinYospacePlayer implements PlayerAPI {
   // Bitmovin Player
   private readonly player: PlayerAPI;
@@ -29,6 +39,14 @@ export class BitmovinYospacePlayer implements PlayerAPI {
   private manager: YSSessionManager;
   private yospaceListenerAdapter: YospaceAdListenerAdapter;
   private playerPolicy: BitmovinYospacePlayerPolicy;
+
+  // magic content duration handling
+  private contentDuration: number = 0;
+  private contentMapping: StreamPartMapping[] = [];
+  private adChunks: StreamPart[] = [];
+  // Helper fields to improve performance of magic time calculation
+  private lastTimeLineElement: YSTimelineElement;
+
 
   // TODO: consider custom YospacePlayerConfig if something is needed (DEBUGGING discussion)
   constructor(containerElement: HTMLElement, config: PlayerConfig) {
@@ -53,12 +71,12 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     let onTimeChanged = (event: TimeChangedEvent) => {
       this.manager.reportPlayerEvent(YSPlayerEvents.POSITION, event.time);
 
-      // TODO: will be needed for magic time calculation
+      // fire magic time-changed event
       this.fireEvent<TimeChangedEvent>({
         timestamp: Date.now(),
         type: PlayerEvent.TimeChanged,
         time: this.getCurrentTime()
-      } as TimeChangedEvent);
+      });
     };
 
     let onPause = () => {
@@ -66,8 +84,42 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     };
 
     let onSourceLoaded = () => {
-      // TODO: will be needed for magic time calculation
-      this.fireEvent<PlayerEventBase>({
+      let session = this.manager.session;
+      let timeline = session.timeline;
+
+      // calculate duration magic
+      for (let element of timeline.getAllElements()) {
+        this.lastTimeLineElement = element;
+        let originalChunk = {
+          start: element.offset,
+          end: element.offset + element.duration
+        };
+
+        switch (element.type) {
+          case YSTimelineElement.ADVERT:
+            this.adChunks.push(originalChunk);
+            break;
+          case YSTimelineElement.VOD:
+
+            let magicalContentChunk = {
+              start: this.contentDuration,
+              end: this.contentDuration + element.duration
+            };
+
+            this.contentMapping.push({
+              magic: magicalContentChunk,
+              original: originalChunk
+            });
+
+            this.contentDuration += element.duration;
+
+            break;
+          case YSTimelineElement.LIVE:
+          // TODO: find out how to handle
+        }
+      }
+
+      this.fireEvent({
         timestamp: Date.now(),
         type: PlayerEvent.SourceLoaded,
       });
@@ -199,22 +251,69 @@ export class BitmovinYospacePlayer implements PlayerAPI {
   }
 
   seek(time: number, issuer?: string): boolean {
+    // do not use this seek method for seeking within ads (skip) use player.seek(…) instead
     if (!this.playerPolicy.canSeek()) {
       return false;
     }
 
+    // magical content seeking
+    let chunk = this.contentMapping.filter((mapping: StreamPartMapping) => {
+      return mapping.magic.start <= time && time < mapping.magic.end
+    })[0];
+
+    let elapsedTimeInChunk = time - chunk.magic.start;
+    let magicSeekTarget = chunk.original.start + elapsedTimeInChunk;
+
+    console.log('Tried to seek to ', time, 'but was mapped to', magicSeekTarget);
+    time = magicSeekTarget;
+
     return this.player.seek(time, issuer);
+
   }
 
   getCurrentTime(): number {
-    return this.player.getCurrentTime();
+    // TODO: only for VoD (take from config)
+    if (this.isAdActive()) {
+      // return currentTime in AdBreak
+      let ad = this.getCurrentAd();
+      let indexInAdBreak = ad.adBreak.adverts.indexOf(ad);
+
+      let previousAdverts: YSAdvert[] = ad.adBreak.adverts.slice(0, indexInAdBreak);
+
+      // TODO: may also here the performance should be improved
+      let startTime = ad.adBreak.startPosition + previousAdverts.reduce((pv, cv) => pv + cv.duration, 0);
+
+      // debugger;
+      // let adStart = ad.ad; // FIXME: need to be ad
+      let currentAdPosition = this.player.getCurrentTime();
+
+      return currentAdPosition - startTime;
+
+    }
+
+    // TODO: get previous adBreaks
+    let currentRealTime = this.player.getCurrentTime();
+
+    let previousBreaksDuration = 0;
+
+    // TODO: i think we would need to improve the performance of this
+    this.adChunks.filter((chunk: StreamPart) => {
+      if (chunk.start < currentRealTime && currentRealTime > chunk.end) {
+        previousBreaksDuration += chunk.end - chunk.start;
+      }
+    });
+
+    let time = currentRealTime - previousBreaksDuration;
+    return time;
+
   }
 
   getDuration(): number {
+    // return magic content duration
     if (this.isAdActive()) {
       return this.getCurrentAd().duration;
     }
-    return this.player.getDuration();
+    return this.contentDuration;
   }
 
   // Helper
@@ -287,6 +386,28 @@ export class BitmovinYospacePlayer implements PlayerAPI {
       clickThroughUrl: ysAd.advert.linear.clickThrough,
       mediaFileUrl: ysAd.advert.linear.mediaFiles[0].src,
     };
+  }
+
+  getVideoBufferLength(): number | null {
+    let bufferLength = this.player.getVideoBufferLength();
+    if (this.isAdActive()) {
+      return Math.min(bufferLength, this.getCurrentAd().duration);
+    }
+
+    let futureBreakDurations = 0;
+    let currentRealTime = this.player.getCurrentTime();
+    let bufferedRange = currentRealTime + bufferLength;
+
+    // TODO: i think we would need to improve the performance of this
+    this.adChunks.map((chunk: StreamPart) => {
+      if (chunk.start > currentRealTime && chunk.end < bufferedRange) {
+        futureBreakDurations += chunk.end - chunk.start;
+      } else if (chunk.start > currentRealTime && chunk.start < bufferedRange && chunk.end > bufferedRange) {
+        futureBreakDurations += bufferedRange - chunk.start;
+      }
+    });
+
+    return Math.max(bufferLength - futureBreakDurations, 0);
   }
 
   // Custom advertising module with overwritten methods
@@ -388,6 +509,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
   }
 
   getAudioBufferLength(): number | null {
+    // TODO: implement if yospace supports audio only streams
     return this.player.getAudioBufferLength();
   }
 
@@ -493,10 +615,6 @@ export class BitmovinYospacePlayer implements PlayerAPI {
 
   getTotalStalledTime(): number {
     return this.player.getTotalStalledTime();
-  }
-
-  getVideoBufferLength(): number | null {
-    return this.player.getVideoBufferLength();
   }
 
   getVideoElement(): HTMLVideoElement | HTMLObjectElement {
