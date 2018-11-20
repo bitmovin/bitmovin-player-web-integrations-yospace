@@ -54,7 +54,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
       this.manager.reportPlayerEvent(YSPlayerEvents.POSITION, event.time);
 
       // TODO: will be needed for magic time calculation
-      this.fireEvent({
+      this.fireEvent<TimeChangedEvent>({
         timestamp: Date.now(),
         type: PlayerEvent.TimeChanged,
         time: this.getCurrentTime()
@@ -67,7 +67,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
 
     let onSourceLoaded = () => {
       // TODO: will be needed for magic time calculation
-      this.fireEvent({
+      this.fireEvent<PlayerEventBase>({
         timestamp: Date.now(),
         type: PlayerEvent.SourceLoaded,
       });
@@ -229,7 +229,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     return this.manager.session.currentAdvert;
   }
 
-  private fireEvent(event: PlayerEventBase): void {
+  private fireEvent<E extends PlayerEventBase>(event: E): void {
     if (this.eventHandlers[event.type]) {
       for (let callback of this.eventHandlers[event.type]) {
         callback(event);
@@ -251,24 +251,24 @@ export class BitmovinYospacePlayer implements PlayerAPI {
   private onAdBreakStart = (event: BYSAdBreakEvent) => {
     let adBreak = event.adBreak;
     let playerEvent = AdEventsFactory.createAdBreakEvent(this.player, adBreak, PlayerEvent.AdBreakStarted);
-    this.fireEvent(playerEvent);
+    this.fireEvent<AdBreakEvent>(playerEvent);
   };
 
   private onAdStart = (event: BYSAdEvent) => {
     let playerEvent = AdEventsFactory.createAdEvent(this.player, PlayerEvent.AdStarted, this.playerPolicy, this.manager);
-    this.fireEvent(playerEvent);
+    this.fireEvent<AdEvent>(playerEvent);
     // TODO: autoskip if available
   };
 
   private onAdFinished = (event: BYSAdEvent) => {
     let playerEvent = AdEventsFactory.createAdEvent(this.player, PlayerEvent.AdFinished, this.playerPolicy, this.manager);
-    this.fireEvent(playerEvent);
+    this.fireEvent<AdEvent>(playerEvent);
   };
 
   private onAdBreakFinished = (event: BYSAdBreakEvent) => {
     let adBreak = event.adBreak;
     let playerEvent = AdEventsFactory.createAdBreakEvent(this.player, adBreak, PlayerEvent.AdBreakFinished);
-    this.fireEvent(playerEvent);
+    this.fireEvent<AdBreakEvent>(playerEvent);
   };
 
   // Custom advertising module with overwritten methods
