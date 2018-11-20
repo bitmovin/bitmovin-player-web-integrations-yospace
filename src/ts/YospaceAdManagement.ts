@@ -23,6 +23,7 @@ interface YospaceSourceConfig extends SourceConfig {
 interface StreamPart {
   start: number;
   end: number;
+  adBreak?: YSAdBreak;
 }
 
 interface StreamPartMapping {
@@ -44,8 +45,6 @@ export class BitmovinYospacePlayer implements PlayerAPI {
   private contentDuration: number = 0;
   private contentMapping: StreamPartMapping[] = [];
   private adChunks: StreamPart[] = [];
-  // Helper fields to improve performance of magic time calculation
-  private lastTimeLineElement: YSTimelineElement;
 
 
   // TODO: consider custom YospacePlayerConfig if something is needed (DEBUGGING discussion)
@@ -89,14 +88,15 @@ export class BitmovinYospacePlayer implements PlayerAPI {
 
       // calculate duration magic
       for (let element of timeline.getAllElements()) {
-        this.lastTimeLineElement = element;
-        let originalChunk = {
+        let originalChunk: StreamPart = {
           start: element.offset,
           end: element.offset + element.duration
         };
 
         switch (element.type) {
           case YSTimelineElement.ADVERT:
+            originalChunk.adBreak = element.adBreak;
+
             this.adChunks.push(originalChunk);
             break;
           case YSTimelineElement.VOD:
@@ -257,55 +257,29 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     }
 
     // magical content seeking
-    let chunk = this.contentMapping.filter((mapping: StreamPartMapping) => {
+    let originalChunk = this.contentMapping.filter((mapping: StreamPartMapping) => {
       return mapping.magic.start <= time && time < mapping.magic.end
     })[0];
 
-    let elapsedTimeInChunk = time - chunk.magic.start;
-    let magicSeekTarget = chunk.original.start + elapsedTimeInChunk;
+    let elapsedTimeInChunk = time - originalChunk.magic.start;
+    let magicSeekTarget = originalChunk.original.start + elapsedTimeInChunk;
 
-    console.log('Tried to seek to ', time, 'but was mapped to', magicSeekTarget);
-    time = magicSeekTarget;
-
-    return this.player.seek(time, issuer);
-
+    return this.player.seek(magicSeekTarget, issuer);
   }
 
   getCurrentTime(): number {
     // TODO: only for VoD (take from config)
     if (this.isAdActive()) {
       // return currentTime in AdBreak
-      let ad = this.getCurrentAd();
-      let indexInAdBreak = ad.adBreak.adverts.indexOf(ad);
-
-      let previousAdverts: YSAdvert[] = ad.adBreak.adverts.slice(0, indexInAdBreak);
-
-      // TODO: may also here the performance should be improved
-      let startTime = ad.adBreak.startPosition + previousAdverts.reduce((pv, cv) => pv + cv.duration, 0);
-
-      // debugger;
-      // let adStart = ad.ad; // FIXME: need to be ad
       let currentAdPosition = this.player.getCurrentTime();
-
-      return currentAdPosition - startTime;
-
+      return currentAdPosition - this.getAdStartTime(this.getCurrentAd());
     }
 
-    // TODO: get previous adBreaks
     let currentRealTime = this.player.getCurrentTime();
+    let previousBreaksDuration = this.getAdBreaksBefore(currentRealTime)
+      .reduce((sum, adBreak) => sum + adBreak.getDuration(), 0);
 
-    let previousBreaksDuration = 0;
-
-    // TODO: i think we would need to improve the performance of this
-    this.adChunks.filter((chunk: StreamPart) => {
-      if (chunk.start < currentRealTime && currentRealTime > chunk.end) {
-        previousBreaksDuration += chunk.end - chunk.start;
-      }
-    });
-
-    let time = currentRealTime - previousBreaksDuration;
-    return time;
-
+    return currentRealTime - previousBreaksDuration;
   }
 
   getDuration(): number {
@@ -388,6 +362,19 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     };
   }
 
+  private getAdBreaksBefore(position: number): YSAdBreak[] {
+    return this.adChunks
+      .filter(chunk => chunk.start < position && position > chunk.end)
+      .map(element => element.adBreak);
+  }
+
+  private getAdStartTime(ad: YSAdvert): number {
+    let indexInAdBreak = ad.adBreak.adverts.indexOf(ad);
+    let previousAdverts: YSAdvert[] = ad.adBreak.adverts.slice(0, indexInAdBreak);
+
+    return ad.adBreak.startPosition + previousAdverts.reduce((sum, cv) => sum + cv.duration, 0);
+  }
+
   getVideoBufferLength(): number | null {
     let bufferLength = this.player.getVideoBufferLength();
     if (this.isAdActive()) {
@@ -398,7 +385,6 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     let currentRealTime = this.player.getCurrentTime();
     let bufferedRange = currentRealTime + bufferLength;
 
-    // TODO: i think we would need to improve the performance of this
     this.adChunks.map((chunk: StreamPart) => {
       if (chunk.start > currentRealTime && chunk.end < bufferedRange) {
         futureBreakDurations += chunk.end - chunk.start;
@@ -447,13 +433,8 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     skip: () => {
       if (this.isAdActive() && this.playerPolicy.canSkip() === 0) {
         let ad = this.getCurrentAd();
-        let indexInAdBreak = ad.adBreak.adverts.indexOf(ad);
-        let previousAdverts: YSAdvert[] = ad.adBreak.adverts.slice(0, indexInAdBreak);
+        let seekTarget = this.getAdStartTime(ad) + ad.duration;
 
-        // TODO: the performance should be improved
-        let startTime = ad.adBreak.startPosition + previousAdverts.reduce((pv, cv) => pv + cv.duration, 0);
-
-        let seekTarget = startTime + ad.duration;
         if (seekTarget >= this.player.getDuration()) {
           // this.player.unload();
           // TODO: we can't seek to the very very end so an unload may fix the problem
