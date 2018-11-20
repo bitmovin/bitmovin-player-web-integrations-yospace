@@ -4,7 +4,7 @@ import {
   AdConfig, AdEvent, AudioQuality, AudioTrack, DownloadedAudioData, DownloadedVideoData, LinearAd, LogLevel,
   MetadataType, PlaybackEvent, Player, PlayerAdvertisingAPI, PlayerAPI, PlayerConfig, PlayerEvent, PlayerEventBase,
   PlayerEventCallback, PlayerExports, PlayerSubtitlesAPI, PlayerType, PlayerVRAPI, QueryParameters, SegmentMap,
-  Snapshot, SourceConfig, StreamType, Technology, Thumbnail, TimeChangedEvent, TimeRange, VideoQuality
+  Snapshot, SourceConfig, StreamType, Technology, Thumbnail, TimeChangedEvent, TimeRange, VideoQuality, Ad
 } from 'bitmovin-player';
 import { ArrayUtils, UIFactory } from 'bitmovin-player-ui';
 import { BYSAdBreakEvent, BYSAdEvent, BYSListenerEvent, YospaceAdListenerAdapter } from "./YospaceListenerAdapter";
@@ -271,6 +271,24 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     this.fireEvent(playerEvent);
   };
 
+  private adBreakMapper(ysAdBreak: YSAdBreak): AdBreak {
+    return {
+      id: ysAdBreak.adBreakIdentifier, // can be null
+      scheduleTime: ysAdBreak.startPosition,
+      ads: ysAdBreak.adverts.map(this.adMapper)
+    };
+  }
+
+  private adMapper(ysAd: YSAdvert): Ad {
+    return {
+      isLinear: !!ysAd.advert.linear,
+      requiresUi: true,
+      id: ysAd.advert.id,
+      clickThroughUrl: ysAd.advert.linear.clickThrough,
+      mediaFileUrl: ysAd.advert.linear.mediaFiles[0].src,
+    };
+  }
+
   // Custom advertising module with overwritten methods
   private advertisingModule: PlayerAdvertisingAPI = {
     discardAdBreak: (adBreakId: string) => {
@@ -279,8 +297,11 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     },
 
     getActiveAdBreak: () => {
-      // TODO: map YSAdBreak to AdBreak
-      return undefined;
+      if (!this.isAdActive()) {
+        return undefined;
+      }
+
+      return this.adBreakMapper(this.getCurrentAd().adBreak);
     },
 
     isLinearAdActive: () => {
@@ -288,8 +309,13 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     },
 
     list: () => {
-      // TODO: go through timeline and return YSAdBreaks mapped to AdBreak
-      return [];
+      if (!this.manager) {
+        return [];
+      }
+
+      return this.manager.session.timeline.getAllElements()
+        .filter((element: YSTimelineElement) => element.type === YSTimelineElement.ADVERT)
+        .map((element: YSTimelineElement) => this.adBreakMapper(element.adBreak));
     },
 
     schedule: (adConfig: AdConfig) => {
