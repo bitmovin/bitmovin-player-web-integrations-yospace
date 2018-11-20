@@ -118,7 +118,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
           source.hls = this.manager.masterPlaylist();
 
           if (this.manager.isYospaceStream()) {
-            this.yospaceListenerAdapter = new YospaceAdListenerAdapter(this);
+            this.yospaceListenerAdapter = new YospaceAdListenerAdapter();
             this.bindYospaceEvent();
             this.manager.registerPlayer(this.yospaceListenerAdapter);
           } else {
