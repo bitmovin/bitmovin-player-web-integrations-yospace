@@ -1,5 +1,5 @@
 import { BitmovinYospacePlayer, } from "./YoSpaceAdManagement";
-import { Ad, AdBreak, AdEvent, LinearAd, PlayerEvent } from "bitmovin-player";
+import { LinearAd } from "bitmovin-player";
 
 export interface BitmovinYospacePlayerPolicy {
   canMute(): boolean;
