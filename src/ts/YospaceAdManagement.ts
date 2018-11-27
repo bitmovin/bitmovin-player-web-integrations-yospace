@@ -276,11 +276,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
       return currentAdPosition - this.getAdStartTime(this.getCurrentAd());
     }
 
-    let currentRealTime = this.player.getCurrentTime();
-    let previousBreaksDuration = this.getAdBreaksBefore(currentRealTime)
-      .reduce((sum, adBreak) => sum + adBreak.getDuration(), 0);
-
-    return currentRealTime - previousBreaksDuration;
+    return this.toMagicTime(this.player.getCurrentTime());
   }
 
   getDuration(): number {
@@ -348,7 +344,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
   private adBreakMapper(ysAdBreak: YSAdBreak): AdBreak {
     return {
       id: ysAdBreak.adBreakIdentifier, // can be null
-      scheduleTime: ysAdBreak.startPosition,
+      scheduleTime: this.toMagicTime(ysAdBreak.startPosition),
       ads: ysAdBreak.adverts.map(this.adMapper)
     };
   }
@@ -399,6 +395,13 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     });
 
     return Math.max(bufferLength - futureBreakDurations, 0);
+  }
+
+  private toMagicTime(timestamp: number): number {
+    let previousBreaksDuration = this.getAdBreaksBefore(timestamp)
+      .reduce((sum, adBreak) => sum + adBreak.getDuration(), 0);
+
+    return timestamp - previousBreaksDuration;
   }
 
   // Custom advertising module with overwritten methods
