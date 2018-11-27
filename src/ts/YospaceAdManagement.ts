@@ -47,6 +47,8 @@ export class BitmovinYospacePlayer implements PlayerAPI {
   private contentMapping: StreamPartMapping[] = [];
   private adChunks: StreamPart[] = [];
 
+  // save original seek target in case of seek will seek over an AdBreak to recover to this position
+  private cachedSeekTarget: number;
 
   // TODO: consider custom YospacePlayerConfig if something is needed (DEBUGGING discussion)
   constructor(containerElement: HTMLElement, config: PlayerConfig) {
@@ -257,12 +259,20 @@ export class BitmovinYospacePlayer implements PlayerAPI {
       return false;
     }
 
+    let allowedSeekTarget = this.playerPolicy.canSeekTo(time);
+    if (allowedSeekTarget !== time) {
+      // cache original seek target
+      this.cachedSeekTarget = time;
+    } else {
+      this.cachedSeekTarget = null;
+    }
+
     // magical content seeking
     let originalChunk = this.contentMapping.filter((mapping: StreamPartMapping) => {
-      return mapping.magic.start <= time && time < mapping.magic.end
+      return mapping.magic.start <= allowedSeekTarget && allowedSeekTarget <= mapping.magic.end
     })[0];
 
-    let elapsedTimeInChunk = time - originalChunk.magic.start;
+    let elapsedTimeInChunk = allowedSeekTarget - originalChunk.magic.start;
     let magicSeekTarget = originalChunk.original.start + elapsedTimeInChunk;
 
     return this.player.seek(magicSeekTarget, issuer);
@@ -339,6 +349,11 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     let adBreak = event.adBreak;
     let playerEvent = AdEventsFactory.createAdBreakEvent(this.player, adBreak, PlayerEvent.AdBreakFinished);
     this.fireEvent<AdBreakEvent>(playerEvent);
+
+    if (this.cachedSeekTarget) {
+      this.seek(this.cachedSeekTarget, "yospace-ad-skipping");
+      this.cachedSeekTarget = null;
+    }
   };
 
   private adBreakMapper(ysAdBreak: YSAdBreak): AdBreak {

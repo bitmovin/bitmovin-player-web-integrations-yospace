@@ -22,8 +22,18 @@ export class DefaultBitmovinYospacePlayerPolicy implements BitmovinYospacePlayer
   }
 
   canSeekTo(seekTarget: number): number {
-    // TODO: do not allow seeking over ads
-    // TODO: (To enable we need closest ad in future -> seek to / play it -> seek to original target)
+    const currentTime = this.player.getCurrentTime();
+    let adBreaks = this.player.ads.list();
+
+    let skippedAdBreaks = adBreaks.filter(adBreak => {
+      return adBreak.scheduleTime > currentTime && adBreak.scheduleTime < seekTarget;
+    });
+
+    if (skippedAdBreaks.length > 0) {
+      let adBreakToPlay = skippedAdBreaks[skippedAdBreaks.length - 1];
+      return adBreakToPlay.scheduleTime;
+    }
+
     return seekTarget;
   }
 
