@@ -2,9 +2,10 @@
 import {
   AdBreak, AdBreakEvent, ViewMode, ViewModeOptions,
   AdConfig, AdEvent, AudioQuality, AudioTrack, DownloadedAudioData, DownloadedVideoData, LinearAd, LogLevel,
-  MetadataType, PlaybackEvent, Player, PlayerAdvertisingAPI, PlayerAPI, PlayerConfig, PlayerEvent, PlayerEventBase,
+  MetadataType, Player, PlayerAdvertisingAPI, PlayerAPI, PlayerConfig, PlayerEvent, PlayerEventBase,
   PlayerEventCallback, PlayerExports, PlayerSubtitlesAPI, PlayerType, PlayerVRAPI, QueryParameters, SegmentMap,
-  Snapshot, SourceConfig, StreamType, Technology, Thumbnail, TimeChangedEvent, TimeRange, VideoQuality, Ad
+  Snapshot, SourceConfig, StreamType, Technology, Thumbnail, TimeChangedEvent, TimeRange, VideoQuality,
+  PlayerBufferAPI,
 } from 'bitmovin-player';
 import { ArrayUtils, UIFactory } from 'bitmovin-player-ui';
 import { BYSAdBreakEvent, BYSAdEvent, BYSListenerEvent, YospaceAdListenerAdapter } from "./YospaceListenerAdapter";
@@ -328,13 +329,13 @@ export class BitmovinYospacePlayer implements PlayerAPI {
   };
 
   private onAdStart = (event: BYSAdEvent) => {
-    let playerEvent = AdEventsFactory.createAdEvent(this.player, PlayerEvent.AdStarted, this.playerPolicy, this.manager);
+    let playerEvent = AdEventsFactory.createAdEvent(this.player, PlayerEvent.AdStarted, this.manager, this.getCurrentAd());
     this.fireEvent<AdEvent>(playerEvent);
     // TODO: autoskip if available
   };
 
   private onAdFinished = (event: BYSAdEvent) => {
-    let playerEvent = AdEventsFactory.createAdEvent(this.player, PlayerEvent.AdFinished, this.playerPolicy, this.manager);
+    let playerEvent = AdEventsFactory.createAdEvent(this.player, PlayerEvent.AdFinished, this.manager, this.getCurrentAd());
     this.fireEvent<AdEvent>(playerEvent);
   };
 
@@ -352,13 +353,17 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     };
   }
 
-  private adMapper(ysAd: YSAdvert): Ad {
+  private adMapper(ysAd: YSAdvert): LinearAd {
     return {
       isLinear: !!ysAd.advert.linear,
-      requiresUi: true,
+      duration: ysAd.duration,
       id: ysAd.advert.id,
       clickThroughUrl: ysAd.advert.linear.clickThrough,
       mediaFileUrl: ysAd.advert.linear.mediaFiles[0].src,
+      skippableAfter: ysAd.advert.linear.skipOffset,
+      uiConfig: {
+        requestsUi: true,
+      },
     };
   }
 
@@ -411,6 +416,14 @@ export class BitmovinYospacePlayer implements PlayerAPI {
       return this.adBreakMapper(this.getCurrentAd().adBreak);
     },
 
+    getActiveAd: () => {
+      if (!this.isAdActive()) {
+        return undefined;
+      }
+
+      return this.adMapper(this.getCurrentAd());
+    },
+
     isLinearAdActive: () => {
       return this.isAdActive();
     },
@@ -456,6 +469,10 @@ export class BitmovinYospacePlayer implements PlayerAPI {
 
   get subtitles(): PlayerSubtitlesAPI {
     return this.player.subtitles;
+  }
+
+  get buffer(): PlayerBufferAPI {
+    return this.player.buffer;
   }
 
   /**
@@ -740,18 +757,20 @@ class AdEventsFactory {
     };
   }
 
-  static createAdEvent(player: PlayerAPI, type: PlayerEvent, policy: BitmovinYospacePlayerPolicy, manager: YSSessionManager): AdEvent {
-    console.log('skippable after', policy.canSkip());
+  static createAdEvent(player: PlayerAPI, type: PlayerEvent, manager: YSSessionManager, ad: YSAdvert): AdEvent {
     return {
       timestamp: Date.now(),
       type: type,
       ad: {
         isLinear: true,
-        requiresUi: true,
-        skippableAfter: policy.canSkip(),
+        duration: ad.duration,
+        skippableAfter: ad.advert.linear.skipOffset,
         clickThroughUrl: manager.session.getLinearClickthrough(),
-        adClickedCallback: () => {
+        clickThroughUrlOpened: () => {
           manager.reportPlayerEvent(PlayerEvent.AdClicked);
+        },
+        uiConfig: {
+          requestsUi: true,
         }
       } as LinearAd
     };

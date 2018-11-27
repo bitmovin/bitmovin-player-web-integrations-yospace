@@ -1,6 +1,5 @@
-import {
-  BitmovinYospacePlayer,
-} from "./YoSpaceAdManagement";
+import { BitmovinYospacePlayer, } from "./YoSpaceAdManagement";
+import { Ad, AdBreak, AdEvent, LinearAd, PlayerEvent } from "bitmovin-player";
 
 export interface BitmovinYospacePlayerPolicy {
   canMute(): boolean;
@@ -18,8 +17,8 @@ export class DefaultBitmovinYospacePlayerPolicy implements BitmovinYospacePlayer
   }
 
   canSeek(): boolean {
-    // TODO: check if an ad is played currently
-    return true;
+    // allow only seeking if no add is playing
+    return this.player.ads.getActiveAd() === undefined;
   }
 
   canSeekTo(seekTarget: number): number {
@@ -29,8 +28,21 @@ export class DefaultBitmovinYospacePlayerPolicy implements BitmovinYospacePlayer
   }
 
   canSkip(): number {
-    // TODO: get current ad and return skippOffset
-    return 0;
+    let currentAd = this.player.ads.getActiveAd();
+    if (currentAd && currentAd.isLinear) {
+      let currentTime = this.player.getCurrentTime();
+      if ((currentAd as LinearAd).skippableAfter < 0) {
+        return -1;
+      }
+
+      if (currentTime >= (currentAd as LinearAd).skippableAfter) {
+        return 0;
+      } else {
+        return (currentAd as LinearAd).skippableAfter - currentTime;
+      }
+    }
+
+    return -1;
   }
 
   canMute(): boolean {
