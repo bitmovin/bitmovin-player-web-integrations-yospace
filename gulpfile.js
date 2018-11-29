@@ -142,7 +142,8 @@ gulp.task('serve', function() {
                 baseDir: [paths.target.html],
                 index: 'index.html',
                 routes: {
-                    '/yospace': './yospace'
+                    '/yospace': './yospace',
+                    '/js': './node_modules/bitmovin-player/'
                 }
             }
         });

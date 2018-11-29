@@ -31,8 +31,8 @@ import {
   ViewMode,
   ViewModeOptions
 } from 'bitmovin-player';
-import { ArrayUtils, UIFactory } from 'bitmovin-player-ui';
 import { BYSAdBreakEvent, BYSAdEvent, BYSListenerEvent, YospaceAdListenerAdapter } from "./YospaceListenerAdapter";
+import { ArrayUtils } from "./utils/arrayutils";
 
 enum YospaceAssetType {
   LINEAR,
@@ -61,11 +61,6 @@ export class BitmovinYospacePlayer implements PlayerAPI {
 
   // TODO: consider custom YospacePlayerConfig if something is needed (DEBUGGING discussion)
   constructor(containerElement: HTMLElement, config: PlayerConfig) {
-    // TODO: find out if there is a way to use default ui handling
-    let setupUI = config.ui === undefined || config.ui === true;
-    // do not use default UI loading. UI can't not be loaded when player is initialized in this file.
-    config.ui = false;
-
     // initialize bitmovin player
     this.player = new Player(containerElement, config);
     this.version = this.player.version;
@@ -73,11 +68,6 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     this.exports = this.player.exports;
     this.subtitles = this.player.subtitles;
     this.vr = this.player.vr;
-
-    // set bitmovin player ui if not prohibited
-    if (setupUI) {
-      UIFactory.buildDefaultUI(this);
-    }
 
     // TODO: combine in something like a reportPlayerState method called for multiple events
     let onPlay = () => {
