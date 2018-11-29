@@ -149,7 +149,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
   }
 
   get ads(): PlayerAdvertisingAPI {
-    return this.advertisingModule;
+    return this.advertisingAPI;
   }
 
   setPolicy(policy: BitmovinYospacePlayerPolicy) {
@@ -290,7 +290,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
   }
 
   // Custom advertising module with overwritten methods
-  private advertisingModule: PlayerAdvertisingAPI = {
+  private advertisingAPI: PlayerAdvertisingAPI = {
     discardAdBreak: (adBreakId: string) => {
       console.warn('CSAI is not supported for yospace stream');
       return;
