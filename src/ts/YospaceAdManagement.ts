@@ -111,7 +111,6 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     YSSessionManager.DEFAULTS.DEBUGGING = true;
 
     return new Promise<void>(((resolve, reject) => {
-
       let onInitComplete = (state: YSSessionResult, result: YSSessionStatus) => {
         if (state === YSSessionResult.INITIALISED) {
           // use received url from yospace
@@ -167,9 +166,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
   // Helper
   private fireEvent(event: PlayerEventBase): void {
     if (this.eventHandlers[event.type]) {
-      for (let callback of this.eventHandlers[event.type]) {
-        callback(event);
-      }
+      this.eventHandlers[event.type].forEach((callback: PlayerEventCallback) => callback(event));
     }
   }
 
@@ -178,20 +175,20 @@ export class BitmovinYospacePlayer implements PlayerAPI {
       return;
     }
 
-    this.yospaceListenerAdapter.addListener(BYSListenerEvent.AD_BREAK_START, this.onAdBreakStart);
-    this.yospaceListenerAdapter.addListener(BYSListenerEvent.ADVERT_START, this.onAdStart);
+    this.yospaceListenerAdapter.addListener(BYSListenerEvent.AD_BREAK_START, this.onAdBreakStarted);
+    this.yospaceListenerAdapter.addListener(BYSListenerEvent.ADVERT_START, this.onAdStarted);
     this.yospaceListenerAdapter.addListener(BYSListenerEvent.ADVERT_END, this.onAdFinished);
     this.yospaceListenerAdapter.addListener(BYSListenerEvent.AD_BREAK_END, this.onAdBreakFinished);
   }
 
-  private onAdBreakStart = (event: BYSAdBreakEvent) => {
+  private onAdBreakStarted = (event: BYSAdBreakEvent) => {
     let adBreak = event.adBreak;
     console.log("this", event);
     let playerEvent = AdEventsFactory.createAdBreakEvent(this.player, adBreak, PlayerEvent.AdBreakStarted);
     this.fireEvent(playerEvent);
   };
 
-  private onAdStart = (event: BYSAdEvent) => {
+  private onAdStarted = (event: BYSAdEvent) => {
     let playerEvent = AdEventsFactory.createAdEvent(this.player, PlayerEvent.AdStarted);
     this.fireEvent(playerEvent);
   };
