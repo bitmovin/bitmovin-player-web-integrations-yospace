@@ -1,1 +1,1 @@
-export { BitmovinYospacePlayer } from './YospaceAdManagement';
+export { BitmovinYospacePlayer, YospaceAssetType } from './YospaceAdManagement';
