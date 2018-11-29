@@ -32,7 +32,7 @@ import {
   ViewModeOptions
 } from 'bitmovin-player';
 import { BYSAdBreakEvent, BYSAdEvent, BYSListenerEvent, YospaceAdListenerAdapter } from "./YospaceListenerAdapter";
-import { ArrayUtils } from "./utils/arrayutils";
+import { ArrayUtils } from "bitmovin-player-ui";
 
 enum YospaceAssetType {
   LINEAR,
