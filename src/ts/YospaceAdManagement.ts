@@ -6,9 +6,9 @@ import {
   PlayerEventCallback, PlayerExports, PlayerSubtitlesAPI, PlayerType, PlayerVRAPI, QueryParameters, SegmentMap,
   Snapshot, SourceConfig, StreamType, Technology, Thumbnail, TimeChangedEvent, TimeRange, VideoQuality
 } from 'bitmovin-player';
-import { ArrayUtils, UIFactory } from 'bitmovin-player-ui';
 import { BYSAdBreakEvent, BYSAdEvent, BYSListenerEvent, YospaceAdListenerAdapter } from "./YospaceListenerAdapter";
 import { BitmovinYospacePlayerPolicy, DefaultBitmovinYospacePlayerPolicy } from "./BitmovinYospacePlayerPolicy";
+import { ArrayUtils } from "./utils/arrayutils";
 
 enum YospaceAssetType {
   LINEAR,
@@ -32,18 +32,8 @@ export class BitmovinYospacePlayer implements PlayerAPI {
 
   // TODO: consider custom YospacePlayerConfig if something is needed (DEBUGGING discussion)
   constructor(containerElement: HTMLElement, config: PlayerConfig) {
-    // TODO: find out if there is a way to use default ui handling
-    let setupUI = config.ui === undefined || config.ui === true;
-    // do not use default UI loading. UI can't not be loaded when player is initialized in this file.
-    config.ui = false;
-
     // initialize bitmovin player
     this.player = new Player(containerElement, config);
-
-    // set bitmovin player ui if not prohibited
-    if (setupUI) {
-      UIFactory.buildDefaultUI(this);
-    }
 
     // TODO: combine in something like a reportPlayerState method called for multiple events
     let onPlay = () => {
@@ -103,7 +93,6 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     YSSessionManager.DEFAULTS.DEBUGGING = true;
 
     return new Promise<void>(((resolve, reject) => {
-
       let onInitComplete = (state: YSSessionResult, result: YSSessionStatus) => {
         if (state === YSSessionResult.INITIALISED) {
           // use received url from yospace
@@ -231,9 +220,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
 
   private fireEvent<E extends PlayerEventBase>(event: E): void {
     if (this.eventHandlers[event.type]) {
-      for (let callback of this.eventHandlers[event.type]) {
-        callback(event);
-      }
+      this.eventHandlers[event.type].forEach((callback: PlayerEventCallback) => callback(event));
     }
   }
 
@@ -242,19 +229,19 @@ export class BitmovinYospacePlayer implements PlayerAPI {
       return;
     }
 
-    this.yospaceListenerAdapter.addListener(BYSListenerEvent.AD_BREAK_START, this.onAdBreakStart);
-    this.yospaceListenerAdapter.addListener(BYSListenerEvent.ADVERT_START, this.onAdStart);
+    this.yospaceListenerAdapter.addListener(BYSListenerEvent.AD_BREAK_START, this.onAdBreakStarted);
+    this.yospaceListenerAdapter.addListener(BYSListenerEvent.ADVERT_START, this.onAdStarted);
     this.yospaceListenerAdapter.addListener(BYSListenerEvent.ADVERT_END, this.onAdFinished);
     this.yospaceListenerAdapter.addListener(BYSListenerEvent.AD_BREAK_END, this.onAdBreakFinished);
   }
 
-  private onAdBreakStart = (event: BYSAdBreakEvent) => {
+  private onAdBreakStarted = (event: BYSAdBreakEvent) => {
     let adBreak = event.adBreak;
     let playerEvent = AdEventsFactory.createAdBreakEvent(this.player, adBreak, PlayerEvent.AdBreakStarted);
     this.fireEvent<AdBreakEvent>(playerEvent);
   };
 
-  private onAdStart = (event: BYSAdEvent) => {
+  private onAdStarted = (event: BYSAdEvent) => {
     let playerEvent = AdEventsFactory.createAdEvent(this.player, PlayerEvent.AdStarted, this.playerPolicy, this.manager);
     this.fireEvent<AdEvent>(playerEvent);
     // TODO: autoskip if available
