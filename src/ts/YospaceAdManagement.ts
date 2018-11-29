@@ -151,9 +151,9 @@ export class BitmovinYospacePlayer implements PlayerAPI {
   }
 
   on(eventType: PlayerEvent, callback: PlayerEventCallback): void {
-    if (eventType !== PlayerEvent.SourceLoaded &&
-      eventType !== PlayerEvent.TimeChanged &&
-      eventType !== PlayerEvent.PlaybackFinished) {
+    // we need to suppress some events because they need to be modified first. so don't add it to the actual player
+    const suppressedEventTypes = [PlayerEvent.SourceLoaded, PlayerEvent.TimeChanged, PlayerEvent.PlaybackFinished];
+    if (!suppressedEventTypes.includes(eventType)) {
       this.player.on(eventType, callback);
     }
 
@@ -208,12 +208,12 @@ export class BitmovinYospacePlayer implements PlayerAPI {
 
   // Helper
   private isAdActive(): boolean {
-    return !!this.getCurrentAd();
+    return Boolean(this.getCurrentAd());
   }
 
   private getCurrentAd(): YSAdvert | null {
     if (!this.manager) {
-      return;
+      return null;
     }
     return this.manager.session.currentAdvert;
   }
@@ -280,8 +280,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     },
 
     schedule: (adConfig: AdConfig) => {
-      console.warn('CSAI is not supported for yospace stream');
-      return undefined;
+      return Promise.reject('CSAI is not supported for yospace stream');
     },
 
     skip: () => {
@@ -291,7 +290,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
         let previousAdverts: YSAdvert[] = ad.adBreak.adverts.slice(0, indexInAdBreak);
 
         // TODO: the performance should be improved
-        let startTime = ad.adBreak.startPosition + previousAdverts.reduce((pv, cv) => pv + cv.duration, 0);
+        let startTime = ad.adBreak.startPosition + previousAdverts.reduce((sum, ad) => sum + ad.duration, 0);
 
         let seekTarget = startTime + ad.duration;
         if (seekTarget >= this.player.getDuration()) {
