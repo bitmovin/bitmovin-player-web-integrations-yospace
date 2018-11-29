@@ -271,15 +271,15 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     this.fireEvent<AdBreakEvent>(playerEvent);
   };
 
-  private adBreakMapper(ysAdBreak: YSAdBreak): AdBreak {
+  private mapAdBreak(ysAdBreak: YSAdBreak): AdBreak {
     return {
       id: ysAdBreak.adBreakIdentifier, // can be null
       scheduleTime: ysAdBreak.startPosition,
-      ads: ysAdBreak.adverts.map(this.adMapper)
+      ads: ysAdBreak.adverts.map(this.mapAd)
     };
   }
 
-  private adMapper(ysAd: YSAdvert): Ad {
+  private mapAd(ysAd: YSAdvert): Ad {
     return {
       isLinear: !!ysAd.advert.linear,
       requiresUi: true,
@@ -301,7 +301,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
         return undefined;
       }
 
-      return this.adBreakMapper(this.getCurrentAd().adBreak);
+      return this.mapAdBreak(this.getCurrentAd().adBreak);
     },
 
     isLinearAdActive: () => {
@@ -315,7 +315,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
 
       return this.manager.session.timeline.getAllElements()
         .filter((element: YSTimelineElement) => element.type === YSTimelineElement.ADVERT)
-        .map((element: YSTimelineElement) => this.adBreakMapper(element.adBreak));
+        .map((element: YSTimelineElement) => this.mapAdBreak(element.adBreak));
     },
 
     schedule: (adConfig: AdConfig) => {
