@@ -1,4 +1,4 @@
-import { ArrayUtils } from "./utils/arrayutils";
+import { ArrayUtils } from 'bitmovin-player-ui/dist/js/framework/arrayutils';
 
 /** BYS -> BitmovinYospace */
 export enum BYSListenerEvent {

@@ -8,7 +8,7 @@ import {
 } from 'bitmovin-player';
 import { BYSAdBreakEvent, BYSAdEvent, BYSListenerEvent, YospaceAdListenerAdapter } from "./YospaceListenerAdapter";
 import { BitmovinYospacePlayerPolicy, DefaultBitmovinYospacePlayerPolicy } from "./BitmovinYospacePlayerPolicy";
-import { ArrayUtils } from "./utils/arrayutils";
+import { ArrayUtils } from 'bitmovin-player-ui/dist/js/framework/arrayutils';
 
 enum YospaceAssetType {
   LINEAR,
