@@ -1,6 +1,4 @@
-import {
-  BitmovinYospacePlayer,
-} from "./YoSpaceAdManagement";
+import { BitmovinYospacePlayer } from "./YoSpaceAdManagement";
 
 export interface BitmovinYospacePlayerPolicy {
   canMute(): boolean;
