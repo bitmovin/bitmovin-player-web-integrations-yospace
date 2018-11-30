@@ -63,7 +63,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     // Clear advertising config
     if (config.advertising) {
       console.warn('Client side advertising config is not supported');
-      config.advertising = {};
+      delete config.advertising;
     }
 
     // initialize bitmovin player
