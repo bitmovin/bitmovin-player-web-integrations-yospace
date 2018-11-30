@@ -1,4 +1,4 @@
-import { BitmovinYospacePlayer, } from "./YoSpaceAdManagement";
+import { BitmovinYospacePlayer, } from "./YospaceAdManagement";
 import { LinearAd } from "bitmovin-player";
 
 export interface BitmovinYospacePlayerPolicy {
