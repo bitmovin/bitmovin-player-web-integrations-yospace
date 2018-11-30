@@ -1,10 +1,10 @@
 ///<reference path="Yospace.d.ts"/>
 import {
-  AdBreak, AdBreakEvent, AdConfig, AdEvent, AudioQuality, AudioTrack, DownloadedAudioData, DownloadedVideoData,
-  LinearAd, LogLevel, MetadataParsedEvent, MetadataType, Player, PlayerAdvertisingAPI, PlayerAPI, PlayerBufferAPI,
-  PlayerConfig, PlayerEvent, PlayerEventBase, PlayerEventCallback, PlayerExports, PlayerSubtitlesAPI, PlayerType,
-  PlayerVRAPI, QueryParameters, SeekEvent, SegmentMap, Snapshot, SourceConfig, StreamType, Technology, Thumbnail,
-  TimeChangedEvent, TimeRange, VideoQuality, ViewMode, ViewModeOptions,
+  AdBreak, AdBreakEvent, AdConfig, AdEvent, AudioQuality, AudioTrack, BufferType, DownloadedAudioData,
+  DownloadedVideoData, LinearAd, LogLevel, MediaType, MetadataParsedEvent, MetadataType, Player, PlayerAdvertisingAPI,
+  PlayerAPI, PlayerBufferAPI, PlayerConfig, PlayerEvent, PlayerEventBase, PlayerEventCallback, PlayerExports,
+  PlayerSubtitlesAPI, PlayerType, PlayerVRAPI, QueryParameters, SeekEvent, SegmentMap, Snapshot, SourceConfig,
+  StreamType, Technology, Thumbnail, TimeChangedEvent, TimeRange, VideoQuality, ViewMode, ViewModeOptions,
 } from 'bitmovin-player';
 import { BYSAdBreakEvent, BYSAdEvent, BYSListenerEvent, YospaceAdListenerAdapter } from "./YospaceListenerAdapter";
 import { BitmovinYospacePlayerPolicy, DefaultBitmovinYospacePlayerPolicy } from "./BitmovinYospacePlayerPolicy";
@@ -236,6 +236,10 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     return this.advertisingAPI;
   }
 
+  get buffer(): PlayerBufferAPI {
+    return this.bufferAPI;
+  }
+
   setPolicy(policy: BitmovinYospacePlayerPolicy) {
     this.playerPolicy = policy;
   }
@@ -328,6 +332,20 @@ export class BitmovinYospacePlayer implements PlayerAPI {
 
     // return magic content duration
     return this.contentDuration;
+  }
+
+  /**
+   * @deprecated Use {@link PlayerBufferAPI.getLevel} instead.
+   */
+  getVideoBufferLength(): number | null {
+    return this.buffer.getLevel(BufferType.ForwardDuration, MediaType.Video).level;
+  }
+
+  /**
+   * @deprecated Use {@link PlayerBufferAPI.getLevel} instead.
+   */
+  getAudioBufferLength(): number | null {
+    return this.buffer.getLevel(BufferType.ForwardDuration, MediaType.Audio).level;
   }
 
   // Helper
@@ -432,8 +450,15 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     return ad.adBreak.startPosition + previousAdverts.reduce((sum, cv) => sum + cv.duration, 0);
   }
 
-  getVideoBufferLength(): number | null {
-    let bufferLength = this.player.getVideoBufferLength();
+  private toMagicTime(timestamp: number): number {
+    let previousBreaksDuration = this.getAdBreaksBefore(timestamp)
+      .reduce((sum, adBreak) => sum + adBreak.getDuration(), 0);
+
+    return timestamp - previousBreaksDuration;
+  }
+
+  private mappedBufferLength(type: MediaType): number {
+    let bufferLength = this.player.buffer.getLevel(BufferType.ForwardDuration, type).level;
     if (this.isAdActive()) {
       return Math.min(bufferLength, this.getCurrentAd().duration);
     }
@@ -451,13 +476,6 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     });
 
     return Math.max(bufferLength - futureBreakDurations, 0);
-  }
-
-  private toMagicTime(timestamp: number): number {
-    let previousBreaksDuration = this.getAdBreaksBefore(timestamp)
-      .reduce((sum, adBreak) => sum + adBreak.getDuration(), 0);
-
-    return timestamp - previousBreaksDuration;
   }
 
   // Custom advertising module with overwritten methods
@@ -514,6 +532,22 @@ export class BitmovinYospacePlayer implements PlayerAPI {
         }
       }
     },
+
+    getModuleInfo: () => {
+      return this.player.ads.getModuleInfo();
+    }
+  };
+
+  private bufferAPI: PlayerBufferAPI = {
+    setTargetLevel: (type: BufferType, value: number, media: MediaType) => {
+      this.player.buffer.setTargetLevel(type, value, media);
+    },
+
+    getLevel: (type: BufferType, media: MediaType) => {
+      let bufferLevel = this.player.buffer.getLevel(type, media);
+      bufferLevel.level = this.mappedBufferLength(media);
+      return bufferLevel;
+    }
   };
 
   // Default PlayerAPI implementation
@@ -527,10 +561,6 @@ export class BitmovinYospacePlayer implements PlayerAPI {
 
   get subtitles(): PlayerSubtitlesAPI {
     return this.player.subtitles;
-  }
-
-  get buffer(): PlayerBufferAPI {
-    return this.player.buffer;
   }
 
   /**
@@ -562,11 +592,6 @@ export class BitmovinYospacePlayer implements PlayerAPI {
 
   getAudio(): AudioTrack {
     return this.player.getAudio();
-  }
-
-  getAudioBufferLength(): number | null {
-    // TODO: implement if yospace supports audio only streams
-    return this.player.getAudioBufferLength();
   }
 
   getAudioQuality(): AudioQuality {
