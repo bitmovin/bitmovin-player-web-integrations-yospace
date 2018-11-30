@@ -185,7 +185,6 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     let url = source.hls;
 
     this.yospaceSourceConfig = source;
-    YSSessionManager.DEFAULTS.DEBUGGING = Boolean(this.yospaceConfig.debug);
 
     return new Promise<void>(((resolve, reject) => {
       let onInitComplete = (state: YSSessionResult, result: YSSessionStatus) => {
@@ -216,15 +215,19 @@ export class BitmovinYospacePlayer implements PlayerAPI {
         }
       };
 
+      let properties = {
+        DEBUGGING: Boolean(this.yospaceConfig.debug),
+      };
+
       switch (source.assetType) {
         case YospaceAssetType.LINEAR:
-          this.manager = YSSessionManager.createForLive(url, null, onInitComplete);
+          this.manager = YSSessionManager.createForLive(url, properties, onInitComplete);
           break;
         case YospaceAssetType.VOD:
-          this.manager = YSSessionManager.createForVoD(url, null, onInitComplete);
+          this.manager = YSSessionManager.createForVoD(url, properties, onInitComplete);
           break;
         case YospaceAssetType.LINEAR_START_OVER:
-          this.manager = YSSessionManager.createForNonLinear(url, null, onInitComplete);
+          this.manager = YSSessionManager.createForNonLinear(url, properties, onInitComplete);
           break;
         default:
           console.error('Undefined YospaceSourceConfig.assetType; Could not obtain session;');
