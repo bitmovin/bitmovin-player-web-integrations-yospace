@@ -18,7 +18,7 @@ export class DefaultBitmovinYospacePlayerPolicy implements BitmovinYospacePlayer
 
   canSeek(): boolean {
     // allow only seeking if no add is playing
-    return this.player.ads.getActiveAd() === undefined;
+    return !this.player.ads.getActiveAd();
   }
 
   canSeekTo(seekTarget: number): number {
