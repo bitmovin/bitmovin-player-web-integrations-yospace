@@ -49,22 +49,29 @@
     title: 'Art of Motion',
     description: 'What is this event... Parcour?',
     // dash: 'http://csm-e-ces1eurxaws101j8-6x78eoil2agd.cds1.yospace.com/access/d/400/u/0/1/130782300?f=0000130753172&format=vmap',
-    hls: 'http://csm-e-ces1eurxaws101j8-6x78eoil2agd.cds1.yospace.com/access/d/400/u/0/1/130782300?f=0000130753172&format=vmap',
+    hls: 'http://csm-e.cds1.yospace.com/csm/extlive/yospace02,hlssample.m3u8?yo.br=false&yo.ac=true',
+    // hls: 'http://csm-e-ces1eurxaws101j8-6x78eoil2agd.cds1.yospace.com/access/d/400/u/0/1/130782300?f=0000130753172&format=vmap',
     // progressive: '//bitmovin-a.akamaihd.net/content/MI201109210084_1/MI201109210084_mpeg-4_hd_high_1080p25_10mbits.mp4',
     poster: '//bitmovin-a.akamaihd.net/content/art-of-motion_drm/art-of-motion_poster.jpg',
 
     // Yospace configuration
-    // TODO: add yospace config
+    assetType: bitmovin.player.ads.yospace.YospaceAssetType.LINEAR
   };
   var conf = {
     key: 'YOUR-PLAYER-KEY',
     playback: {
       muted: true,
-    }
+      autoplay: true
+    },
+  };
+
+  // Yospace configuration
+  var yospaceConfig = {
+      debug: true
   };
 
   var playerContainer = document.getElementById('player');
-  let yospacePlayer = new bitmovin.player.ads.yospace.BitmovinYospacePlayer(playerContainer, conf);
+  let yospacePlayer = new bitmovin.player.ads.yospace.BitmovinYospacePlayer(playerContainer, conf, yospaceConfig);
 
   yospacePlayer.load(source).then(function() {
       console.log('loaded');

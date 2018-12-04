@@ -39,7 +39,7 @@ export class DefaultBitmovinYospacePlayerPolicy implements BitmovinYospacePlayer
 
   canSkip(): number {
     let currentAd = this.player.ads.getActiveAd();
-    if (currentAd && currentAd.isLinear) {
+    if (currentAd && currentAd.isLinear && !this.player.isLive()) {
       let currentTime = this.player.getCurrentTime();
       if ((currentAd as LinearAd).skippableAfter < 0) {
         return -1;
