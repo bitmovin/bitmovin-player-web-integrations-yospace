@@ -45,7 +45,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
   // magic content duration handling
   private contentDuration: number = 0;
   private contentMapping: StreamPartMapping[] = [];
-  private adChunks: StreamPart[] = [];
+  private adParts: StreamPart[] = [];
 
   // save original seek target in case of seek will seek over an AdBreak to recover to this position
   private cachedSeekTarget: number;
@@ -80,28 +80,28 @@ export class BitmovinYospacePlayer implements PlayerAPI {
       let timeline = session.timeline;
 
       // calculate duration magic
-      for (let element of timeline.getAllElements()) {
-        let originalChunk: StreamPart = {
+      timeline.getAllElements().forEach((element) => {
+        let originalStreamPart: StreamPart = {
           start: element.offset,
           end: element.offset + element.duration
         };
 
         switch (element.type) {
           case YSTimelineElement.ADVERT:
-            originalChunk.adBreak = element.adBreak;
+            originalStreamPart.adBreak = element.adBreak;
 
-            this.adChunks.push(originalChunk);
+            this.adParts.push(originalStreamPart);
             break;
           case YSTimelineElement.VOD:
 
-            let magicalContentChunk = {
+            let magicalContentPart = {
               start: this.contentDuration,
               end: this.contentDuration + element.duration
             };
 
             this.contentMapping.push({
-              magic: magicalContentChunk,
-              original: originalChunk
+              magic: magicalContentPart,
+              original: originalStreamPart
             });
 
             this.contentDuration += element.duration;
@@ -110,7 +110,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
           case YSTimelineElement.LIVE:
           // TODO: find out how to handle
         }
-      }
+      });
 
       this.fireEvent({
         timestamp: Date.now(),
@@ -257,12 +257,12 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     }
 
     // magical content seeking
-    let originalChunk = this.contentMapping.filter((mapping: StreamPartMapping) => {
+    let originalStreamPart = this.contentMapping.find((mapping: StreamPartMapping) => {
       return mapping.magic.start <= allowedSeekTarget && allowedSeekTarget <= mapping.magic.end
-    })[0];
+    });
 
-    let elapsedTimeInChunk = allowedSeekTarget - originalChunk.magic.start;
-    let magicSeekTarget = originalChunk.original.start + elapsedTimeInChunk;
+    let elapsedTimeInStreamPart = allowedSeekTarget - originalStreamPart.magic.start;
+    let magicSeekTarget = originalStreamPart.original.start + elapsedTimeInStreamPart;
 
     return this.player.seek(magicSeekTarget, issuer);
   }
@@ -366,8 +366,8 @@ export class BitmovinYospacePlayer implements PlayerAPI {
   }
 
   private getAdBreaksBefore(position: number): YSAdBreak[] {
-    return this.adChunks
-      .filter(chunk => chunk.start < position && position > chunk.end)
+    return this.adParts
+      .filter(part => part.start < position && position > part.end)
       .map(element => element.adBreak);
   }
 
@@ -375,7 +375,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     let indexInAdBreak = ad.adBreak.adverts.indexOf(ad);
     let previousAdverts: YSAdvert[] = ad.adBreak.adverts.slice(0, indexInAdBreak);
 
-    return ad.adBreak.startPosition + previousAdverts.reduce((sum, cv) => sum + cv.duration, 0);
+    return ad.adBreak.startPosition + previousAdverts.reduce((sum, advert) => sum + advert.duration, 0);
   }
 
   getVideoBufferLength(): number | null {
@@ -385,14 +385,14 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     }
 
     let futureBreakDurations = 0;
-    let currentRealTime = this.player.getCurrentTime();
-    let bufferedRange = currentRealTime + bufferLength;
+    const currentPlayerTime = this.player.getCurrentTime();
+    let bufferedRange = currentPlayerTime + bufferLength;
 
-    this.adChunks.map((chunk: StreamPart) => {
-      if (chunk.start > currentRealTime && chunk.end < bufferedRange) {
-        futureBreakDurations += chunk.end - chunk.start;
-      } else if (chunk.start > currentRealTime && chunk.start < bufferedRange && chunk.end > bufferedRange) {
-        futureBreakDurations += bufferedRange - chunk.start;
+    this.adParts.map((part: StreamPart) => {
+      if (part.start > currentPlayerTime && part.end < bufferedRange) {
+        futureBreakDurations += part.end - part.start;
+      } else if (part.start > currentPlayerTime && part.start < bufferedRange && part.end > bufferedRange) {
+        futureBreakDurations += bufferedRange - part.start;
       }
     });
 
