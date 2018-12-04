@@ -68,6 +68,8 @@ declare enum YSPlayerEvents {
 
 declare class VASTLinear {
   skipOffset: number;
+  clickThrough: string;
+  mediaFiles: any[];
 }
 
 declare class VASTAd {
@@ -75,6 +77,7 @@ declare class VASTAd {
    * The linear creative contained within this Ad, or null where the ad does not contain a linear creative.
    */
   linear: VASTLinear;
+  id: string;
 }
 
 declare class YSAdvert {
