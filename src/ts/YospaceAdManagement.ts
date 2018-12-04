@@ -2,9 +2,10 @@
 import {
   AdBreak, AdBreakEvent, ViewMode, ViewModeOptions,
   AdConfig, AdEvent, AudioQuality, AudioTrack, DownloadedAudioData, DownloadedVideoData, LinearAd, LogLevel,
-  MetadataType, PlaybackEvent, Player, PlayerAdvertisingAPI, PlayerAPI, PlayerConfig, PlayerEvent, PlayerEventBase,
+  MetadataType, Player, PlayerAdvertisingAPI, PlayerAPI, PlayerConfig, PlayerEvent, PlayerEventBase,
   PlayerEventCallback, PlayerExports, PlayerSubtitlesAPI, PlayerType, PlayerVRAPI, QueryParameters, SegmentMap,
-  Snapshot, SourceConfig, StreamType, Technology, Thumbnail, TimeChangedEvent, TimeRange, VideoQuality, Ad
+  Snapshot, SourceConfig, StreamType, Technology, Thumbnail, TimeChangedEvent, TimeRange, VideoQuality,
+  PlayerBufferAPI,
 } from 'bitmovin-player';
 import { BYSAdBreakEvent, BYSAdEvent, BYSListenerEvent, YospaceAdListenerAdapter } from "./YospaceListenerAdapter";
 import { BitmovinYospacePlayerPolicy, DefaultBitmovinYospacePlayerPolicy } from "./BitmovinYospacePlayerPolicy";
@@ -46,6 +47,8 @@ export class BitmovinYospacePlayer implements PlayerAPI {
   private contentMapping: StreamPartMapping[] = [];
   private adParts: StreamPart[] = [];
 
+  // save original seek target in case of seek will seek over an AdBreak to recover to this position
+  private cachedSeekTarget: number;
 
   // TODO: consider custom YospacePlayerConfig if something is needed (DEBUGGING discussion)
   constructor(containerElement: HTMLElement, config: PlayerConfig) {
@@ -245,12 +248,20 @@ export class BitmovinYospacePlayer implements PlayerAPI {
       return false;
     }
 
+    let allowedSeekTarget = this.playerPolicy.canSeekTo(time);
+    if (allowedSeekTarget !== time) {
+      // cache original seek target
+      this.cachedSeekTarget = time;
+    } else {
+      this.cachedSeekTarget = null;
+    }
+
     // magical content seeking
     let originalStreamPart = this.contentMapping.find((mapping: StreamPartMapping) => {
-      return mapping.magic.start <= time && time < mapping.magic.end
+      return mapping.magic.start <= allowedSeekTarget && allowedSeekTarget <= mapping.magic.end
     });
 
-    let elapsedTimeInStreamPart = time - originalStreamPart.magic.start;
+    let elapsedTimeInStreamPart = allowedSeekTarget - originalStreamPart.magic.start;
     let magicSeekTarget = originalStreamPart.original.start + elapsedTimeInStreamPart;
 
     return this.player.seek(magicSeekTarget, issuer);
@@ -264,11 +275,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
       return currentAdPosition - this.getAdStartTime(this.getCurrentAd());
     }
 
-    const currentPlayerTime = this.player.getCurrentTime();
-    let previousBreaksDuration = this.getAdBreaksBefore(currentPlayerTime)
-      .reduce((sum, adBreak) => sum + adBreak.getDuration(), 0);
-
-    return currentPlayerTime - previousBreaksDuration;
+    return this.toMagicTime(this.player.getCurrentTime());
   }
 
   getDuration(): number {
@@ -315,13 +322,13 @@ export class BitmovinYospacePlayer implements PlayerAPI {
   };
 
   private onAdStarted = (event: BYSAdEvent) => {
-    let playerEvent = AdEventsFactory.createAdEvent(this.player, PlayerEvent.AdStarted, this.playerPolicy, this.manager);
+    let playerEvent = AdEventsFactory.createAdEvent(this.player, PlayerEvent.AdStarted, this.manager, this.getCurrentAd());
     this.fireEvent<AdEvent>(playerEvent);
     // TODO: autoskip if available
   };
 
   private onAdFinished = (event: BYSAdEvent) => {
-    let playerEvent = AdEventsFactory.createAdEvent(this.player, PlayerEvent.AdFinished, this.playerPolicy, this.manager);
+    let playerEvent = AdEventsFactory.createAdEvent(this.player, PlayerEvent.AdFinished, this.manager, this.getCurrentAd());
     this.fireEvent<AdEvent>(playerEvent);
   };
 
@@ -329,23 +336,32 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     let adBreak = event.adBreak;
     let playerEvent = AdEventsFactory.createAdBreakEvent(this.player, adBreak, PlayerEvent.AdBreakFinished);
     this.fireEvent<AdBreakEvent>(playerEvent);
+
+    if (this.cachedSeekTarget) {
+      this.seek(this.cachedSeekTarget, "yospace-ad-skipping");
+      this.cachedSeekTarget = null;
+    }
   };
 
   private mapAdBreak(ysAdBreak: YSAdBreak): AdBreak {
     return {
       id: ysAdBreak.adBreakIdentifier, // can be null
-      scheduleTime: ysAdBreak.startPosition,
+      scheduleTime: this.toMagicTime(ysAdBreak.startPosition),
       ads: ysAdBreak.adverts.map(this.mapAd)
     };
   }
 
-  private mapAd(ysAd: YSAdvert): Ad {
+  private mapAd(ysAd: YSAdvert): LinearAd {
     return {
       isLinear: !!ysAd.advert.linear,
-      requiresUi: true,
+      duration: ysAd.duration,
       id: ysAd.advert.id,
       clickThroughUrl: ysAd.advert.linear.clickThrough,
       mediaFileUrl: ysAd.advert.linear.mediaFiles[0].src,
+      skippableAfter: ysAd.advert.linear.skipOffset,
+      uiConfig: {
+        requestsUi: true,
+      },
     };
   }
 
@@ -383,6 +399,13 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     return Math.max(bufferLength - futureBreakDurations, 0);
   }
 
+  private toMagicTime(timestamp: number): number {
+    let previousBreaksDuration = this.getAdBreaksBefore(timestamp)
+      .reduce((sum, adBreak) => sum + adBreak.getDuration(), 0);
+
+    return timestamp - previousBreaksDuration;
+  }
+
   // Custom advertising module with overwritten methods
   private advertisingAPI: PlayerAdvertisingAPI = {
     discardAdBreak: (adBreakId: string) => {
@@ -396,6 +419,14 @@ export class BitmovinYospacePlayer implements PlayerAPI {
       }
 
       return this.mapAdBreak(this.getCurrentAd().adBreak);
+    },
+
+    getActiveAd: () => {
+      if (!this.isAdActive()) {
+        return undefined;
+      }
+
+      return this.mapAd(this.getCurrentAd());
     },
 
     isLinearAdActive: () => {
@@ -442,6 +473,10 @@ export class BitmovinYospacePlayer implements PlayerAPI {
 
   get subtitles(): PlayerSubtitlesAPI {
     return this.player.subtitles;
+  }
+
+  get buffer(): PlayerBufferAPI {
+    return this.player.buffer;
   }
 
   /**
@@ -726,18 +761,20 @@ class AdEventsFactory {
     };
   }
 
-  static createAdEvent(player: PlayerAPI, type: PlayerEvent, policy: BitmovinYospacePlayerPolicy, manager: YSSessionManager): AdEvent {
-    console.log('skippable after', policy.canSkip());
+  static createAdEvent(player: PlayerAPI, type: PlayerEvent, manager: YSSessionManager, ad: YSAdvert): AdEvent {
     return {
       timestamp: Date.now(),
       type: type,
       ad: {
         isLinear: true,
-        requiresUi: true,
-        skippableAfter: policy.canSkip(),
+        duration: ad.duration,
+        skippableAfter: ad.advert.linear.skipOffset,
         clickThroughUrl: manager.session.getLinearClickthrough(),
-        adClickedCallback: () => {
+        clickThroughUrlOpened: () => {
           manager.reportPlayerEvent(PlayerEvent.AdClicked);
+        },
+        uiConfig: {
+          requestsUi: true,
         }
       } as LinearAd
     };
