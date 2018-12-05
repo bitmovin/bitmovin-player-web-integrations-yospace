@@ -348,6 +348,91 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     return this.buffer.getLevel(BufferType.ForwardDuration, MediaType.Audio).level;
   }
 
+  getBufferedRanges(): TimeRange[] {
+    if (this.isLive()) {
+      return this.player.getBufferedRanges();
+    }
+
+    const playerBufferedRanges = this.player.getBufferedRanges();
+    let magicBufferedRanges: TimeRange[] = [];
+
+    if (this.isAdActive()) {
+      // Only return ranges within the active ad
+      const currentAd = this.getCurrentAd();
+      const adStart = this.getAdStartTime(currentAd);
+      const adEnd = adStart + currentAd.duration;
+
+      playerBufferedRanges.forEach((range) => {
+        let magicStart = Math.max(adStart, range.start);
+        let magicEnd = Math.min(adEnd, range.end);
+
+        // Filter ranges that are not in current adParts by checking if end is greater as the start timestamp
+        if (magicEnd > magicStart) {
+          magicBufferedRanges.push({
+            start: magicStart - adStart,
+            end: magicEnd - adStart
+          });
+        }
+      });
+    } else {
+      playerBufferedRanges.forEach((range) => {
+        const getAdAtTime = (time: number) => {
+          return this.adChunks.find((part) => part.start <= time && part.end >= time);
+        };
+
+        const adAtRangeStart = getAdAtTime(range.start);
+        const adAtRangeEnd = getAdAtTime(range.end);
+
+        let rangeStart: number = range.start;
+
+        if (adAtRangeStart) {
+          // The start of the range is within an ad
+          // -> We have to modify the range start to the right content value
+          // -> Value is adBreak finish timestamp
+          // -> This timestamp need to be mapped into magic time
+          // -> This value is then the magic start of the current range
+          rangeStart = getAdAtTime(range.start).end;
+        }
+        const magicRangeStart = this.toMagicTime(rangeStart);
+
+        let rangeEnd: number = range.end;
+        if (adAtRangeEnd) {
+          // The end of the range is within an ad
+          // -> We have to modify the range end to the right content value
+          // -> Value is adBreak start timestamp
+          // -> This timestamp need to be mapped into magic time
+          // -> This value is then the magic start of the current range
+          rangeEnd = getAdAtTime(range.end).start;
+        }
+
+        let magicRangeEnd = this.toMagicTime(rangeEnd);
+
+        const adBreaksBeforeRangeStart = this.getAdBreaksBefore(rangeStart);
+        const adBreaksBeforeRangeEnd = this.getAdBreaksBefore(rangeEnd);
+
+        // Check if there are adBreaks within the range
+        if (adBreaksBeforeRangeStart.length !== adBreaksBeforeRangeEnd.length) {
+          const diff = adBreaksBeforeRangeEnd.filter(x => !adBreaksBeforeRangeStart.includes(x));
+          // Sum the getDuration of the delta adBreaks
+          const sumOfAdBreakDurations = diff.reduce((sum, adBreak) => sum + adBreak.getDuration(), 0);
+          // Subtract the sum from the modified range
+          magicRangeEnd -= sumOfAdBreakDurations;
+        }
+
+        // It's possible that a range start and ends within an ad so the magic will map it to the same start and end
+        // value. To filter them out we check if the end is greater than the start time.
+        if (rangeEnd > rangeStart) {
+          magicBufferedRanges.push({
+            start: magicRangeStart,
+            end: magicRangeEnd
+          })
+        }
+      });
+    }
+
+    return magicBufferedRanges;
+  }
+
   // Helper
   private isAdActive(): boolean {
     return Boolean(this.getCurrentAd());
@@ -435,7 +520,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
 
   private getAdBreaksBefore(position: number): YSAdBreak[] {
     return this.adChunks
-      .filter(chunk => chunk.start < position && position > chunk.end)
+      .filter(chunk => chunk.start < position && position >= chunk.end)
       .map(element => element.adBreak);
   }
 
@@ -612,10 +697,6 @@ export class BitmovinYospacePlayer implements PlayerAPI {
 
   getAvailableVideoQualities(): VideoQuality[] {
     return this.player.getAvailableVideoQualities();
-  }
-
-  getBufferedRanges(): TimeRange[] {
-    return this.player.getBufferedRanges();
   }
 
   getConfig(mergedConfig?: boolean): PlayerConfig {
