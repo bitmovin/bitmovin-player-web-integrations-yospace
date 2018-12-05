@@ -380,7 +380,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     } else {
       playerBufferedRanges.forEach((range) => {
         const getAdAtTime = (time: number) => {
-          return this.adChunks.find((part) => part.start <= time && part.end >= time);
+          return this.adParts.find((part) => part.start <= time && part.end >= time);
         };
 
         const adAtRangeStart = getAdAtTime(range.start);
