@@ -621,6 +621,12 @@ export class BitmovinYospacePlayer implements PlayerAPI {
           // TODO: we can't seek to the very very end so an unload may fix the problem
         } else {
           this.player.seek(seekTarget, 'ad-skip');
+
+          this.fireEvent({
+            timestamp: Date.now(),
+            type: PlayerEvent.AdSkipped,
+            ad: this.mapAd(ad)
+          } as AdEvent);
         }
       }
     },
