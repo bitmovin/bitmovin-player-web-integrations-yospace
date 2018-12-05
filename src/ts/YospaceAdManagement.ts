@@ -1,6 +1,6 @@
 ///<reference path="Yospace.d.ts"/>
 import {
-  AdBreak, AdBreakEvent, AdConfig, AdEvent, AudioQuality, AudioTrack, BufferType, DownloadedAudioData,
+  AdBreak, AdBreakEvent, AdConfig, AdEvent, AudioQuality, AudioTrack, BufferLevel, BufferType, DownloadedAudioData,
   DownloadedVideoData, LinearAd, LogLevel, MediaType, MetadataParsedEvent, MetadataType, Player, PlayerAdvertisingAPI,
   PlayerAPI, PlayerBufferAPI, PlayerConfig, PlayerEvent, PlayerEventBase, PlayerEventCallback, PlayerExports,
   PlayerSubtitlesAPI, PlayerType, PlayerVRAPI, QueryParameters, SeekEvent, SegmentMap, Snapshot, SourceConfig,
@@ -538,22 +538,21 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     return ad.adBreak.startPosition + previousAdverts.reduce((sum, advert) => sum + advert.duration, 0);
   }
 
-  private toMagicTime(timestamp: number): number {
-    let previousBreaksDuration = this.getAdBreaksBefore(timestamp)
+  private toMagicTime(playbackTime: number): number {
+    const previousBreaksDuration = this.getAdBreaksBefore(playbackTime)
       .reduce((sum, adBreak) => sum + adBreak.getDuration(), 0);
 
-    return timestamp - previousBreaksDuration;
+    return playbackTime - previousBreaksDuration;
   }
 
-  private mappedBufferLength(type: MediaType): number {
-    let bufferLength = this.player.buffer.getLevel(BufferType.ForwardDuration, type).level;
+  private magicBufferLevel(bufferLevel: BufferLevel): number {
     if (this.isAdActive()) {
-      return Math.min(bufferLength, this.getCurrentAd().duration);
+      return Math.min(bufferLevel.level, this.getCurrentAd().duration);
     }
 
     let futureBreakDurations = 0;
     const currentPlayerTime = this.player.getCurrentTime();
-    let bufferedRange = currentPlayerTime + bufferLength;
+    const bufferedRange = currentPlayerTime + bufferLevel.level;
 
     this.adParts.map((part: StreamPart) => {
       if (part.start > currentPlayerTime && part.end < bufferedRange) {
@@ -563,7 +562,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
       }
     });
 
-    return Math.max(bufferLength - futureBreakDurations, 0);
+    return Math.max(bufferLevel.level - futureBreakDurations, 0);
   }
 
   // Custom advertising module with overwritten methods
@@ -633,7 +632,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
 
     getLevel: (type: BufferType, media: MediaType) => {
       let bufferLevel = this.player.buffer.getLevel(type, media);
-      bufferLevel.level = this.mappedBufferLength(media);
+      bufferLevel.level = this.magicBufferLevel(bufferLevel);
       return bufferLevel;
     }
   };
