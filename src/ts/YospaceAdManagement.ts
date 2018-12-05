@@ -50,7 +50,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
   // magic content duration handling
   private contentDuration: number = 0;
   private contentMapping: StreamPartMapping[] = [];
-  private adChunks: StreamPart[] = [];
+  private adParts: StreamPart[] = [];
   // helper attribute to calculate current time during an ad in live streams
   private adStartedTimestamp: number;
 
@@ -63,7 +63,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     // Clear advertising config
     if (config.advertising) {
       console.warn('Client side advertising config is not supported');
-      config.advertising = {};
+      delete config.advertising;
     }
 
     // initialize bitmovin player
@@ -94,7 +94,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
         let session = this.manager.session;
         let timeline = session.timeline;
         // calculate duration magic
-        for (let element of timeline.getAllElements()) {
+        timeline.getAllElements().forEach((element) => {
           let originalChunk: StreamPart = {
             start: element.offset,
             end: element.offset + element.duration
@@ -104,7 +104,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
             case YSTimelineElement.ADVERT:
               originalChunk.adBreak = element.adBreak;
 
-              this.adChunks.push(originalChunk);
+              this.adParts.push(originalChunk);
               break;
             case YSTimelineElement.VOD:
 
@@ -121,7 +121,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
               this.contentDuration += element.duration;
               break;
           }
-        }
+        });
       }
 
       this.fireEvent({
@@ -185,7 +185,6 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     let url = source.hls;
 
     this.yospaceSourceConfig = source;
-    YSSessionManager.DEFAULTS.DEBUGGING = Boolean(this.yospaceConfig.debug);
 
     return new Promise<void>(((resolve, reject) => {
       let onInitComplete = (state: YSSessionResult, result: YSSessionStatus) => {
@@ -216,15 +215,19 @@ export class BitmovinYospacePlayer implements PlayerAPI {
         }
       };
 
+      let properties = {
+        DEBUGGING: Boolean(this.yospaceConfig.debug),
+      };
+
       switch (source.assetType) {
         case YospaceAssetType.LINEAR:
-          this.manager = YSSessionManager.createForLive(url, null, onInitComplete);
+          this.manager = YSSessionManager.createForLive(url, properties, onInitComplete);
           break;
         case YospaceAssetType.VOD:
-          this.manager = YSSessionManager.createForVoD(url, null, onInitComplete);
+          this.manager = YSSessionManager.createForVoD(url, properties, onInitComplete);
           break;
         case YospaceAssetType.LINEAR_START_OVER:
-          this.manager = YSSessionManager.createForNonLinear(url, null, onInitComplete);
+          this.manager = YSSessionManager.createForNonLinear(url, properties, onInitComplete);
           break;
         default:
           console.error('Undefined YospaceSourceConfig.assetType; Could not obtain session;');
@@ -301,12 +304,12 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     }
 
     // magical content seeking
-    let originalChunk = this.contentMapping.filter((mapping: StreamPartMapping) => {
+    let originalStreamPart = this.contentMapping.find((mapping: StreamPartMapping) => {
       return mapping.magic.start <= allowedSeekTarget && allowedSeekTarget <= mapping.magic.end
-    })[0];
+    });
 
-    let elapsedTimeInChunk = allowedSeekTarget - originalChunk.magic.start;
-    let magicSeekTarget = originalChunk.original.start + elapsedTimeInChunk;
+    let elapsedTimeInStreamPart = allowedSeekTarget - originalStreamPart.magic.start;
+    let magicSeekTarget = originalStreamPart.original.start + elapsedTimeInStreamPart;
 
     return this.player.seek(magicSeekTarget, issuer);
   }
@@ -519,8 +522,8 @@ export class BitmovinYospacePlayer implements PlayerAPI {
   }
 
   private getAdBreaksBefore(position: number): YSAdBreak[] {
-    return this.adChunks
-      .filter(chunk => chunk.start < position && position >= chunk.end)
+    return this.adParts
+      .filter(part => part.start < position && position >= part.end)
       .map(element => element.adBreak);
   }
 
@@ -532,7 +535,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     let indexInAdBreak = ad.adBreak.adverts.indexOf(ad);
     let previousAdverts: YSAdvert[] = ad.adBreak.adverts.slice(0, indexInAdBreak);
 
-    return ad.adBreak.startPosition + previousAdverts.reduce((sum, cv) => sum + cv.duration, 0);
+    return ad.adBreak.startPosition + previousAdverts.reduce((sum, advert) => sum + advert.duration, 0);
   }
 
   private toMagicTime(timestamp: number): number {
@@ -549,14 +552,14 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     }
 
     let futureBreakDurations = 0;
-    let currentRealTime = this.player.getCurrentTime();
-    let bufferedRange = currentRealTime + bufferLength;
+    const currentPlayerTime = this.player.getCurrentTime();
+    let bufferedRange = currentPlayerTime + bufferLength;
 
-    this.adChunks.map((chunk: StreamPart) => {
-      if (chunk.start > currentRealTime && chunk.end < bufferedRange) {
-        futureBreakDurations += chunk.end - chunk.start;
-      } else if (chunk.start > currentRealTime && chunk.start < bufferedRange && chunk.end > bufferedRange) {
-        futureBreakDurations += bufferedRange - chunk.start;
+    this.adParts.map((part: StreamPart) => {
+      if (part.start > currentPlayerTime && part.end < bufferedRange) {
+        futureBreakDurations += part.end - part.start;
+      } else if (part.start > currentPlayerTime && part.start < bufferedRange && part.end > bufferedRange) {
+        futureBreakDurations += bufferedRange - part.start;
       }
     });
 
