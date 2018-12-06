@@ -389,22 +389,18 @@ export class BitmovinYospacePlayer implements PlayerAPI {
         let rangeStart: number = range.start;
 
         if (adAtRangeStart) {
-          // The start of the range is within an ad
-          // -> We have to modify the range start to the right content value
-          // -> Value is adBreak finish timestamp
-          // -> This timestamp need to be mapped into magic time
-          // -> This value is then the magic start of the current range
+          // If the start of the range is within an ad we have to modify the range start to the right content value.
+          // Value should be adBreak finish timestamp and need to be mapped into magic time.
+          // This value is then the magic start of the current range.
           rangeStart = getAdAtTime(range.start).end;
         }
         const magicRangeStart = this.toMagicTime(rangeStart);
 
         let rangeEnd: number = range.end;
         if (adAtRangeEnd) {
-          // The end of the range is within an ad
-          // -> We have to modify the range end to the right content value
-          // -> Value is adBreak start timestamp
-          // -> This timestamp need to be mapped into magic time
-          // -> This value is then the magic start of the current range
+          // If the end of the range is within an ad we have to modify the range end to the right content value.
+          // Value should be adBreak start timestamp and need to be mapped into magic time.
+          // This value is then the magic start of the current range.
           rangeEnd = getAdAtTime(range.end).start;
         }
 
