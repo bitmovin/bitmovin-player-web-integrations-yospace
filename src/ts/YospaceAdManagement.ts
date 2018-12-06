@@ -66,6 +66,11 @@ export class BitmovinYospacePlayer implements PlayerAPI {
       delete config.advertising;
     }
 
+    if (config.ui === undefined || config.ui) {
+      console.warn('Please setup the UI after initializing the yospace player');
+      config.ui = false;
+    }
+
     // initialize bitmovin player
     this.player = new Player(containerElement, config);
 

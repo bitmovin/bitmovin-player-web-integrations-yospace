@@ -12,6 +12,8 @@
   <script type="text/javascript" src="yospace/yo-ad-management.min.js"></script>
   <script type="text/javascript" src="js/bitmovinplayer-yospace.js"></script>
 
+  <script type="text/javascript" src="//cdn.bitmovin.com/player/web/8.1.0-rc1/bitmovinplayer-ui.js"></script>
+  <link rel="stylesheet" href="//cdn.bitmovin.com/player/web/8.1.0-rc1/bitmovinplayer-ui.css">
   <style>
     .container {
       color: white;
@@ -63,6 +65,7 @@
       muted: true,
       autoplay: true
     },
+    ui: false,
   };
 
   // Yospace configuration
@@ -73,6 +76,7 @@
   var playerContainer = document.getElementById('player');
   let yospacePlayer = new bitmovin.player.ads.yospace.BitmovinYospacePlayer(playerContainer, conf, yospaceConfig);
 
+  bitmovin.playerui.UIFactory.buildDefaultUI(yospacePlayer);
   yospacePlayer.load(source).then(function() {
       console.log('loaded');
   }).catch(function() {
