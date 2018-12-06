@@ -510,7 +510,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
 
   private mapAd(ysAd: YSAdvert): LinearAd {
     return {
-      isLinear: !!ysAd.advert.linear,
+      isLinear: Boolean(ysAd.advert.linear),
       duration: ysAd.duration,
       id: ysAd.advert.id,
       clickThroughUrl: ysAd.advert.linear.clickThrough,
