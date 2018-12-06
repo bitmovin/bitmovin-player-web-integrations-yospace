@@ -1,10 +1,10 @@
 ///<reference path="Yospace.d.ts"/>
 import {
-  AdBreak, AdBreakEvent, AdConfig, AdEvent, AudioQuality, AudioTrack, DownloadedAudioData, DownloadedVideoData,
-  LinearAd, LogLevel, MetadataParsedEvent, MetadataType, Player, PlayerAdvertisingAPI, PlayerAPI, PlayerBufferAPI,
-  PlayerConfig, PlayerEvent, PlayerEventBase, PlayerEventCallback, PlayerExports, PlayerSubtitlesAPI, PlayerType,
-  PlayerVRAPI, QueryParameters, SeekEvent, SegmentMap, Snapshot, SourceConfig, StreamType, Technology, Thumbnail,
-  TimeChangedEvent, TimeRange, VideoQuality, ViewMode, ViewModeOptions,
+  AdBreak, AdBreakEvent, AdConfig, AdEvent, AudioQuality, AudioTrack, BufferLevel, BufferType, DownloadedAudioData,
+  DownloadedVideoData, LinearAd, LogLevel, MediaType, MetadataParsedEvent, MetadataType, Player, PlayerAdvertisingAPI,
+  PlayerAPI, PlayerBufferAPI, PlayerConfig, PlayerEvent, PlayerEventBase, PlayerEventCallback, PlayerExports,
+  PlayerSubtitlesAPI, PlayerType, PlayerVRAPI, QueryParameters, SeekEvent, SegmentMap, Snapshot, SourceConfig,
+  StreamType, Technology, Thumbnail, TimeChangedEvent, TimeRange, VideoQuality, ViewMode, ViewModeOptions,
 } from 'bitmovin-player';
 import { BYSAdBreakEvent, BYSAdEvent, BYSListenerEvent, YospaceAdListenerAdapter } from "./YospaceListenerAdapter";
 import { BitmovinYospacePlayerPolicy, DefaultBitmovinYospacePlayerPolicy } from "./BitmovinYospacePlayerPolicy";
@@ -239,6 +239,10 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     return this.advertisingAPI;
   }
 
+  get buffer(): PlayerBufferAPI {
+    return this.bufferAPI;
+  }
+
   setPolicy(policy: BitmovinYospacePlayerPolicy) {
     this.playerPolicy = policy;
   }
@@ -333,6 +337,101 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     return this.contentDuration;
   }
 
+  /**
+   * @deprecated Use {@link PlayerBufferAPI.getLevel} instead.
+   */
+  getVideoBufferLength(): number | null {
+    return this.buffer.getLevel(BufferType.ForwardDuration, MediaType.Video).level;
+  }
+
+  /**
+   * @deprecated Use {@link PlayerBufferAPI.getLevel} instead.
+   */
+  getAudioBufferLength(): number | null {
+    return this.buffer.getLevel(BufferType.ForwardDuration, MediaType.Audio).level;
+  }
+
+  getBufferedRanges(): TimeRange[] {
+    if (this.isLive()) {
+      return this.player.getBufferedRanges();
+    }
+
+    const playerBufferedRanges = this.player.getBufferedRanges();
+    let magicBufferedRanges: TimeRange[] = [];
+
+    if (this.isAdActive()) {
+      // Only return ranges within the active ad
+      const currentAd = this.getCurrentAd();
+      const adStart = this.getAdStartTime(currentAd);
+      const adEnd = adStart + currentAd.duration;
+
+      playerBufferedRanges.forEach((range) => {
+        let magicStart = Math.max(adStart, range.start);
+        let magicEnd = Math.min(adEnd, range.end);
+
+        // Filter ranges that are not in current adParts by checking if end is greater as the start timestamp
+        if (magicEnd > magicStart) {
+          magicBufferedRanges.push({
+            start: magicStart - adStart,
+            end: magicEnd - adStart
+          });
+        }
+      });
+    } else {
+      playerBufferedRanges.forEach((range) => {
+        const getAdAtTime = (time: number) => {
+          return this.adParts.find((part) => part.start <= time && part.end >= time);
+        };
+
+        const adAtRangeStart = getAdAtTime(range.start);
+        const adAtRangeEnd = getAdAtTime(range.end);
+
+        let rangeStart: number = range.start;
+
+        if (adAtRangeStart) {
+          // If the start of the range is within an ad we have to modify the range start to the right content value.
+          // Value should be adBreak finish timestamp and need to be mapped into magic time.
+          // This value is then the magic start of the current range.
+          rangeStart = getAdAtTime(range.start).end;
+        }
+        const magicRangeStart = this.toMagicTime(rangeStart);
+
+        let rangeEnd: number = range.end;
+        if (adAtRangeEnd) {
+          // If the end of the range is within an ad we have to modify the range end to the right content value.
+          // Value should be adBreak start timestamp and need to be mapped into magic time.
+          // This value is then the magic start of the current range.
+          rangeEnd = getAdAtTime(range.end).start;
+        }
+
+        let magicRangeEnd = this.toMagicTime(rangeEnd);
+
+        const adBreaksBeforeRangeStart = this.getAdBreaksBefore(rangeStart);
+        const adBreaksBeforeRangeEnd = this.getAdBreaksBefore(rangeEnd);
+
+        // Check if there are adBreaks within the range
+        if (adBreaksBeforeRangeStart.length !== adBreaksBeforeRangeEnd.length) {
+          const diff = adBreaksBeforeRangeEnd.filter(x => !adBreaksBeforeRangeStart.includes(x));
+          // Sum the getDuration of the delta adBreaks
+          const sumOfAdBreakDurations = diff.reduce((sum, adBreak) => sum + adBreak.getDuration(), 0);
+          // Subtract the sum from the modified range
+          magicRangeEnd -= sumOfAdBreakDurations;
+        }
+
+        // It's possible that a range start and ends within an ad so the magic will map it to the same start and end
+        // value. To filter them out we check if the end is greater than the start time.
+        if (rangeEnd > rangeStart) {
+          magicBufferedRanges.push({
+            start: magicRangeStart,
+            end: magicRangeEnd
+          })
+        }
+      });
+    }
+
+    return magicBufferedRanges;
+  }
+
   // Helper
   private isAdActive(): boolean {
     return Boolean(this.getCurrentAd());
@@ -420,7 +519,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
 
   private getAdBreaksBefore(position: number): YSAdBreak[] {
     return this.adParts
-      .filter(part => part.start < position && position > part.end)
+      .filter(part => part.start < position && position >= part.end)
       .map(element => element.adBreak);
   }
 
@@ -435,15 +534,21 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     return ad.adBreak.startPosition + previousAdverts.reduce((sum, advert) => sum + advert.duration, 0);
   }
 
-  getVideoBufferLength(): number | null {
-    let bufferLength = this.player.getVideoBufferLength();
+  private toMagicTime(playbackTime: number): number {
+    const previousBreaksDuration = this.getAdBreaksBefore(playbackTime)
+      .reduce((sum, adBreak) => sum + adBreak.getDuration(), 0);
+
+    return playbackTime - previousBreaksDuration;
+  }
+
+  private magicBufferLevel(bufferLevel: BufferLevel): number {
     if (this.isAdActive()) {
-      return Math.min(bufferLength, this.getCurrentAd().duration);
+      return Math.min(bufferLevel.level, this.getCurrentAd().duration);
     }
 
     let futureBreakDurations = 0;
     const currentPlayerTime = this.player.getCurrentTime();
-    let bufferedRange = currentPlayerTime + bufferLength;
+    const bufferedRange = currentPlayerTime + bufferLevel.level;
 
     this.adParts.map((part: StreamPart) => {
       if (part.start > currentPlayerTime && part.end < bufferedRange) {
@@ -453,14 +558,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
       }
     });
 
-    return Math.max(bufferLength - futureBreakDurations, 0);
-  }
-
-  private toMagicTime(timestamp: number): number {
-    let previousBreaksDuration = this.getAdBreaksBefore(timestamp)
-      .reduce((sum, adBreak) => sum + adBreak.getDuration(), 0);
-
-    return timestamp - previousBreaksDuration;
+    return Math.max(bufferLevel.level - futureBreakDurations, 0);
   }
 
   // Custom advertising module with overwritten methods
@@ -517,6 +615,22 @@ export class BitmovinYospacePlayer implements PlayerAPI {
         }
       }
     },
+
+    getModuleInfo: () => {
+      return this.player.ads.getModuleInfo();
+    }
+  };
+
+  private bufferAPI: PlayerBufferAPI = {
+    setTargetLevel: (type: BufferType, value: number, media: MediaType) => {
+      this.player.buffer.setTargetLevel(type, value, media);
+    },
+
+    getLevel: (type: BufferType, media: MediaType) => {
+      let bufferLevel = this.player.buffer.getLevel(type, media);
+      bufferLevel.level = this.magicBufferLevel(bufferLevel);
+      return bufferLevel;
+    }
   };
 
   // Default PlayerAPI implementation
@@ -530,10 +644,6 @@ export class BitmovinYospacePlayer implements PlayerAPI {
 
   get subtitles(): PlayerSubtitlesAPI {
     return this.player.subtitles;
-  }
-
-  get buffer(): PlayerBufferAPI {
-    return this.player.buffer;
   }
 
   /**
@@ -567,11 +677,6 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     return this.player.getAudio();
   }
 
-  getAudioBufferLength(): number | null {
-    // TODO: implement if yospace supports audio only streams
-    return this.player.getAudioBufferLength();
-  }
-
   getAudioQuality(): AudioQuality {
     return this.player.getAudioQuality();
   }
@@ -590,10 +695,6 @@ export class BitmovinYospacePlayer implements PlayerAPI {
 
   getAvailableVideoQualities(): VideoQuality[] {
     return this.player.getAvailableVideoQualities();
-  }
-
-  getBufferedRanges(): TimeRange[] {
-    return this.player.getBufferedRanges();
   }
 
   getConfig(mergedConfig?: boolean): PlayerConfig {
