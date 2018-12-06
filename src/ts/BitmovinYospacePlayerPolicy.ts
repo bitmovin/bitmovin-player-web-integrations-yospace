@@ -23,14 +23,14 @@ export class DefaultBitmovinYospacePlayerPolicy implements BitmovinYospacePlayer
 
   canSeekTo(seekTarget: number): number {
     const currentTime = this.player.getCurrentTime();
-    let adBreaks = this.player.ads.list();
+    const adBreaks = this.player.ads.list();
 
-    let skippedAdBreaks = adBreaks.filter(adBreak => {
+    const skippedAdBreaks = adBreaks.filter(adBreak => {
       return adBreak.scheduleTime > currentTime && adBreak.scheduleTime < seekTarget;
     });
 
     if (skippedAdBreaks.length > 0) {
-      let adBreakToPlay = skippedAdBreaks[skippedAdBreaks.length - 1];
+      const adBreakToPlay = skippedAdBreaks[skippedAdBreaks.length - 1];
       return adBreakToPlay.scheduleTime;
     }
 
@@ -38,9 +38,9 @@ export class DefaultBitmovinYospacePlayerPolicy implements BitmovinYospacePlayer
   }
 
   canSkip(): number {
-    let currentAd = this.player.ads.getActiveAd();
+    const currentAd = this.player.ads.getActiveAd();
     if (currentAd && currentAd.isLinear && !this.player.isLive()) {
-      let currentTime = this.player.getCurrentTime();
+      const currentTime = this.player.getCurrentTime();
       if ((currentAd as LinearAd).skippableAfter < 0) {
         return -1;
       }
