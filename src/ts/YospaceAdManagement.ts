@@ -241,11 +241,11 @@ export class BitmovinYospacePlayer implements PlayerAPI {
   }
 
   get ads(): PlayerAdvertisingAPI {
-    return this.advertisingAPI;
+    return this.advertisingApi;
   }
 
   get buffer(): PlayerBufferAPI {
-    return this.bufferAPI;
+    return this.bufferApi;
   }
 
   setPolicy(policy: BitmovinYospacePlayerPolicy) {
@@ -567,7 +567,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
   }
 
   // Custom advertising module with overwritten methods
-  private advertisingAPI: PlayerAdvertisingAPI = {
+  private advertisingApi: PlayerAdvertisingAPI = {
     discardAdBreak: (adBreakId: string) => {
       console.warn('CSAI is not supported for yospace stream');
       return;
@@ -632,7 +632,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     }
   };
 
-  private bufferAPI: PlayerBufferAPI = {
+  private bufferApi: PlayerBufferAPI = {
     setTargetLevel: (type: BufferType, value: number, media: MediaType) => {
       this.player.buffer.setTargetLevel(type, value, media);
     },
