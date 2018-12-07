@@ -60,6 +60,9 @@ export class BitmovinYospacePlayer implements PlayerAPI {
   // Event handling
   private suppressedEventsController: EventSuppressController = new EventSuppressController();
 
+  // Replay support
+  private isPlaybackFinished = false;
+
   constructor(containerElement: HTMLElement, config: PlayerConfig, yospaceConfig: YospaceConfiguration = {}) {
     this.yospaceConfig = yospaceConfig;
 
@@ -292,6 +295,12 @@ export class BitmovinYospacePlayer implements PlayerAPI {
   }
 
   play(issuer?: string): Promise<void> {
+    if (this.isPlaybackFinished) {
+      this.suppressedEventsController.add(PlayerEvent.Seek, PlayerEvent.Seeked);
+      this.player.seek(0);
+      this.isPlaybackFinished = false;
+    }
+
     if (this.isAdActive() && this.player.isPaused()) {
       // track ad resumed
       this.getCurrentAd().adResumed();
@@ -634,6 +643,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
         const seekTarget = this.getAdStartTime(ad) + ad.duration;
 
         if (seekTarget >= this.player.getDuration()) {
+          this.isPlaybackFinished = true;
           this.suppressedEventsController.add(PlayerEvent.Paused, PlayerEvent.Seek, PlayerEvent.Seeked);
           this.player.pause();
           this.player.seek(ad.adBreak.startPosition - 1); // -1 to be sure to don't have a frame of the ad visible
