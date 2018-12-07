@@ -1,12 +1,15 @@
 ///<reference path="Yospace.d.ts"/>
 import {
-  AdBreak, AdBreakEvent, AdConfig, AdEvent, AudioQuality, AudioTrack, BufferLevel, BufferType, DownloadedAudioData,
-  DownloadedVideoData, LinearAd, LogLevel, MediaType, MetadataParsedEvent, MetadataType, Player, PlayerAdvertisingAPI,
-  PlayerAPI, PlayerBufferAPI, PlayerConfig, PlayerEvent, PlayerEventBase, PlayerEventCallback, PlayerExports,
-  PlayerSubtitlesAPI, PlayerType, PlayerVRAPI, QueryParameters, SeekEvent, SegmentMap, Snapshot, SourceConfig,
-  StreamType, Technology, Thumbnail, TimeChangedEvent, TimeRange, VideoQuality, ViewMode, ViewModeOptions,
+  AdBreak, AdBreakEvent, AdConfig, AdEvent, AdQuartile, AdQuartileEvent, AudioQuality, AudioTrack, BufferLevel,
+  BufferType, DownloadedAudioData, DownloadedVideoData, LinearAd, LogLevel, MediaType, MetadataParsedEvent,
+  MetadataType, Player, PlayerAdvertisingAPI, PlayerAPI, PlayerBufferAPI, PlayerConfig, PlayerEvent, PlayerEventBase,
+  PlayerEventCallback, PlayerExports, PlayerSubtitlesAPI, PlayerType, PlayerVRAPI, QueryParameters, SeekEvent,
+  SegmentMap, Snapshot, SourceConfig, StreamType, Technology, Thumbnail, TimeChangedEvent, TimeRange, VideoQuality,
+  ViewMode, ViewModeOptions,
 } from 'bitmovin-player';
-import { BYSAdBreakEvent, BYSAdEvent, BYSListenerEvent, YospaceAdListenerAdapter } from "./YospaceListenerAdapter";
+import {
+  BYSAdBreakEvent, BYSAdEvent, BYSAnalyticsFiredEvent, BYSListenerEvent, YospaceAdListenerAdapter
+} from "./YospaceListenerAdapter";
 import { BitmovinYospacePlayerPolicy, DefaultBitmovinYospacePlayerPolicy } from "./BitmovinYospacePlayerPolicy";
 import { ArrayUtils } from 'bitmovin-player-ui/dist/js/framework/arrayutils';
 
@@ -464,6 +467,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     this.yospaceListenerAdapter.addListener(BYSListenerEvent.ADVERT_START, this.onAdStarted);
     this.yospaceListenerAdapter.addListener(BYSListenerEvent.ADVERT_END, this.onAdFinished);
     this.yospaceListenerAdapter.addListener(BYSListenerEvent.AD_BREAK_END, this.onAdBreakFinished);
+    this.yospaceListenerAdapter.addListener(BYSListenerEvent.ANALYTICS_FIRED, this.onAnalyticsFired);
   }
 
   private onAdBreakStarted = (event: BYSAdBreakEvent) => {
@@ -498,6 +502,34 @@ export class BitmovinYospacePlayer implements PlayerAPI {
       this.seek(this.cachedSeekTarget, "yospace-ad-skipping");
       this.cachedSeekTarget = null;
     }
+  };
+
+  private onAnalyticsFired = (event: BYSAnalyticsFiredEvent) => {
+    let playerEvent: AdQuartileEvent = {
+      timestamp: Date.now(),
+      type: PlayerEvent.AdQuartile,
+      quartile: null
+    };
+
+    switch (event.call_id) {
+      case 'firstQuartile':
+        playerEvent.quartile = AdQuartile.FIRST_QUARTILE;
+        break;
+      case 'midpoint':
+        playerEvent.quartile = AdQuartile.MIDPOINT;
+        break;
+      case 'thirdQuartile':
+        playerEvent.quartile = AdQuartile.THIRD_QUARTILE;
+        break;
+      case 'complete':
+        // will be handled via AdFinishedEvent so extra event needed
+        return;
+      default:
+        // No quartile event so nothing to fire
+        return;
+    }
+
+    this.fireEvent(playerEvent);
   };
 
   private mapAdBreak(ysAdBreak: YSAdBreak): AdBreak {
