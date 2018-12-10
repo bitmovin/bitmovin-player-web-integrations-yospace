@@ -1003,6 +1003,6 @@ class EventSuppressController {
   }
 
   isSuppressed(eventType: PlayerEvent): boolean {
-    return Boolean(this.suppressedEvents.includes(eventType));
+    return this.suppressedEvents.includes(eventType);
   }
 }
