@@ -187,6 +187,8 @@ export class BitmovinYospacePlayer implements PlayerAPI {
       console.warn('HLS source missing');
       return;
     }
+    this.resetState();
+
     const url = source.hls;
 
     this.yospaceSourceConfig = source;
@@ -568,6 +570,20 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     return Math.max(bufferLevel.level - futureBreakDurations, 0);
   }
 
+  private resetState(): void {
+    // reset all local attributes
+    if (this.manager) {
+      this.manager.shutdown();
+      this.manager = null;
+    }
+
+    this.contentDuration = 0;
+    this.contentMapping = [];
+    this.adParts = [];
+    this.adStartedTimestamp = null;
+    this.cachedSeekTarget = null;
+  }
+
   // Custom advertising module with overwritten methods
   private advertisingApi: PlayerAdvertisingAPI = {
     discardAdBreak: (adBreakId: string) => {
@@ -647,15 +663,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
   };
 
   unload(): Promise<void> {
-    // reset all local attributes
-    this.manager.shutdown();
-    this.manager = null;
-
-    this.contentDuration = 0;
-    this.contentMapping = [];
-    this.adParts = [];
-    this.adStartedTimestamp = null;
-    this.cachedSeekTarget = null;
+    this.resetState();
 
     return this.player.unload();
   }
