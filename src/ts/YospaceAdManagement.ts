@@ -505,31 +505,20 @@ export class BitmovinYospacePlayer implements PlayerAPI {
   };
 
   private onAnalyticsFired = (event: BYSAnalyticsFiredEvent) => {
-    let playerEvent: AdQuartileEvent = {
-      timestamp: Date.now(),
-      type: PlayerEvent.AdQuartile,
-      quartile: null
+    const isQuartileEvent = (eventName: string) => {
+      const yospaceQuartileEventNames = [
+        'firstQuartile',
+        'midpoint',
+        'thirdQuartile',
+        // In our domain logic the 'complete' event is handed via the `AdFinished` event so we can ignore it here
+      ];
+
+      return yospaceQuartileEventNames.includes(eventName);
     };
 
-    switch (event.call_id) {
-      case 'firstQuartile':
-        playerEvent.quartile = AdQuartile.FIRST_QUARTILE;
-        break;
-      case 'midpoint':
-        playerEvent.quartile = AdQuartile.MIDPOINT;
-        break;
-      case 'thirdQuartile':
-        playerEvent.quartile = AdQuartile.THIRD_QUARTILE;
-        break;
-      case 'complete':
-        // will be handled via AdFinishedEvent so extra event needed
-        return;
-      default:
-        // No quartile event so nothing to fire
-        return;
+    if (isQuartileEvent(event.call_id)) {
+      this.handleQuartileEvent(event.call_id);
     }
-
-    this.fireEvent(playerEvent);
   };
 
   private mapAdBreak(ysAdBreak: YSAdBreak): AdBreak {
@@ -596,6 +585,27 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     });
 
     return Math.max(bufferLevel.level - futureBreakDurations, 0);
+  }
+
+  private handleQuartileEvent(adQuartileEventName: string): void {
+    const mapQuartileEvent = (quartileEvent: string) => {
+      switch (quartileEvent) {
+        case 'firstQuartile':
+          return AdQuartile.FIRST_QUARTILE;
+        case 'midpoint':
+          return AdQuartile.MIDPOINT;
+        case 'thirdQuartile':
+          return AdQuartile.THIRD_QUARTILE;
+      }
+    };
+
+    const playerEvent: AdQuartileEvent = {
+      timestamp: Date.now(),
+      type: PlayerEvent.AdQuartile,
+      quartile: mapQuartileEvent(adQuartileEventName),
+    };
+
+    this.fireEvent(playerEvent);
   }
 
   // Custom advertising module with overwritten methods
@@ -905,6 +915,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
   }
 
   setPlaybackSpeed(speed: number): void {
+    // TODO: handle this; set playback-speed to 1 if ad is starts and reset afterwards; do not allow changing during ad
     this.player.setPlaybackSpeed(speed);
   }
 
