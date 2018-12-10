@@ -543,6 +543,17 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     };
   }
 
+  private mapAdQuartile(quartileEvent: string): AdQuartile {
+    switch (quartileEvent) {
+      case 'firstQuartile':
+        return AdQuartile.FIRST_QUARTILE;
+      case 'midpoint':
+        return AdQuartile.MIDPOINT;
+      case 'thirdQuartile':
+        return AdQuartile.THIRD_QUARTILE;
+    }
+  };
+
   private getAdBreaksBefore(position: number): YSAdBreak[] {
     return this.adParts
       .filter(part => part.start < position && position >= part.end)
@@ -588,21 +599,10 @@ export class BitmovinYospacePlayer implements PlayerAPI {
   }
 
   private handleQuartileEvent(adQuartileEventName: string): void {
-    const mapQuartileEvent = (quartileEvent: string) => {
-      switch (quartileEvent) {
-        case 'firstQuartile':
-          return AdQuartile.FIRST_QUARTILE;
-        case 'midpoint':
-          return AdQuartile.MIDPOINT;
-        case 'thirdQuartile':
-          return AdQuartile.THIRD_QUARTILE;
-      }
-    };
-
     const playerEvent: AdQuartileEvent = {
       timestamp: Date.now(),
       type: PlayerEvent.AdQuartile,
-      quartile: mapQuartileEvent(adQuartileEventName),
+      quartile: this.mapAdQuartile(adQuartileEventName),
     };
 
     this.fireEvent(playerEvent);
