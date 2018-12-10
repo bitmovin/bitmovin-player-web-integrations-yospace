@@ -194,8 +194,10 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     return new Promise<void>(((resolve, reject) => {
       const onInitComplete = (state: YSSessionResult, result: YSSessionStatus) => {
         if (state === YSSessionResult.INITIALISED) {
+          // clone source to not modify passed object
+          let clonedSource = JSON.parse(JSON.stringify(source)) as YospaceSourceConfig;
           // use received url from yospace
-          source.hls = this.manager.masterPlaylist();
+          clonedSource.hls = this.manager.masterPlaylist();
 
           if (this.manager.isYospaceStream()) {
             this.yospaceListenerAdapter = new YospaceAdListenerAdapter();
@@ -213,7 +215,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
             this.manager = null;
           }
 
-          this.player.load(source, forceTechnology, disableSeeking).then(resolve).catch(reject);
+          this.player.load(clonedSource, forceTechnology, disableSeeking).then(resolve).catch(reject);
         } else {
           // TODO: Error handling
           reject();
