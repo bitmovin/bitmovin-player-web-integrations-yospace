@@ -644,6 +644,20 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     }
   };
 
+  unload(): Promise<void> {
+    // reset all local attributes
+    this.manager.shutdown();
+    this.manager = null;
+
+    this.contentDuration = 0;
+    this.contentMapping = [];
+    this.adParts = [];
+    this.adStartedTimestamp = null;
+    this.cachedSeekTarget = null;
+
+    return this.player.unload();
+  }
+
   // Default PlayerAPI implementation
   get version(): string {
     return this.player.version;
@@ -906,10 +920,6 @@ export class BitmovinYospacePlayer implements PlayerAPI {
 
   timeShift(offset: number, issuer?: string): void {
     this.player.timeShift(offset, issuer);
-  }
-
-  unload(): Promise<void> {
-    return this.player.unload();
   }
 
   unmute(issuer?: string): void {

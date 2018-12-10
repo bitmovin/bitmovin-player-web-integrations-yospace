@@ -9,11 +9,11 @@ declare enum YSSessionResult {
 }
 
 declare enum YSSessionStatus {
-  CONNECTION_ERROR,
-  MALFORMED_URL,
-  NON_YOSPACE_URL,
-  CONNECTION_TIMEOUT,
-  NO_LIVEPAUSE,
+  CONNECTION_ERROR = -1,
+  CONNECTION_TIMEOUT = -2,
+  MALFORMED_URL = -3,
+  NON_YOSPACE_URL = -10,
+  NO_LIVEPAUSE = -11,
 }
 
 interface YSSessionManagerDefault {
