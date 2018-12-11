@@ -1,12 +1,15 @@
 ///<reference path="Yospace.d.ts"/>
 import {
-  AdBreak, AdBreakEvent, AdConfig, AdEvent, AudioQuality, AudioTrack, BufferLevel, BufferType, DownloadedAudioData,
-  DownloadedVideoData, LinearAd, LogLevel, MediaType, MetadataParsedEvent, MetadataType, Player, PlayerAdvertisingAPI,
-  PlayerAPI, PlayerBufferAPI, PlayerConfig, PlayerEvent, PlayerEventBase, PlayerEventCallback, PlayerExports,
-  PlayerSubtitlesAPI, PlayerType, PlayerVRAPI, QueryParameters, SeekEvent, SegmentMap, Snapshot, SourceConfig,
-  StreamType, Technology, Thumbnail, TimeChangedEvent, TimeRange, VideoQuality, ViewMode, ViewModeOptions,
+  AdBreak, AdBreakEvent, AdConfig, AdEvent, AdQuartile, AdQuartileEvent, AudioQuality, AudioTrack, BufferLevel,
+  BufferType, DownloadedAudioData, DownloadedVideoData, LinearAd, LogLevel, MediaType, MetadataParsedEvent,
+  MetadataType, Player, PlayerAdvertisingAPI, PlayerAPI, PlayerBufferAPI, PlayerConfig, PlayerEvent, PlayerEventBase,
+  PlayerEventCallback, PlayerExports, PlayerSubtitlesAPI, PlayerType, PlayerVRAPI, QueryParameters, SeekEvent,
+  SegmentMap, Snapshot, SourceConfig, StreamType, Technology, Thumbnail, TimeChangedEvent, TimeRange, VideoQuality,
+  ViewMode, ViewModeOptions,
 } from 'bitmovin-player';
-import { BYSAdBreakEvent, BYSAdEvent, BYSListenerEvent, YospaceAdListenerAdapter } from "./YospaceListenerAdapter";
+import {
+  BYSAdBreakEvent, BYSAdEvent, BYSAnalyticsFiredEvent, BYSListenerEvent, YospaceAdListenerAdapter
+} from "./YospaceListenerAdapter";
 import { BitmovinYospacePlayerPolicy, DefaultBitmovinYospacePlayerPolicy } from "./BitmovinYospacePlayerPolicy";
 import { ArrayUtils } from 'bitmovin-player-ui/dist/js/framework/arrayutils';
 
@@ -469,6 +472,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     this.yospaceListenerAdapter.addListener(BYSListenerEvent.ADVERT_START, this.onAdStarted);
     this.yospaceListenerAdapter.addListener(BYSListenerEvent.ADVERT_END, this.onAdFinished);
     this.yospaceListenerAdapter.addListener(BYSListenerEvent.AD_BREAK_END, this.onAdBreakFinished);
+    this.yospaceListenerAdapter.addListener(BYSListenerEvent.ANALYTICS_FIRED, this.onAnalyticsFired);
   }
 
   private onAdBreakStarted = (event: BYSAdBreakEvent) => {
@@ -505,6 +509,23 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     }
   };
 
+  private onAnalyticsFired = (event: BYSAnalyticsFiredEvent) => {
+    const isQuartileEvent = (eventName: string) => {
+      const yospaceQuartileEventNames = [
+        'firstQuartile',
+        'midpoint',
+        'thirdQuartile',
+        // In our domain logic the 'complete' event is handed via the `AdFinished` event so we can ignore it here
+      ];
+
+      return yospaceQuartileEventNames.includes(eventName);
+    };
+
+    if (isQuartileEvent(event.call_id)) {
+      this.handleQuartileEvent(event.call_id);
+    }
+  };
+
   private mapAdBreak(ysAdBreak: YSAdBreak): AdBreak {
     return {
       id: ysAdBreak.adBreakIdentifier, // can be null
@@ -526,6 +547,17 @@ export class BitmovinYospacePlayer implements PlayerAPI {
       },
     };
   }
+
+  private mapAdQuartile(quartileEvent: string): AdQuartile {
+    switch (quartileEvent) {
+      case 'firstQuartile':
+        return AdQuartile.FIRST_QUARTILE;
+      case 'midpoint':
+        return AdQuartile.MIDPOINT;
+      case 'thirdQuartile':
+        return AdQuartile.THIRD_QUARTILE;
+    }
+  };
 
   private getAdBreaksBefore(position: number): YSAdBreak[] {
     return this.adParts
@@ -583,6 +615,16 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     this.adParts = [];
     this.adStartedTimestamp = null;
     this.cachedSeekTarget = null;
+  }
+
+  private handleQuartileEvent(adQuartileEventName: string): void {
+    const playerEvent: AdQuartileEvent = {
+      timestamp: Date.now(),
+      type: PlayerEvent.AdQuartile,
+      quartile: this.mapAdQuartile(adQuartileEventName),
+    };
+
+    this.fireEvent(playerEvent);
   }
 
   // Custom advertising module with overwritten methods
@@ -898,6 +940,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
   }
 
   setPlaybackSpeed(speed: number): void {
+    // TODO: handle this; set playback-speed to 1 if ad is starts and reset afterwards; do not allow changing during ad
     this.player.setPlaybackSpeed(speed);
   }
 
