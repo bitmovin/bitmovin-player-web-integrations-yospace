@@ -5,7 +5,7 @@ import {
   MetadataType, Player, PlayerAdvertisingAPI, PlayerAPI, PlayerBufferAPI, PlayerConfig, PlayerEvent, PlayerEventBase,
   PlayerEventCallback, PlayerExports, PlayerSubtitlesAPI, PlayerType, PlayerVRAPI, QueryParameters, SeekEvent,
   SegmentMap, Snapshot, SourceConfig, StreamType, Technology, Thumbnail, TimeChangedEvent, TimeRange, VideoQuality,
-  ViewMode, ViewModeOptions,
+  ViewMode, ViewModeOptions, PlaybackEvent,
 } from 'bitmovin-player';
 import {
   BYSAdBreakEvent, BYSAdEvent, BYSAnalyticsFiredEvent, BYSListenerEvent, YospaceAdListenerAdapter
@@ -60,6 +60,12 @@ export class BitmovinYospacePlayer implements PlayerAPI {
   // save original seek target in case of seek will seek over an AdBreak to recover to this position
   private cachedSeekTarget: number;
 
+  // Event handling
+  private suppressedEventsController: EventSuppressController = new EventSuppressController();
+
+  // Replay support
+  private isPlaybackFinished = false;
+
   constructor(containerElement: HTMLElement, config: PlayerConfig, yospaceConfig: YospaceConfiguration = {}) {
     this.yospaceConfig = yospaceConfig;
 
@@ -93,8 +99,14 @@ export class BitmovinYospacePlayer implements PlayerAPI {
       });
     };
 
-    const onPause = () => {
+    const onPause = (event: PlaybackEvent) => {
       this.manager.reportPlayerEvent(YSPlayerEvents.PAUSE);
+
+      if (!this.suppressedEventsController.isSuppressed(PlayerEvent.Paused)) {
+        this.fireEvent(event);
+      } else {
+        this.suppressedEventsController.remove(PlayerEvent.Paused);
+      }
     };
 
     const onSourceLoaded = () => {
@@ -140,10 +152,22 @@ export class BitmovinYospacePlayer implements PlayerAPI {
 
     const onSeek = (event: SeekEvent) => {
       this.manager.reportPlayerEvent(YSPlayerEvents.SEEK_START, this.player.getCurrentTime());
+
+      if (!this.suppressedEventsController.isSuppressed(PlayerEvent.Seek)) {
+        this.fireEvent(event);
+      } else {
+        this.suppressedEventsController.remove(PlayerEvent.Seek);
+      }
     };
 
     const onSeeked = (event: SeekEvent) => {
       this.manager.reportPlayerEvent(YSPlayerEvents.SEEK_END, this.player.getCurrentTime());
+
+      if (!this.suppressedEventsController.isSuppressed(PlayerEvent.Seeked)) {
+        this.fireEvent(event);
+      } else {
+        this.suppressedEventsController.remove(PlayerEvent.Seeked);
+      }
     };
 
     const onMetaData = (event: MetadataParsedEvent) => {
@@ -262,7 +286,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
 
   on(eventType: PlayerEvent, callback: PlayerEventCallback): void {
     // we need to suppress some events because they need to be modified first. so don't add it to the actual player
-    const suppressedEventTypes = [PlayerEvent.SourceLoaded, PlayerEvent.TimeChanged, PlayerEvent.PlaybackFinished];
+    const suppressedEventTypes = [PlayerEvent.SourceLoaded, PlayerEvent.TimeChanged, PlayerEvent.Paused];
     if (!suppressedEventTypes.includes(eventType)) {
       this.player.on(eventType, callback);
     }
@@ -274,6 +298,12 @@ export class BitmovinYospacePlayer implements PlayerAPI {
   }
 
   play(issuer?: string): Promise<void> {
+    if (this.isPlaybackFinished) {
+      this.suppressedEventsController.add(PlayerEvent.Seek, PlayerEvent.Seeked);
+      this.player.seek(0);
+      this.isPlaybackFinished = false;
+    }
+
     if (this.isAdActive() && this.player.isPaused()) {
       // track ad resumed
       this.getCurrentAd().adResumed();
@@ -655,17 +685,23 @@ export class BitmovinYospacePlayer implements PlayerAPI {
         const seekTarget = this.getAdStartTime(ad) + ad.duration;
 
         if (seekTarget >= this.player.getDuration()) {
-          // this.player.unload();
-          // TODO: we can't seek to the very very end so an unload may fix the problem
-        } else {
-          this.player.seek(seekTarget, 'ad-skip');
-
+          this.isPlaybackFinished = true;
+          this.suppressedEventsController.add(PlayerEvent.Paused, PlayerEvent.Seek, PlayerEvent.Seeked);
+          this.player.pause();
+          this.player.seek(ad.adBreak.startPosition - 1); // -1 to be sure to don't have a frame of the ad visible
           this.fireEvent({
             timestamp: Date.now(),
-            type: PlayerEvent.AdSkipped,
-            ad: this.mapAd(ad)
-          } as AdEvent);
+            type: PlayerEvent.PlaybackFinished
+          });
+        } else {
+          this.player.seek(seekTarget, 'ad-skip');
         }
+
+        this.fireEvent({
+          timestamp: Date.now(),
+          type: PlayerEvent.AdSkipped,
+          ad: this.mapAd(ad)
+        } as AdEvent);
       }
     },
 
@@ -989,5 +1025,27 @@ class AdEventsFactory {
         }
       } as LinearAd
     };
+  }
+}
+
+class EventSuppressController {
+  private suppressedEvents: PlayerEvent[] = [];
+
+  add(...items: PlayerEvent[]) {
+    for (let item of items) {
+      if (!this.isSuppressed(item)) {
+        this.suppressedEvents.push(item);
+      }
+    }
+  }
+
+  remove(...items: PlayerEvent[]) {
+    for (let item of items) {
+      ArrayUtils.remove(this.suppressedEvents, item);
+    }
+  }
+
+  isSuppressed(eventType: PlayerEvent): boolean {
+    return this.suppressedEvents.includes(eventType);
   }
 }
