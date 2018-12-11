@@ -66,6 +66,9 @@ export class BitmovinYospacePlayer implements PlayerAPI {
   // Replay support
   private isPlaybackFinished = false;
 
+  // save playback speed to restore after AdBreak
+  private playbackSpeed: number = 1;
+
   constructor(containerElement: HTMLElement, config: PlayerConfig, yospaceConfig: YospaceConfiguration = {}) {
     this.yospaceConfig = yospaceConfig;
 
@@ -475,6 +478,16 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     return magicBufferedRanges;
   }
 
+  setPlaybackSpeed(speed: number): void {
+    // TODO: ask turner about that
+    if (this.isAdActive()) {
+      return;
+    }
+
+    this.playbackSpeed = speed;
+    this.player.setPlaybackSpeed(this.playbackSpeed);
+  }
+
   // Helper
   private isAdActive(): boolean {
     return Boolean(this.getCurrentAd());
@@ -506,6 +519,8 @@ export class BitmovinYospacePlayer implements PlayerAPI {
   }
 
   private onAdBreakStarted = (event: BYSAdBreakEvent) => {
+    this.player.setPlaybackSpeed(1);
+
     const adBreak = event.adBreak;
     const playerEvent = AdEventsFactory.createAdBreakEvent(this.player, adBreak, PlayerEvent.AdBreakStarted);
     this.fireEvent<AdBreakEvent>(playerEvent);
@@ -537,6 +552,8 @@ export class BitmovinYospacePlayer implements PlayerAPI {
       this.seek(this.cachedSeekTarget, "yospace-ad-skipping");
       this.cachedSeekTarget = null;
     }
+
+    this.player.setPlaybackSpeed(this.playbackSpeed);
   };
 
   private onAnalyticsFired = (event: BYSAnalyticsFiredEvent) => {
@@ -973,11 +990,6 @@ export class BitmovinYospacePlayer implements PlayerAPI {
 
   setLogLevel(level: LogLevel): void {
     this.player.setLogLevel(level);
-  }
-
-  setPlaybackSpeed(speed: number): void {
-    // TODO: handle this; set playback-speed to 1 if ad is starts and reset afterwards; do not allow changing during ad
-    this.player.setPlaybackSpeed(speed);
   }
 
   setPosterImage(url: string, keepPersistent: boolean): void {
