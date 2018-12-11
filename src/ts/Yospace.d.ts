@@ -41,29 +41,29 @@ declare class YSSessionManager {
   masterPlaylist(): string;
   registerPlayer(cb_obj: Object): void;
   isYospaceStream(): boolean;
-  reportPlayerEvent(evt: string, data?: any): void;
+  reportPlayerEvent(evt: YSPlayerEvents, data?: any): void;
   shutdown(): void;
 }
 
 declare enum YSPlayerEvents {
-  CLICK = "click",
-  CONTINUE = "continue",
-  END = "complete",
-  ERROR = "error",
-  FULLSCREEN = "fullscreen",
-  LINEAR_EVENT = "linear",
-  METADATA = "id3",
-  MUTE = "mute",
-  NONLINEAR = "non_linear",
-  NONLINEAR_EVENT = "nonlinear",
-  PAUSE = "pause",
-  POSITION = "position",
-  READY = "ready",
-  RESUME = "resume",
-  SEEK_END = "seek_end",
-  SEEK_START = "seek_begin",
-  STALL = "buffer",
-  START = "start"
+  CLICK,
+  CONTINUE,
+  END,
+  ERROR,
+  FULLSCREEN,
+  LINEAR_EVENT,
+  METADATA,
+  MUTE,
+  NONLINEAR,
+  NONLINEAR_EVENT,
+  PAUSE,
+  POSITION,
+  READY,
+  RESUME,
+  SEEK_END,
+  SEEK_START,
+  STALL,
+  START,
 }
 
 declare class VASTLinear {

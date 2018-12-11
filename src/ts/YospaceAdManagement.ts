@@ -1003,7 +1003,7 @@ class AdEventsFactory {
         skippableAfter: player.isLive() ? -1 : ad.advert.linear.skipOffset,
         clickThroughUrl: manager.session.getLinearClickthrough(),
         clickThroughUrlOpened: () => {
-          manager.reportPlayerEvent(PlayerEvent.AdClicked);
+          manager.reportPlayerEvent(YSPlayerEvents.CLICK);
         },
         uiConfig: {
           requestsUi: true,
