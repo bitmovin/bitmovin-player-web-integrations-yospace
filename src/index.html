@@ -8,6 +8,8 @@
 
   <!-- Bitmovin Player -->
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha256-3edrmyuQ0w65f8gfBsqowzjJe2iM6n0nKciPUp8y+7E=" crossorigin="anonymous"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 
   <script type="text/javascript" src="yospace/yo-ad-management.min.js"></script>
   <script type="text/javascript" src="js/bitmovinplayer-yospace.js"></script>
@@ -15,31 +17,32 @@
   <script type="text/javascript" src="//cdn.bitmovin.com/player/web/8.1.0-rc1/bitmovinplayer-ui.js"></script>
   <link rel="stylesheet" href="//cdn.bitmovin.com/player/web/8.1.0-rc1/bitmovinplayer-ui.css">
   <style>
-    .container {
-      color: white;
-      text-align: center;
-    }
-    .container a {
-      color: white;
-    }
-    .container h1 {
-      margin-bottom: 22px;
-      line-height: 66px;
-    }
-    .container h2 {
-      font-weight: normal;
-      margin-bottom: 36px;
-      line-height: 26px;
-    }
     .player-wrapper {
-      width: 95%;
       margin: 20px auto;
       box-shadow: 0 0 30px rgba(0,0,0,0.7);
+    }
+    .meta-info {
+      margin: 20px auto;
+      text-align: center;
     }
   </style>
 </head>
 <body>
 <div class="container">
+  <div class="meta-info">
+    <div class="row">
+      <div class="col-12">
+        <div class="btn-group btn-group-toggle" data-toggle="buttons">
+          <label class="btn btn-outline-secondary active">
+            <input type="radio" name="options" id="option-vod" autocomplete="off" checked>Load VOD
+          </label>
+          <label class="btn btn-outline-secondary">
+            <input type="radio" name="options" id="option-live" autocomplete="off">Load Live
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
   <div class="content">
     <div class="player-wrapper">
       <div id="player"></div>
@@ -47,18 +50,41 @@
   </div>
 </div>
 <script type="text/javascript">
-  var source = {
-    title: 'Art of Motion',
-    description: 'What is this event... Parcour?',
-    // dash: 'http://csm-e-ces1eurxaws101j8-6x78eoil2agd.cds1.yospace.com/access/d/400/u/0/1/130782300?f=0000130753172&format=vmap',
+  var yospacePlayer;
+
+  var vodButton = $('#option-vod').parent();
+  var liveButton = $('#option-live').parent();
+
+  vodButton.on('click', function() {
+    vodButton.button('toggle');
+
+    yospacePlayer.unload();
+    yospacePlayer.load(vodSource);
+  });
+
+  liveButton.on('click', function() {
+    liveButton.button('toggle');
+
+    yospacePlayer.unload();
+    yospacePlayer.load(liveSource);
+  });
+
+  var liveSource = {
+    title: 'Live Stream',
     hls: 'http://csm-e.cds1.yospace.com/csm/extlive/yospace02,hlssample.m3u8?yo.br=false&yo.ac=true',
-    // hls: 'http://csm-e-ces1eurxaws101j8-6x78eoil2agd.cds1.yospace.com/access/d/400/u/0/1/130782300?f=0000130753172&format=vmap',
-    // progressive: '//bitmovin-a.akamaihd.net/content/MI201109210084_1/MI201109210084_mpeg-4_hd_high_1080p25_10mbits.mp4',
-    poster: '//bitmovin-a.akamaihd.net/content/art-of-motion_drm/art-of-motion_poster.jpg',
 
     // Yospace configuration
     assetType: bitmovin.player.ads.yospace.YospaceAssetType.LINEAR
   };
+
+  var vodSource = {
+    title: 'VOD Stream',
+    hls: 'http://csm-e-ces1eurxaws101j8-6x78eoil2agd.cds1.yospace.com/access/d/400/u/0/1/130782300?f=0000130753172&format=vmap',
+
+    // Yospace configuration
+    assetType: bitmovin.player.ads.yospace.YospaceAssetType.VOD
+  };
+
   var conf = {
     key: 'YOUR-PLAYER-KEY',
     playback: {
@@ -74,10 +100,10 @@
   };
 
   var playerContainer = document.getElementById('player');
-  let yospacePlayer = new bitmovin.player.ads.yospace.BitmovinYospacePlayer(playerContainer, conf, yospaceConfig);
+  yospacePlayer = new bitmovin.player.ads.yospace.BitmovinYospacePlayer(playerContainer, conf, yospaceConfig);
 
   bitmovin.playerui.UIFactory.buildDefaultUI(yospacePlayer);
-  yospacePlayer.load(source).then(function() {
+  yospacePlayer.load(vodSource).then(function() {
       console.log('loaded');
   }).catch(function() {
       console.log('gotcha');

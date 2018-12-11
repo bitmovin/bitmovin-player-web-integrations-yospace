@@ -214,6 +214,8 @@ export class BitmovinYospacePlayer implements PlayerAPI {
       console.warn('HLS source missing');
       return;
     }
+    this.resetState();
+
     const url = source.hls;
 
     this.yospaceSourceConfig = source;
@@ -221,8 +223,11 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     return new Promise<void>(((resolve, reject) => {
       const onInitComplete = (state: YSSessionResult, result: YSSessionStatus) => {
         if (state === YSSessionResult.INITIALISED) {
-          // use received url from yospace
-          source.hls = this.manager.masterPlaylist();
+          // clone source to not modify passed object
+          let clonedSource = {
+            ...source,
+            hls: this.manager.masterPlaylist(), // use received url from yospace
+          };
 
           if (this.manager.isYospaceStream()) {
             this.yospaceListenerAdapter = new YospaceAdListenerAdapter();
@@ -240,7 +245,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
             this.manager = null;
           }
 
-          this.player.load(source, forceTechnology, disableSeeking).then(resolve).catch(reject);
+          this.player.load(clonedSource, forceTechnology, disableSeeking).then(resolve).catch(reject);
         } else {
           // TODO: Error handling
           reject();
@@ -628,6 +633,20 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     return Math.max(bufferLevel.level - futureBreakDurations, 0);
   }
 
+  private resetState(): void {
+    // reset all local attributes
+    if (this.manager) {
+      this.manager.shutdown();
+      this.manager = null;
+    }
+
+    this.contentDuration = 0;
+    this.contentMapping = [];
+    this.adParts = [];
+    this.adStartedTimestamp = null;
+    this.cachedSeekTarget = null;
+  }
+
   private handleQuartileEvent(adQuartileEventName: string): void {
     const playerEvent: AdQuartileEvent = {
       timestamp: Date.now(),
@@ -721,6 +740,12 @@ export class BitmovinYospacePlayer implements PlayerAPI {
       return bufferLevel;
     }
   };
+
+  unload(): Promise<void> {
+    this.resetState();
+
+    return this.player.unload();
+  }
 
   // Default PlayerAPI implementation
   get version(): string {
@@ -987,10 +1012,6 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     this.player.timeShift(offset, issuer);
   }
 
-  unload(): Promise<void> {
-    return this.player.unload();
-  }
-
   unmute(issuer?: string): void {
     this.player.unmute(issuer);
   }
@@ -1018,7 +1039,7 @@ class AdEventsFactory {
         skippableAfter: player.isLive() ? -1 : ad.advert.linear.skipOffset,
         clickThroughUrl: manager.session.getLinearClickthrough(),
         clickThroughUrlOpened: () => {
-          manager.reportPlayerEvent(PlayerEvent.AdClicked);
+          manager.reportPlayerEvent(YSPlayerEvents.CLICK);
         },
         uiConfig: {
           requestsUi: true,
