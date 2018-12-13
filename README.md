@@ -21,11 +21,12 @@ bitmovin.playerui.UIFactory.buildDefaultUI(yospacePlayer);
 
 // Load a new yospace source
 var source = {
-    hls: 'your yospace url',
+  hls: 'your yospace url',
 
-    // Yospace configuration
-    assetType: bitmovin.player.ads.yospace.YospaceAssetType.LINEAR
-  };
+  // Yospace configuration
+  assetType: bitmovin.player.ads.yospace.YospaceAssetType.LINEAR
+};
+
 yospacePlayer.load(source);
 ```
 
