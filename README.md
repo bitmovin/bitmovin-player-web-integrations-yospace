@@ -23,8 +23,12 @@ bitmovin.playerui.UIFactory.buildDefaultUI(yospacePlayer);
 var source = {
   hls: 'your yospace url',
 
-  // Yospace configuration
+  // The type of the asset
   assetType: bitmovin.player.ads.yospace.YospaceAssetType.LINEAR
+  // one of:
+  // - bitmovin.player.ads.yospace.YospaceAssetType.LINEAR
+  // - bitmovin.player.ads.yospace.YospaceAssetType.VOD
+  // - bitmovin.player.ads.yospace.YospaceAssetType.LINEAR_START_OVER
 };
 
 yospacePlayer.load(source);
