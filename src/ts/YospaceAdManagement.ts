@@ -479,8 +479,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
   }
 
   setPlaybackSpeed(speed: number): void {
-    // TODO: ask turner about that
-    if (this.isAdActive()) {
+    if (!this.playerPolicy.canChangePlaybackSpeed()) {
       return;
     }
 
