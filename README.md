@@ -63,5 +63,4 @@ var yospacePlayer = new bitmovin.player.ads.yospace.BitmovinYospacePlayer(player
 
 ## Limitations
 
-- Since EMSG is not supported in Safari we can't track ads in live streams for now.
-- When the very last post-roll ad is skipped we are showing another frame then when it finished playing. 
+- EMSG is not supported in Safari yet. So there is no ads tracking in live streams in Safari.
