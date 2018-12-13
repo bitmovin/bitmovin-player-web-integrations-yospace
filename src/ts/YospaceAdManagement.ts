@@ -247,6 +247,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
       const properties = {
         ...YSSessionManager.DEFAULTS,
         DEBUGGING: Boolean(this.yospaceConfig.debug),
+        USE_ID3: source.assetType !== YospaceAssetType.VOD, // Use time based tracking only for VOD
       };
 
       switch (source.assetType) {
