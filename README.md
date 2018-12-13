@@ -63,4 +63,4 @@ var yospacePlayer = new bitmovin.player.ads.yospace.BitmovinYospacePlayer(player
 
 ## Limitations
 
-- EMSG is not supported in Safari yet. So there is no ads tracking in live streams in Safari.
+- No support for ad tracking during live streams in Safari if EMSG tags are used. (EMSG tags are not supported from Safari)
