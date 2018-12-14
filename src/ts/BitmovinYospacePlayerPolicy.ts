@@ -7,6 +7,7 @@ export interface BitmovinYospacePlayerPolicy {
   canSeekTo(seekTarget: number): number;
   canSkip(): number;
   canPause(): boolean;
+  canChangePlaybackSpeed(): boolean;
 }
 
 export class DefaultBitmovinYospacePlayerPolicy implements BitmovinYospacePlayerPolicy {
@@ -61,5 +62,9 @@ export class DefaultBitmovinYospacePlayerPolicy implements BitmovinYospacePlayer
 
   canPause(): boolean {
     return true;
+  }
+
+  canChangePlaybackSpeed(): boolean {
+    return !Boolean(this.player.ads.getActiveAd());
   }
 }
