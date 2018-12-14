@@ -17,12 +17,12 @@ declare enum YSSessionStatus {
 }
 
 interface YSSessionManagerDefault {
-  LOW_FREQ: number,  // Low-Priority Poll Interval (mSecs)
-  HIGH_FREQ: number, // High-Priority Poll Interval (mSecs)
-  USE_ID3: boolean,  // Use ID3 tags instead of playback position
-                     // (Note that this should never be user-modified)
-  AD_DEBUG: boolean, // Should Ad debugging be found and printed (from yo.ad)
-  DEBUGGING: boolean // Should trace messages be output to the console?
+  LOW_FREQ: number;   // Low-Priority Poll Interval (mSecs)
+  HIGH_FREQ: number;  // High-Priority Poll Interval (mSecs)
+  USE_ID3: boolean;   // Use ID3 tags instead of playback position
+                      // (Note that this should never be user-modified)
+  AD_DEBUG: boolean;  // Should Ad debugging be found and printed (from yo.ad)
+  DEBUGGING: boolean; // Should trace messages be output to the console?
 }
 
 declare class YSSessionManager {

@@ -1,4 +1,4 @@
-///<reference path="Yospace.d.ts"/>
+///<reference path='Yospace.d.ts'/>
 import {
   AdBreak, AdBreakEvent, AdConfig, AdEvent, AdQuartile, AdQuartileEvent, AudioQuality, AudioTrack, BufferLevel,
   BufferType, DownloadedAudioData, DownloadedVideoData, LinearAd, LogLevel, MediaType, MetadataParsedEvent,
@@ -9,8 +9,8 @@ import {
 } from 'bitmovin-player';
 import {
   BYSAdBreakEvent, BYSAdEvent, BYSAnalyticsFiredEvent, BYSListenerEvent, YospaceAdListenerAdapter
-} from "./YospaceListenerAdapter";
-import { BitmovinYospacePlayerPolicy, DefaultBitmovinYospacePlayerPolicy } from "./BitmovinYospacePlayerPolicy";
+} from './YospaceListenerAdapter';
+import { BitmovinYospacePlayerPolicy, DefaultBitmovinYospacePlayerPolicy } from './BitmovinYospacePlayerPolicy';
 import { ArrayUtils } from 'bitmovin-player-ui/dist/js/framework/arrayutils';
 
 export enum YospaceAssetType {
@@ -189,7 +189,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
         const key = (frame as any).key;
 
         if (!neededId3Tags.includes(key)) {
-          console.log("Ignoring un-needed ID3 tag: " + key);
+          console.log('Ignoring un-needed ID3 tag: ' + key);
           continue;
         }
 
@@ -243,7 +243,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
             }
           } else {
             // TODO: error or just continue with the url?
-            console.log("Shutting down SDK on non-yospace stream");
+            console.log('Shutting down SDK on non-yospace stream');
             this.manager.shutdown();
             this.manager = null;
           }
@@ -351,7 +351,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
 
     // magical content seeking
     const originalStreamPart = this.contentMapping.find((mapping: StreamPartMapping) => {
-      return mapping.magic.start <= allowedSeekTarget && allowedSeekTarget <= mapping.magic.end
+      return mapping.magic.start <= allowedSeekTarget && allowedSeekTarget <= mapping.magic.end;
     });
 
     const elapsedTimeInStreamPart = allowedSeekTarget - originalStreamPart.magic.start;
@@ -470,7 +470,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
           magicBufferedRanges.push({
             start: magicRangeStart,
             end: magicRangeEnd
-          })
+          });
         }
       });
     }
@@ -548,7 +548,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     this.fireEvent<AdBreakEvent>(playerEvent);
 
     if (this.cachedSeekTarget) {
-      this.seek(this.cachedSeekTarget, "yospace-ad-skipping");
+      this.seek(this.cachedSeekTarget, 'yospace-ad-skipping');
       this.cachedSeekTarget = null;
     }
 
