@@ -12,6 +12,10 @@ import {
 } from "./YospaceListenerAdapter";
 import { BitmovinYospacePlayerPolicy, DefaultBitmovinYospacePlayerPolicy } from "./BitmovinYospacePlayerPolicy";
 import { ArrayUtils } from 'bitmovin-player-ui/dist/js/framework/arrayutils';
+import {
+  YospaceErrorCode, YospaceErrorEvent, YospaceEventBase, YospacePlayerError, YospacePlayerEvent,
+  YospacePlayerEventCallback, YospacePolicyError, YospacePolicyErrorCode,
+} from "./YospaceError";
 
 export enum YospaceAssetType {
   LINEAR,
@@ -41,7 +45,7 @@ interface StreamPartMapping {
 export class BitmovinYospacePlayer implements PlayerAPI {
   // Bitmovin Player
   private readonly player: PlayerAPI;
-  private eventHandlers: { [eventType: string]: PlayerEventCallback[]; } = {};
+  private eventHandlers: { [eventType: string]: YospacePlayerEventCallback[]; } = {};
 
   // Yospace fields
   private yospaceConfig: YospaceConfiguration;
@@ -214,7 +218,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
   load(source: YospaceSourceConfig, forceTechnology?: string, disableSeeking?: boolean): Promise<void> {
     // for now we only support hls source
     if (!source.hls) {
-      console.warn('HLS source missing');
+      console.error('HLS source missing');
       return;
     }
     this.resetState();
@@ -242,15 +246,16 @@ export class BitmovinYospacePlayer implements PlayerAPI {
               this.playerPolicy = new DefaultBitmovinYospacePlayerPolicy(this);
             }
           } else {
-            // TODO: error or just continue with the url?
-            console.log("Shutting down SDK on non-yospace stream");
             this.manager.shutdown();
             this.manager = null;
+
+            this.handleYospaceError(new YospacePlayerError((YospaceErrorCode.INVALID_SOURCE)));
+            reject("Shutting down SDK on non-yospace stream");
           }
 
           this.player.load(clonedSource, forceTechnology, disableSeeking).then(resolve).catch(reject);
         } else {
-          // TODO: Error handling
+          this.handleYospaceError(new YospacePlayerError(YospaceErrorCode.NO_ANALYTICS));
           reject();
         }
       };
@@ -292,11 +297,16 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     ArrayUtils.remove(this.eventHandlers[eventType], callback);
   }
 
-  on(eventType: PlayerEvent, callback: PlayerEventCallback): void {
-    // we need to suppress some events because they need to be modified first. so don't add it to the actual player
-    const suppressedEventTypes = [PlayerEvent.SourceLoaded, PlayerEvent.TimeChanged, PlayerEvent.Paused];
-    if (!suppressedEventTypes.includes(eventType)) {
-      this.player.on(eventType, callback);
+  on(eventType: YospacePlayerEvent, callback: PlayerEventCallback): void;
+  on(eventType: PlayerEvent, callback: PlayerEventCallback): void;
+  on(eventType: PlayerEvent | YospacePlayerEvent, callback: PlayerEventCallback): void {
+    if (EnumHelper.isPlayerEvent(eventType)) {
+      // we need to suppress some events because they need to be modified first. so don't add it to the actual player
+      const suppressedEventTypes = [PlayerEvent.SourceLoaded, PlayerEvent.TimeChanged, PlayerEvent.Paused];
+      const event = eventType as PlayerEvent;
+      if (!suppressedEventTypes.includes(event)) {
+        this.player.on(event, callback);
+      }
     }
 
     if (!this.eventHandlers[eventType]) {
@@ -326,18 +336,23 @@ export class BitmovinYospacePlayer implements PlayerAPI {
         this.getCurrentAd().adPaused();
       }
       this.player.pause();
+    } else {
+      this.handleYospacePolicyEvent(YospacePolicyErrorCode.PAUSE_NOT_ALLOWED);
     }
   }
 
   mute(issuer?: string): void {
     if (this.playerPolicy.canMute()) {
       this.player.mute();
+    } else {
+      this.handleYospacePolicyEvent(YospacePolicyErrorCode.MUTE_NOT_ALLOWED);
     }
   }
 
   seek(time: number, issuer?: string): boolean {
     // do not use this seek method for seeking within ads (skip) use player.seek(…) instead
     if (!this.playerPolicy.canSeek()) {
+      this.handleYospacePolicyEvent(YospacePolicyErrorCode.SEEK_NOT_ALLOWED);
       return false;
     }
 
@@ -345,6 +360,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     if (allowedSeekTarget !== time) {
       // cache original seek target
       this.cachedSeekTarget = time;
+      this.handleYospacePolicyEvent(YospacePolicyErrorCode.SEEK_TO_NOT_ALLOWED);
     } else {
       this.cachedSeekTarget = null;
     }
@@ -480,6 +496,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
 
   setPlaybackSpeed(speed: number): void {
     if (!this.playerPolicy.canChangePlaybackSpeed()) {
+      this.handleYospacePolicyEvent(YospacePolicyErrorCode.CHANGE_PLAYBACK_SPEED_NOT_ALLOWED);
       return;
     }
 
@@ -499,9 +516,9 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     return this.manager.session.currentAdvert;
   }
 
-  private fireEvent<E extends PlayerEventBase>(event: E): void {
+  private fireEvent<E extends PlayerEventBase | YospaceEventBase>(event: E): void {
     if (this.eventHandlers[event.type]) {
-      this.eventHandlers[event.type].forEach((callback: PlayerEventCallback) => callback(event));
+      this.eventHandlers[event.type].forEach((callback: YospacePlayerEventCallback) => callback(event));
     }
   }
 
@@ -673,6 +690,28 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     this.fireEvent(playerEvent);
   }
 
+  private handleYospaceError(error: YospacePlayerError) {
+    this.handleYospaceEvent({
+      timestamp: Date.now(),
+      type: YospacePlayerEvent.YospaceError,
+      code: error.code,
+      name: error.name,
+    } as YospaceErrorEvent);
+  }
+
+  private handleYospacePolicyEvent(code: YospacePolicyErrorCode): void {
+    this.handleYospaceEvent({
+      timestamp: Date.now(),
+      type: YospacePlayerEvent.PolicyError,
+      code: code,
+      name: YospacePolicyErrorCode[code],
+    } as YospacePolicyError);
+  }
+
+  private handleYospaceEvent<E extends YospaceEventBase>(event: E): void {
+    this.fireEvent(event);
+  }
+
   // Custom advertising module with overwritten methods
   private advertisingApi: PlayerAdvertisingAPI = {
     discardAdBreak: (adBreakId: string) => {
@@ -715,28 +754,32 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     },
 
     skip: () => {
-      if (this.isAdActive() && this.playerPolicy.canSkip() === 0) {
-        const ad = this.getCurrentAd();
-        const seekTarget = this.getAdStartTime(ad) + ad.duration;
+      if (this.isAdActive()) {
+        if (this.playerPolicy.canSkip() === 0) {
+          const ad = this.getCurrentAd();
+          const seekTarget = this.getAdStartTime(ad) + ad.duration;
 
-        if (seekTarget >= this.player.getDuration()) {
-          this.isPlaybackFinished = true;
-          this.suppressedEventsController.add(PlayerEvent.Paused, PlayerEvent.Seek, PlayerEvent.Seeked);
-          this.player.pause();
-          this.player.seek(ad.adBreak.startPosition - 1); // -1 to be sure to don't have a frame of the ad visible
+          if (seekTarget >= this.player.getDuration()) {
+            this.isPlaybackFinished = true;
+            this.suppressedEventsController.add(PlayerEvent.Paused, PlayerEvent.Seek, PlayerEvent.Seeked);
+            this.player.pause();
+            this.player.seek(ad.adBreak.startPosition - 1); // -1 to be sure to don't have a frame of the ad visible
+            this.fireEvent({
+              timestamp: Date.now(),
+              type: PlayerEvent.PlaybackFinished
+            });
+          } else {
+            this.player.seek(seekTarget, 'ad-skip');
+          }
+
           this.fireEvent({
             timestamp: Date.now(),
-            type: PlayerEvent.PlaybackFinished
-          });
+            type: PlayerEvent.AdSkipped,
+            ad: this.mapAd(ad)
+          } as AdEvent);
         } else {
-          this.player.seek(seekTarget, 'ad-skip');
+          this.handleYospacePolicyEvent(YospacePolicyErrorCode.SKIP_NOT_ALLOWED);
         }
-
-        this.fireEvent({
-          timestamp: Date.now(),
-          type: PlayerEvent.AdSkipped,
-          ad: this.mapAd(ad)
-        } as AdEvent);
       }
     },
 
@@ -1079,5 +1122,13 @@ class EventSuppressController {
 
   isSuppressed(eventType: PlayerEvent): boolean {
     return this.suppressedEvents.includes(eventType);
+  }
+}
+
+class EnumHelper {
+  static isPlayerEvent(eventType: PlayerEvent | YospacePlayerEvent) {
+    return Object.keys(PlayerEvent).map((o) => {
+      return o.toLowerCase()
+    }).includes(eventType as string);
   }
 }
