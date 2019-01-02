@@ -1,6 +1,6 @@
-# BitmovinYospaceModule
+# Bitmovin Player Yospace Integration
 
-This integration complete encapsulate the usage of Yospace. After creating the player it can be used like a normal [BitmovinPlayer](https://bitmovin.com/docs/player) instance.
+This integration complete encapsulate the usage of Yospace. After creating the player it can be used like a normal [Bitmovin Player](https://bitmovin.com/docs/player) instance.
 
 ## Usage
 
@@ -39,9 +39,9 @@ yospacePlayer.load(source);
 #### Policy
 
 As there can be different rules for different use-cases we provide a `BitmovinYospacePlayerPolicy` interface which can be implemented.
-In this policy you could define which actions should be allowed during playback.
+In this policy you can define which actions should be allowed during playback.
 
-You can set the policy by calling: (should be called right after initialization)
+You can set the policy right after initialization by calling:
 
 ```js
 yospacePlayer.setPolicy(...); // pass in your policy object which implements BitmovinYospacePlayerPolicy
