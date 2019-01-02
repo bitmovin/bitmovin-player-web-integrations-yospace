@@ -178,7 +178,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
         return;
       }
 
-      let yospaceMetadataObject: Object = {};
+      let yospaceMetadataObject: { [key: string]: any; };
       if (type === 'ID3') {
         yospaceMetadataObject = this.parseId3Tags(event);
       } else {
