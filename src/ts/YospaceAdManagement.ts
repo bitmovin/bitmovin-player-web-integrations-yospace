@@ -5,7 +5,7 @@ import {
   MetadataType, Player, PlayerAdvertisingAPI, PlayerAPI, PlayerBufferAPI, PlayerConfig, PlayerEvent, PlayerEventBase,
   PlayerEventCallback, PlayerExports, PlayerSubtitlesAPI, PlayerType, PlayerVRAPI, QueryParameters, SeekEvent,
   SegmentMap, Snapshot, SourceConfig, StreamType, Technology, Thumbnail, TimeChangedEvent, TimeRange, VideoQuality,
-  ViewMode, ViewModeOptions, PlaybackEvent,
+  ViewMode, ViewModeOptions, PlaybackEvent, MetadataEvent,
 } from 'bitmovin-player';
 import {
   BYSAdBreakEvent, BYSAdEvent, BYSAnalyticsFiredEvent, BYSListenerEvent, YospaceAdListenerAdapter
@@ -173,30 +173,22 @@ export class BitmovinYospacePlayer implements PlayerAPI {
       }
     };
 
-    const onMetaData = (event: MetadataParsedEvent) => {
-      const charsToStr = (arr: [number]) => {
-        return arr.filter(char => char > 31 && char < 127).map(char => String.fromCharCode(char)).join('');
-      };
+    const onMetaData = (event: MetadataEvent) => {
+      const validTypes = ['ID3', 'EMSG'];
+      const type = event.metadataType;
 
-      const metadata = event.metadata as any;
-      const id3Object: any = {
-        startTime: event.start ? event.start : this.player.getCurrentTime(),
-      };
-
-      // only check some needed id3 tags
-      const neededId3Tags = ['YMID', 'YDUR', 'YSEQ', 'YTYP', 'YSCP'];
-      for (let frame of metadata.frames) {
-        const key = (frame as any).key;
-
-        if (!neededId3Tags.includes(key)) {
-          console.log("Ignoring un-needed ID3 tag: " + key);
-          continue;
-        }
-
-        id3Object[key] = charsToStr((frame as any).data);
+      if (!validTypes.includes(type)) {
+        return;
       }
 
-      this.manager.reportPlayerEvent(YSPlayerEvents.METADATA, id3Object);
+      let yospaceMetadataObject: { [key: string]: any; };
+      if (type === 'ID3') {
+        yospaceMetadataObject = this.parseId3Tags(event);
+      } else {
+        yospaceMetadataObject = this.mapEmsgToId3Tags(event);
+      }
+
+      this.manager.reportPlayerEvent(YSPlayerEvents.METADATA, yospaceMetadataObject);
     };
 
     this.player.on(PlayerEvent.Playing, onPlay);
@@ -256,7 +248,9 @@ export class BitmovinYospacePlayer implements PlayerAPI {
       };
 
       const properties = {
+        ...YSSessionManager.DEFAULTS,
         DEBUGGING: Boolean(this.yospaceConfig.debug),
+        USE_ID3: source.assetType !== YospaceAssetType.VOD, // Use time based tracking only for VOD
       };
 
       switch (source.assetType) {
@@ -671,6 +665,38 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     };
 
     this.fireEvent(playerEvent);
+  }
+
+  private parseId3Tags(event: MetadataEvent): Object {
+    const charsToStr = (arr: [number]) => {
+      return arr.filter(char => char > 31 && char < 127).map(char => String.fromCharCode(char)).join('');
+    };
+
+    const metadata = event.metadata as any;
+    const yospaceMetadataObject: any = {
+      startTime: event.start ? event.start : this.player.getCurrentTime(),
+    };
+
+    metadata.frames.forEach((frame: any) => {
+      yospaceMetadataObject[frame.key] = charsToStr(frame.data);
+    });
+
+    return yospaceMetadataObject;
+  }
+
+  private mapEmsgToId3Tags(event: MetadataEvent): Object {
+    const metadata = event.metadata as any;
+    const yospaceMetadataObject: any = {
+      startTime: metadata.presentationTime ? metadata.presentationTime : this.player.getCurrentTime(),
+    };
+
+    const messageData: string = metadata.messageData;
+    messageData.split(',').forEach((metadata: string) => {
+      let tags = metadata.split('=');
+      yospaceMetadataObject[tags[0]] = tags[1];
+    });
+
+    return yospaceMetadataObject;
   }
 
   // Custom advertising module with overwritten methods
