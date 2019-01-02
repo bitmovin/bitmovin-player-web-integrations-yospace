@@ -5,7 +5,7 @@ interface YSSessionManagerDelegateFunction {
 declare enum YSSessionResult {
   INITIALISED,
   NO_ANALYTICS,
-  NOT_INITIALISED
+  NOT_INITIALISED,
 }
 
 declare enum YSSessionStatus {

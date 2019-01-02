@@ -7,7 +7,7 @@ export enum BYSListenerEvent {
   ADVERT_END = 'advert_end',
   AD_BREAK_END = 'ad_break_end',
   UPDATE_TIMELINE = 'update_timeline',
-  ANALYTICS_FIRED = 'analytics_fired'
+  ANALYTICS_FIRED = 'analytics_fired',
 }
 
 interface BYSListenerEventBase {
@@ -58,28 +58,28 @@ export class YospaceAdListenerAdapter {
   AdBreakStart(brk: YSAdBreak): void {
     this.emitEvent({
       type: BYSListenerEvent.AD_BREAK_START,
-      adBreak: brk
+      adBreak: brk,
     } as BYSAdBreakEvent);
   }
 
   AdvertStart(mediaId: string): void {
     this.emitEvent({
       type: BYSListenerEvent.ADVERT_START,
-      mediaId: mediaId
+      mediaId: mediaId,
     } as BYSAdEvent);
   }
 
   AdvertEnd(mediaId: string): void {
     this.emitEvent({
       type: BYSListenerEvent.ADVERT_END,
-      mediaId: mediaId
+      mediaId: mediaId,
     } as BYSAdEvent);
   }
 
   AdBreakEnd(brk: YSAdBreak): void {
     this.emitEvent({
       type: BYSListenerEvent.AD_BREAK_END,
-      adBreak: brk
+      adBreak: brk,
     } as BYSAdBreakEvent);
   }
 
@@ -87,7 +87,7 @@ export class YospaceAdListenerAdapter {
     console.log('[listener] UpdateTimeline', timeline);
     this.emitEvent({
       type: BYSListenerEvent.UPDATE_TIMELINE,
-      timeline: timeline
+      timeline: timeline,
     } as BYSUpdateTimelineEvent);
   }
 
@@ -96,7 +96,7 @@ export class YospaceAdListenerAdapter {
     this.emitEvent({
       type: BYSListenerEvent.ANALYTICS_FIRED,
       call_id: call_id,
-      call_data: call_data
+      call_data: call_data,
     } as BYSAnalyticsFiredEvent);
   }
 
