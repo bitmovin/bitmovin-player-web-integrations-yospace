@@ -1,8 +1,8 @@
-import { PlayerEventBase } from "bitmovin-player";
+import { PlayerEventBase } from 'bitmovin-player';
 
 export enum YospacePlayerEvent {
   YospaceError = 'yospaceerror',
-  PolicyError = 'policyerror'
+  PolicyError = 'policyerror',
 }
 
 export enum YospaceErrorCode {
@@ -19,20 +19,20 @@ export enum YospacePolicyErrorCode {
   SEEK_TO_NOT_ALLOWED = 1002,
   SKIP_NOT_ALLOWED = 1003,
   PAUSE_NOT_ALLOWED = 1004,
-  CHANGE_PLAYBACK_SPEED_NOT_ALLOWED = 1005
+  CHANGE_PLAYBACK_SPEED_NOT_ALLOWED = 1005,
 }
 
 export interface YospaceErrorEvent extends YospaceEventBase {
-  code: YospaceErrorCode,
-  name: string
+  code: YospaceErrorCode;
+  name: string;
 }
 
 export interface YospacePolicyError extends YospaceEventBase {
-  code: YospacePolicyErrorCode
+  code: YospacePolicyErrorCode;
 }
 
 export interface YospaceEventBase {
-  type: YospacePlayerEvent
+  type: YospacePlayerEvent;
 }
 
 export interface YospacePlayerEventCallback {
