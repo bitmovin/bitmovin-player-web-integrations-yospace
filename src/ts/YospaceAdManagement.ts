@@ -245,15 +245,15 @@ export class BitmovinYospacePlayer implements PlayerAPI {
             if (!this.playerPolicy) {
               this.playerPolicy = new DefaultBitmovinYospacePlayerPolicy(this);
             }
+
+            this.player.load(clonedSource, forceTechnology, disableSeeking).then(resolve).catch(reject);
           } else {
             this.manager.shutdown();
             this.manager = null;
 
-            this.handleYospaceError(new YospacePlayerError((YospaceErrorCode.INVALID_SOURCE)));
+            this.handleYospaceError(new YospacePlayerError(YospaceErrorCode.INVALID_SOURCE));
             reject("Shutting down SDK on non-yospace stream");
           }
-
-          this.player.load(clonedSource, forceTechnology, disableSeeking).then(resolve).catch(reject);
         } else {
           this.handleYospaceError(new YospacePlayerError(YospaceErrorCode.NO_ANALYTICS));
           reject();
