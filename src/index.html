@@ -39,6 +39,9 @@
           <label class="btn btn-outline-secondary">
             <input type="radio" name="options" id="option-live" autocomplete="off">Load Live
           </label>
+          <label class="btn btn-outline-secondary">
+            <input type="radio" name="options" id="option-fp" autocomplete="off">Load Fairplay
+          </label>
         </div>
       </div>
     </div>
@@ -54,6 +57,7 @@
 
   var vodButton = $('#option-vod').parent();
   var liveButton = $('#option-live').parent();
+  var fairplayButton = $('#option-fp').parent();
 
   vodButton.on('click', function() {
     vodButton.button('toggle');
@@ -67,6 +71,13 @@
 
     yospacePlayer.unload();
     yospacePlayer.load(liveSource);
+  });
+
+  fairplayButton.on('click', function() {
+    fairplayButton.button('toggle');
+
+    yospacePlayer.unload();
+    yospacePlayer.load(fairplaySource);
   });
 
   var liveSource = {
@@ -83,6 +94,38 @@
 
     // Yospace configuration
     assetType: bitmovin.player.ads.yospace.YospaceAssetType.VOD
+  };
+
+  var fairplaySource = {
+    title: 'Fairplay Stream',
+    // Yospace configuration
+    assetType: bitmovin.player.ads.yospace.YospaceAssetType.VOD,
+
+    hls: 'https://csm-e-turnerstg-5p30c9t6lfad.tls1.yospace.com/csm/access/525947592/cWEvY21hZl9hZHZhbmNlZF9mbXA0X2Zyb21faW50ZXIvcHJvZ19zZWcvbXdjX0NBUkUxMDA5MjYxNzAwMDE4ODUyL2NiY3MvM2MzYzNjM2MzYzNjM2MzYzNjM2MzYzNjM2MzYzNjM2MwMDAwMDJhZS9tYXN0ZXJfZnAubTN1OA==?yo.av=2',
+    drm: {
+      fairplay: {
+        LA_URL: 'https://fairplay.license.istreamplanet.com/api/license/a229afbf-e1d3-499e-8127-c33cd7231e58',
+        certificateURL: 'https://fairplay.license.istreamplanet.com/api/AppCert/a229afbf-e1d3-499e-8127-c33cd7231e58',
+        prepareContentId : function(skd) {
+          parts = skd.split("/")
+          return parts[parts.length - 1];
+        },
+        prepareCertificate: function(certificate) {
+          str = ab2str(certificate).split('\"').join('')
+          var uint8 = str2uint8(atob(str))
+          return uint8;
+        },
+        prepareMessage: function(event, session) {
+          return event.messageBase64Encoded;
+        },
+        prepareLicense: function(license) {
+          str = license.split('\"').join('')
+          return str;
+        },
+        useUint16InitData: true
+      }
+    }
+
   };
 
   var conf = {
@@ -111,6 +154,20 @@
   // bitmovin.player.playerui.UIFactory.buildDefaultUI(yospacePlayer);
 
   // TODO: test with custom UI
+
+  function ab2str(buf) {
+    return String.fromCharCode.apply(null, new Uint8Array(buf));
+  }
+
+  function str2uint8(str) {
+    var buf = new ArrayBuffer(str.length);
+    var bufView = new Uint8Array(buf);
+    for (var i=0, strLen=str.length; i < strLen; i++) {
+      bufView[i] = str.charCodeAt(i);
+    }
+    return bufView;
+  }
+
 
 </script>
 </body>
