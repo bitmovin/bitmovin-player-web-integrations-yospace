@@ -329,6 +329,10 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     }
   }
 
+  /**
+   * If policy.canSeekTo returns another position than the target, the player will restore to the original seek
+   * position after the ads finished / skipped
+   */
   seek(time: number, issuer?: string): boolean {
     // do not use this seek method for seeking within ads (skip) use player.seek(…) instead
     if (!this.playerPolicy.canSeek()) {
