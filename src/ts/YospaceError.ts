@@ -29,9 +29,11 @@ export interface YospaceErrorEvent extends YospaceEventBase {
 
 export interface YospacePolicyError extends YospaceEventBase {
   code: YospacePolicyErrorCode;
+  name: string;
 }
 
 export interface YospaceEventBase {
+  timestamp: number;
   type: YospacePlayerEvent;
 }
 

@@ -685,21 +685,21 @@ export class BitmovinYospacePlayer implements PlayerAPI {
   }
 
   private handleYospaceError(error: YospacePlayerError) {
-    this.handleYospaceEvent({
+    this.handleYospaceEvent<YospaceErrorEvent>({
       timestamp: Date.now(),
       type: YospacePlayerEvent.YospaceError,
       code: error.code,
       name: error.name,
-    } as YospaceErrorEvent);
+    });
   }
 
   private handleYospacePolicyEvent(code: YospacePolicyErrorCode): void {
-    this.handleYospaceEvent({
+    this.handleYospaceEvent<YospacePolicyError>({
       timestamp: Date.now(),
       type: YospacePlayerEvent.PolicyError,
       code: code,
       name: YospacePolicyErrorCode[code],
-    } as YospacePolicyError);
+    });
   }
 
   private handleYospaceEvent<E extends YospaceEventBase>(event: E): void {
