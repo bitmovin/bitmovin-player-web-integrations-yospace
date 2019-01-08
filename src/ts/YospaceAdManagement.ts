@@ -1,4 +1,4 @@
-///<reference path="Yospace.d.ts"/>
+///<reference path='Yospace.d.ts'/>
 import {
   AdBreak, AdBreakEvent, AdConfig, AdEvent, AdQuartile, AdQuartileEvent, AudioQuality, AudioTrack, BufferLevel,
   BufferType, DownloadedAudioData, DownloadedVideoData, LinearAd, LogLevel, MediaType, MetadataParsedEvent,
@@ -8,9 +8,9 @@ import {
   ViewMode, ViewModeOptions, PlaybackEvent, MetadataEvent,
 } from 'bitmovin-player';
 import {
-  BYSAdBreakEvent, BYSAdEvent, BYSAnalyticsFiredEvent, BYSListenerEvent, YospaceAdListenerAdapter
-} from "./YospaceListenerAdapter";
-import { BitmovinYospacePlayerPolicy, DefaultBitmovinYospacePlayerPolicy } from "./BitmovinYospacePlayerPolicy";
+  BYSAdBreakEvent, BYSAdEvent, BYSAnalyticsFiredEvent, BYSListenerEvent, YospaceAdListenerAdapter,
+} from './YospaceListenerAdapter';
+import { BitmovinYospacePlayerPolicy, DefaultBitmovinYospacePlayerPolicy } from './BitmovinYospacePlayerPolicy';
 import { ArrayUtils } from 'bitmovin-player-ui/dist/js/framework/arrayutils';
 import {
   YospaceErrorCode, YospaceErrorEvent, YospaceEventBase, YospacePlayerError, YospacePlayerEvent,
@@ -20,7 +20,7 @@ import {
 export enum YospaceAssetType {
   LINEAR,
   VOD,
-  LINEAR_START_OVER
+  LINEAR_START_OVER,
 }
 
 export interface YospaceSourceConfig extends SourceConfig {
@@ -102,7 +102,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
       this.fireEvent<TimeChangedEvent>({
         timestamp: Date.now(),
         type: PlayerEvent.TimeChanged,
-        time: this.getCurrentTime()
+        time: this.getCurrentTime(),
       });
     };
 
@@ -124,7 +124,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
         timeline.getAllElements().forEach((element) => {
           const originalChunk: StreamPart = {
             start: element.offset,
-            end: element.offset + element.duration
+            end: element.offset + element.duration,
           };
 
           switch (element.type) {
@@ -137,12 +137,12 @@ export class BitmovinYospacePlayer implements PlayerAPI {
 
               const magicalContentChunk = {
                 start: this.contentDuration,
-                end: this.contentDuration + element.duration
+                end: this.contentDuration + element.duration,
               };
 
               this.contentMapping.push({
                 magic: magicalContentChunk,
-                original: originalChunk
+                original: originalChunk,
               });
 
               this.contentDuration += element.duration;
@@ -361,7 +361,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
 
     // magical content seeking
     const originalStreamPart = this.contentMapping.find((mapping: StreamPartMapping) => {
-      return mapping.magic.start <= allowedSeekTarget && allowedSeekTarget <= mapping.magic.end
+      return mapping.magic.start <= allowedSeekTarget && allowedSeekTarget <= mapping.magic.end;
     });
 
     const elapsedTimeInStreamPart = allowedSeekTarget - originalStreamPart.magic.start;
@@ -429,7 +429,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
         if (magicEnd > magicStart) {
           magicBufferedRanges.push({
             start: magicStart - adStart,
-            end: magicEnd - adStart
+            end: magicEnd - adStart,
           });
         }
       });
@@ -479,8 +479,8 @@ export class BitmovinYospacePlayer implements PlayerAPI {
         if (rangeEnd > rangeStart) {
           magicBufferedRanges.push({
             start: magicRangeStart,
-            end: magicRangeEnd
-          })
+            end: magicRangeEnd,
+          });
         }
       });
     }
@@ -559,7 +559,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     this.fireEvent<AdBreakEvent>(playerEvent);
 
     if (this.cachedSeekTarget) {
-      this.seek(this.cachedSeekTarget, "yospace-ad-skipping");
+      this.seek(this.cachedSeekTarget, 'yospace-ad-skipping');
       this.cachedSeekTarget = null;
     }
 
@@ -587,7 +587,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     return {
       id: ysAdBreak.adBreakIdentifier, // can be null
       scheduleTime: this.toMagicTime(ysAdBreak.startPosition),
-      ads: ysAdBreak.adverts.map(this.mapAd)
+      ads: ysAdBreak.adverts.map(this.mapAd),
     };
   }
 
@@ -614,7 +614,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
       case 'thirdQuartile':
         return AdQuartile.THIRD_QUARTILE;
     }
-  };
+  }
 
   private getAdBreaksBefore(position: number): YSAdBreak[] {
     return this.adParts
@@ -801,7 +801,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
           this.fireEvent({
             timestamp: Date.now(),
             type: PlayerEvent.AdSkipped,
-            ad: this.mapAd(ad)
+            ad: this.mapAd(ad),
           } as AdEvent);
         } else {
           this.handleYospacePolicyEvent(YospacePolicyErrorCode.SKIP_NOT_ALLOWED);
@@ -811,7 +811,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
 
     getModuleInfo: () => {
       return this.player.ads.getModuleInfo();
-    }
+    },
   };
 
   private bufferApi: PlayerBufferAPI = {
@@ -823,7 +823,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
       const bufferLevel = this.player.buffer.getLevel(type, media);
       bufferLevel.level = this.magicBufferLevel(bufferLevel);
       return bufferLevel;
-    }
+    },
   };
 
   unload(): Promise<void> {
@@ -1104,8 +1104,8 @@ class AdEventsFactory {
       type: type,
       adBreak: {
         id: adBreak.adBreakIdentifier, // can be null
-        scheduleTime: adBreak.startPosition
-      }
+        scheduleTime: adBreak.startPosition,
+      },
     };
   }
 
@@ -1123,8 +1123,8 @@ class AdEventsFactory {
         },
         uiConfig: {
           requestsUi: true,
-        }
-      } as LinearAd
+        },
+      } as LinearAd,
     };
   }
 }

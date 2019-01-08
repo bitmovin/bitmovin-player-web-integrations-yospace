@@ -2,33 +2,33 @@ import { ArrayUtils } from 'bitmovin-player-ui/dist/js/framework/arrayutils';
 
 /** BYS -> BitmovinYospace */
 export enum BYSListenerEvent {
-  AD_BREAK_START = "ad_break_start",
-  ADVERT_START = "advert_start",
-  ADVERT_END = "advert_end",
-  AD_BREAK_END = "ad_break_end",
-  UPDATE_TIMELINE = "update_timeline",
-  ANALYTICS_FIRED = "analytics_fired"
+  AD_BREAK_START = 'ad_break_start',
+  ADVERT_START = 'advert_start',
+  ADVERT_END = 'advert_end',
+  AD_BREAK_END = 'ad_break_end',
+  UPDATE_TIMELINE = 'update_timeline',
+  ANALYTICS_FIRED = 'analytics_fired',
 }
 
 interface BYSListenerEventBase {
-  type: BYSListenerEvent
+  type: BYSListenerEvent;
 }
 
 export interface BYSAdEvent extends BYSListenerEventBase {
-  mediaId: string
+  mediaId: string;
 }
 
 export interface BYSAdBreakEvent extends BYSListenerEventBase {
-  adBreak: YSAdBreak
+  adBreak: YSAdBreak;
 }
 
 export interface BYSUpdateTimelineEvent extends BYSListenerEventBase {
-  timeline: YSTimeline
+  timeline: YSTimeline;
 }
 
 export interface BYSAnalyticsFiredEvent extends BYSListenerEventBase {
-  call_id: any,
-  call_data: any
+  call_id: any;
+  call_data: any;
 }
 
 interface BYSListenerCallbackFunction {
@@ -58,28 +58,28 @@ export class YospaceAdListenerAdapter {
   AdBreakStart(brk: YSAdBreak): void {
     this.emitEvent({
       type: BYSListenerEvent.AD_BREAK_START,
-      adBreak: brk
+      adBreak: brk,
     } as BYSAdBreakEvent);
   }
 
   AdvertStart(mediaId: string): void {
     this.emitEvent({
       type: BYSListenerEvent.ADVERT_START,
-      mediaId: mediaId
+      mediaId: mediaId,
     } as BYSAdEvent);
   }
 
   AdvertEnd(mediaId: string): void {
     this.emitEvent({
       type: BYSListenerEvent.ADVERT_END,
-      mediaId: mediaId
+      mediaId: mediaId,
     } as BYSAdEvent);
   }
 
   AdBreakEnd(brk: YSAdBreak): void {
     this.emitEvent({
       type: BYSListenerEvent.AD_BREAK_END,
-      adBreak: brk
+      adBreak: brk,
     } as BYSAdBreakEvent);
   }
 
@@ -87,7 +87,7 @@ export class YospaceAdListenerAdapter {
     console.log('[listener] UpdateTimeline', timeline);
     this.emitEvent({
       type: BYSListenerEvent.UPDATE_TIMELINE,
-      timeline: timeline
+      timeline: timeline,
     } as BYSUpdateTimelineEvent);
   }
 
@@ -96,7 +96,7 @@ export class YospaceAdListenerAdapter {
     this.emitEvent({
       type: BYSListenerEvent.ANALYTICS_FIRED,
       call_id: call_id,
-      call_data: call_data
+      call_data: call_data,
     } as BYSAnalyticsFiredEvent);
   }
 
