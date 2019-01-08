@@ -1153,8 +1153,6 @@ class EventSuppressController {
 
 class EnumHelper {
   static isPlayerEvent(eventType: PlayerEvent | YospacePlayerEvent) {
-    return Object.keys(PlayerEvent).map((o) => {
-      return o.toLowerCase()
-    }).includes(eventType as string);
+    return Object.values(PlayerEvent).includes(eventType as string);
   }
 }
