@@ -1088,6 +1088,7 @@ class AdEventsFactory {
         uiConfig: {
           requestsUi: true,
         },
+        extensions: VastExtensionHelper.getExtensions(ad.advert),
       } as LocalLinearAd,
     };
   }
