@@ -1,6 +1,6 @@
 # Bitmovin Player Yospace Integration
 
-This integration complete encapsulate the usage of Yospace. After creating the player it can be used like a normal [Bitmovin Player](https://bitmovin.com/docs/player) instance.
+This integration completely encapsulates the usage of Yospace. After creating the player it can be used like a normal [Bitmovin Player](https://bitmovin.com/docs/player) instance.
 
 ## Usage
 
@@ -63,4 +63,4 @@ var yospacePlayer = new bitmovin.player.ads.yospace.BitmovinYospacePlayer(player
 
 ## Limitations
 
-- No support for ad tracking during live streams in Safari if EMSG tags are used. (EMSG tags are not supported from Safari)
+- No support for ad tracking during live streams in Safari if EMSG tags are used. (EMSG tags are not supported by Safari)

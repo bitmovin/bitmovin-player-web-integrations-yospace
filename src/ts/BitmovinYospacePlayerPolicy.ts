@@ -5,12 +5,12 @@ export interface BitmovinYospacePlayerPolicy {
   canMute(): boolean;
   canSeek(): boolean;
   /**
-   * Determine whether the player is permitted to seek to a permitted point in the stream.
+   * Determine whether the player is permitted to seek to a point in the stream.
    * Based on the provided location, the nearest permissible location is returned which should be
    * used by the player to override the viewers chosen seek location.
-   * This is to enable the ability to prevent skipping over adverts.
+   * This provides the ability to prevent skipping over adverts.
    * @param seekTarget
-   * @return The closes available seek target. Default start time of last ad which would be skipped.
+   * @return The closest available seek target. Default start time of last ad which would be skipped.
    */
   canSeekTo(seekTarget: number): number;
   /**
