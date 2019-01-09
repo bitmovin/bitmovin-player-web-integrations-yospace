@@ -12,6 +12,7 @@ import {
 } from './YospaceListenerAdapter';
 import { BitmovinYospacePlayerPolicy, DefaultBitmovinYospacePlayerPolicy } from './BitmovinYospacePlayerPolicy';
 import { ArrayUtils } from 'bitmovin-player-ui/dist/js/framework/arrayutils';
+import { VastExtensionHelper } from './VastExtensionHelper';
 
 export enum YospaceAssetType {
   LINEAR,
@@ -36,6 +37,11 @@ interface StreamPart {
 interface StreamPartMapping {
   magic: StreamPart;
   original: StreamPart;
+}
+
+// TODO: remove this when it's available in the Player
+interface LocalLinearAd extends LinearAd {
+  extensions: any[];
 }
 
 export class BitmovinYospacePlayer implements PlayerAPI {
@@ -578,7 +584,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     };
   }
 
-  private mapAd(ysAd: YSAdvert): LinearAd {
+  private mapAd(ysAd: YSAdvert): LocalLinearAd {
     return {
       isLinear: Boolean(ysAd.advert.linear),
       duration: ysAd.duration,
@@ -589,6 +595,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
       uiConfig: {
         requestsUi: true,
       },
+      extensions: VastExtensionHelper.getExtensions(ysAd.advert),
     };
   }
 
@@ -1085,7 +1092,8 @@ class AdEventsFactory {
         uiConfig: {
           requestsUi: true,
         },
-      } as LinearAd,
+        extensions: VastExtensionHelper.getExtensions(ad.advert),
+      } as LocalLinearAd,
     };
   }
 }

@@ -78,6 +78,7 @@ declare class VASTAd {
    */
   linear: VASTLinear;
   id: string;
+  Extensions: XMLDocument[];
 }
 
 declare class YSAdvert {
