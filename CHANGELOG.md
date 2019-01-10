@@ -7,3 +7,4 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [develop]
 
 ### Added
+- Initial yospace integration

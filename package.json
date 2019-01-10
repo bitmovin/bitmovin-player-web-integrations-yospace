@@ -23,6 +23,7 @@
     "typescript": "^2.2.1",
     "vinyl-buffer": "^1.0.0",
     "vinyl-source-stream": "^1.1.0",
-    "watchify": "^3.9.0"
+    "watchify": "^3.9.0",
+    "x2js": "^3.2.3"
   }
 }

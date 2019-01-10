@@ -79,6 +79,7 @@ declare class VASTAd {
   linear: VASTLinear;
   id: string;
   vastXML: Element;
+  Extensions: XMLDocument[];
 }
 
 declare class YSAdvert {
