@@ -294,7 +294,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
   on(eventType: YospacePlayerEvent, callback: PlayerEventCallback): void;
   on(eventType: PlayerEvent, callback: PlayerEventCallback): void;
   on(eventType: PlayerEvent | YospacePlayerEvent, callback: PlayerEventCallback): void {
-    if (!EnumHelper.isYospaceError(eventType)) {
+    if (!EnumHelper.isYospaceEvent(eventType)) {
       // we need to suppress some events because they need to be modified first. so don't add it to the actual player
       const suppressedEventTypes = [PlayerEvent.SourceLoaded, PlayerEvent.TimeChanged, PlayerEvent.Paused];
       const event = eventType as PlayerEvent;
@@ -1152,7 +1152,9 @@ class EventSuppressController {
 }
 
 class EnumHelper {
-  static isYospaceError(eventType: PlayerEvent | YospacePlayerEvent) {
-    return Object.values(YospacePlayerEvent).includes(eventType as string);
+  static isYospaceEvent(eventType: PlayerEvent | YospacePlayerEvent) {
+    return Object.keys(YospacePlayerEvent).map((key: string) => {
+      return YospacePlayerEvent[key as any];
+    }).includes(eventType);
   }
 }
