@@ -78,6 +78,7 @@ declare class VASTAd {
    */
   linear: VASTLinear;
   id: string;
+  vastXML: Element;
 }
 
 declare class YSAdvert {
@@ -89,6 +90,8 @@ declare class YSAdvert {
   adPaused(): void;
   adResumed(): void;
   setActive(active: boolean): void;
+  hasInteractiveUnit(): boolean;
+  getInteractiveUnit(): VASTInteractive;
 }
 
 declare class YSAdBreak {
@@ -159,6 +162,17 @@ declare class YSTimelineElement {
 
 declare class YSTimeline {
   getAllElements(): YSTimelineElement[];
+}
+
+// VPAID Stuff
+declare class VASTInteractive {
+  /**
+   * @param ev The event type to report
+   * @param position The number of seconds into ad playback where the event occured
+   * @param asset The video asset URL being played
+   * @param brktime The total time of the break containing the advert
+   */
+  track(ev: string, position: number, asset: string, brktime: string): void;
 }
 
 
