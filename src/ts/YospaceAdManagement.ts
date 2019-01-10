@@ -12,6 +12,7 @@ import {
 } from './YospaceListenerAdapter';
 import { BitmovinYospacePlayerPolicy, DefaultBitmovinYospacePlayerPolicy } from './BitmovinYospacePlayerPolicy';
 import { ArrayUtils } from 'bitmovin-player-ui/dist/js/framework/arrayutils';
+import bitmovinAdvertisingModule from 'bitmovin-player/modules/bitmovinplayer-advertising-bitmovin'
 
 export enum YospaceAssetType {
   LINEAR,
@@ -75,8 +76,9 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     // Clear advertising config
     if (config.advertising) {
       console.warn('Client side advertising config is not supported');
-      delete config.advertising;
     }
+    // add advertising again to load ads module
+    config.advertising = {};
 
     if (config.ui === undefined || config.ui) {
       console.warn('Please setup the UI after initializing the yospace player');
@@ -84,6 +86,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     }
 
     // initialize bitmovin player
+    Player.addModule(bitmovinAdvertisingModule);
     this.player = new Player(containerElement, config);
 
     // TODO: combine in something like a reportPlayerState method called for multiple events
@@ -228,6 +231,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
             this.yospaceListenerAdapter = new YospaceAdListenerAdapter();
             this.bindYospaceEvent();
             this.manager.registerPlayer(this.yospaceListenerAdapter);
+            // this.vpaidWrapper = new VPAIDAdapter();
 
             // Initialize policy
             if (!this.playerPolicy) {
@@ -288,7 +292,9 @@ export class BitmovinYospacePlayer implements PlayerAPI {
 
   on(eventType: PlayerEvent, callback: PlayerEventCallback): void {
     // we need to suppress some events because they need to be modified first. so don't add it to the actual player
-    const suppressedEventTypes = [PlayerEvent.SourceLoaded, PlayerEvent.TimeChanged, PlayerEvent.Paused];
+    const suppressedEventTypes = [PlayerEvent.SourceLoaded, PlayerEvent.TimeChanged, PlayerEvent.Paused,
+    PlayerEvent.AdStarted, PlayerEvent.AdBreakStarted];
+    // TODO: suppress all ad events
     if (!suppressedEventTypes.includes(eventType)) {
       this.player.on(eventType, callback);
     }
@@ -520,6 +526,26 @@ export class BitmovinYospacePlayer implements PlayerAPI {
   };
 
   private onAdStarted = (event: BYSAdEvent) => {
+    console.log('[log] [vPAID] some ad started');
+
+    const currentAd = this.getCurrentAd();
+
+    if (currentAd.hasInteractiveUnit()) {
+      const vpaidUri = 'data:text/xml,' + encodeURIComponent('<VAST version="3.0">'+currentAd.advert.vastXML.outerHTML+'</VAST>');
+      this.player.ads.schedule({
+        tag: {
+          url: vpaidUri, //vpaidUri,// currentAd.advert.vastXML.baseURI
+          type: 'vast',
+        },
+        position: this.player.getCurrentTime() + '',
+        replaceContentDuration: currentAd.duration,
+      } as any).then((adBreaks: AdBreak[]) => {
+        // TODO: everything's fine
+      }).catch((reason: any) => {
+        // TODO: error handling
+      })
+    }
+
     const playerEvent = AdEventsFactory.createAdEvent(this.player, PlayerEvent.AdStarted, this.manager, this.getCurrentAd());
     this.fireEvent<AdEvent>(playerEvent);
 
@@ -575,6 +601,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
   }
 
   private mapAd(ysAd: YSAdvert): LinearAd {
+    console.log('[log] ad with unit', ysAd.hasInteractiveUnit());
     return {
       isLinear: Boolean(ysAd.advert.linear),
       duration: ysAd.duration,
@@ -583,7 +610,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
       mediaFileUrl: ysAd.advert.linear.mediaFiles[0].src,
       skippableAfter: ysAd.advert.linear.skipOffset,
       uiConfig: {
-        requestsUi: true,
+        requestsUi: !ysAd.hasInteractiveUnit(),
       },
     };
   }
@@ -1067,10 +1094,12 @@ class AdEventsFactory {
   }
 
   static createAdEvent(player: PlayerAPI, type: PlayerEvent, manager: YSSessionManager, ad: YSAdvert): AdEvent {
+    console.log('[log] ad event with unit', ad.hasInteractiveUnit());
     return {
       timestamp: Date.now(),
       type: type,
       ad: {
+        id: ad.advert.id,
         isLinear: true,
         duration: ad.duration,
         skippableAfter: player.isLive() ? -1 : ad.advert.linear.skipOffset,
@@ -1079,7 +1108,7 @@ class AdEventsFactory {
           manager.reportPlayerEvent(YSPlayerEvents.CLICK);
         },
         uiConfig: {
-          requestsUi: true,
+          requestsUi: !ad.hasInteractiveUnit(),
         },
       } as LinearAd,
     };
