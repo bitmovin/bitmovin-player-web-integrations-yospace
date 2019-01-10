@@ -247,7 +247,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     // To support ads in live streams we need to track metadata events
     this.player.on(PlayerEvent.Metadata, onMetaData);
 
-    // subscribe to adFinished events. In Case of VPAID we rely on the read player event to track it.
+    // subscribe to adFinished events. In Case of VPAID we rely on the real player event to track it.
     this.player.on(PlayerEvent.AdFinished, onAdFinished);
   }
 
