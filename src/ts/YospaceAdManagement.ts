@@ -12,12 +12,12 @@ import {
 } from './YospaceListenerAdapter';
 import { BitmovinYospacePlayerPolicy, DefaultBitmovinYospacePlayerPolicy } from './BitmovinYospacePlayerPolicy';
 import { ArrayUtils } from 'bitmovin-player-ui/dist/js/framework/arrayutils';
-import bitmovinAdvertisingModule from 'bitmovin-player/modules/bitmovinplayer-advertising-bitmovin'
+import bitmovinAdvertisingModule from 'bitmovin-player/modules/bitmovinplayer-advertising-bitmovin';
 import {
   YospaceErrorCode, YospaceErrorEvent, YospaceEventBase, YospacePlayerError, YospacePlayerEvent,
   YospacePlayerEventCallback, YospacePolicyError, YospacePolicyErrorCode,
 } from "./YospaceError";
-import { VastExtensionHelper } from './VastExtensionHelper';
+import { VastHelper } from './VastHelper';
 
 export enum YospaceAssetType {
   LINEAR,
@@ -553,24 +553,20 @@ export class BitmovinYospacePlayer implements PlayerAPI {
   };
 
   private onAdStarted = (event: BYSAdEvent) => {
-    console.log('[log] [vPAID] some ad started');
-
     const currentAd = this.getCurrentAd();
 
     if (currentAd.hasInteractiveUnit()) {
-      const vpaidUri = 'data:text/xml,' + encodeURIComponent('<VAST version="3.0">'+currentAd.advert.vastXML.outerHTML+'</VAST>');
+      // Handle VPAID ad
       this.player.ads.schedule({
         tag: {
-          url: vpaidUri, //vpaidUri,// currentAd.advert.vastXML.baseURI
+          url: VastHelper.buildVastXml(currentAd.advert),
           type: 'vast',
         },
-        position: this.player.getCurrentTime() + '',
+        position: String(this.player.getCurrentTime()),
         replaceContentDuration: currentAd.duration,
-      } as any).then((adBreaks: AdBreak[]) => {
-        // TODO: everything's fine
-      }).catch((reason: any) => {
-        // TODO: error handling
-      })
+      } as AdConfig).catch((reason: string) => {
+        this.handleYospaceError(new YospacePlayerError(YospaceErrorCode.VPAID_ERROR, null, reason));
+      });
     }
 
     const playerEvent = AdEventsFactory.createAdEvent(this.player, PlayerEvent.AdStarted, this.manager, this.getCurrentAd());
@@ -628,7 +624,6 @@ export class BitmovinYospacePlayer implements PlayerAPI {
   }
 
   private mapAd(ysAd: YSAdvert): LocalLinearAd {
-    console.log('[log] ad with unit', ysAd.hasInteractiveUnit());
     return {
       isLinear: Boolean(ysAd.advert.linear),
       duration: ysAd.duration,
@@ -639,7 +634,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
       uiConfig: {
         requestsUi: !ysAd.hasInteractiveUnit(),
       },
-      extensions: VastExtensionHelper.getExtensions(ysAd.advert),
+      extensions: VastHelper.getExtensions(ysAd.advert),
     };
   }
 
@@ -1148,7 +1143,6 @@ class AdEventsFactory {
   }
 
   static createAdEvent(player: PlayerAPI, type: PlayerEvent, manager: YSSessionManager, ad: YSAdvert): AdEvent {
-    console.log('[log] ad event with unit', ad.hasInteractiveUnit());
     return {
       timestamp: Date.now(),
       type: type,
@@ -1164,7 +1158,7 @@ class AdEventsFactory {
         uiConfig: {
           requestsUi: !ad.hasInteractiveUnit(),
         },
-        extensions: VastExtensionHelper.getExtensions(ad.advert),
+        extensions: VastHelper.getExtensions(ad.advert),
       } as LocalLinearAd,
     };
   }
