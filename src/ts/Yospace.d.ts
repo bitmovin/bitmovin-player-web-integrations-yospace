@@ -110,6 +110,7 @@ declare class YSSession {
   timeline: YSTimeline;
 
   getLinearClickthrough(): string;
+  suppressAnalytics(state: boolean): any[];
 }
 
 declare class YSPlayerPolicy {
@@ -163,4 +164,7 @@ declare class YSTimelineElement {
 
 declare class YSTimeline {
   getAllElements(): YSTimelineElement[];
+}
+
+declare class VASTInteractive {
 }

@@ -80,6 +80,9 @@ export class BitmovinYospacePlayer implements PlayerAPI {
   // save playback speed to restore after AdBreak
   private playbackSpeed: number = 1;
 
+  // save vpaid status
+  private isVPaidActive = false;
+
   constructor(containerElement: HTMLElement, config: PlayerConfig, yospaceConfig: YospaceConfiguration = {}) {
     this.yospaceConfig = yospaceConfig;
 
@@ -101,10 +104,18 @@ export class BitmovinYospacePlayer implements PlayerAPI {
 
     // TODO: combine in something like a reportPlayerState method called for multiple events
     const onPlay = () => {
+      if (this.isVPaidActive) {
+        return;
+      }
+
       this.manager.reportPlayerEvent(YSPlayerEvents.START);
     };
 
     const onTimeChanged = (event: TimeChangedEvent) => {
+      if (this.isVPaidActive) {
+        return;
+      }
+
       this.manager.reportPlayerEvent(YSPlayerEvents.POSITION, event.time);
 
       // fire magic time-changed event
@@ -116,6 +127,10 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     };
 
     const onPause = (event: PlaybackEvent) => {
+      if (this.isVPaidActive) {
+        return;
+      }
+
       this.manager.reportPlayerEvent(YSPlayerEvents.PAUSE);
 
       if (!this.suppressedEventsController.isSuppressed(PlayerEvent.Paused)) {
@@ -167,6 +182,10 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     };
 
     const onSeek = (event: SeekEvent) => {
+      if (this.isVPaidActive) {
+        return;
+      }
+
       this.manager.reportPlayerEvent(YSPlayerEvents.SEEK_START, this.player.getCurrentTime());
 
       if (!this.suppressedEventsController.isSuppressed(PlayerEvent.Seek)) {
@@ -177,6 +196,10 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     };
 
     const onSeeked = (event: SeekEvent) => {
+      if (this.isVPaidActive) {
+        return;
+      }
+
       this.manager.reportPlayerEvent(YSPlayerEvents.SEEK_END, this.player.getCurrentTime());
 
       if (!this.suppressedEventsController.isSuppressed(PlayerEvent.Seeked)) {
@@ -187,6 +210,10 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     };
 
     const onMetaData = (event: MetadataEvent) => {
+      if (this.isVPaidActive) {
+        return;
+      }
+
       const validTypes = ['ID3', 'EMSG'];
       const type = event.metadataType;
 
@@ -204,6 +231,11 @@ export class BitmovinYospacePlayer implements PlayerAPI {
       this.manager.reportPlayerEvent(YSPlayerEvents.METADATA, yospaceMetadataObject);
     };
 
+    const onAdFinished = (event: AdEvent) => {
+      this.isVPaidActive = false;
+      this.manager.session.suppressAnalytics(false);
+    };
+
     this.player.on(PlayerEvent.Playing, onPlay);
     this.player.on(PlayerEvent.TimeChanged, onTimeChanged);
     this.player.on(PlayerEvent.Paused, onPause);
@@ -214,6 +246,9 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     this.player.on(PlayerEvent.SourceLoaded, onSourceLoaded);
     // To support ads in live streams we need to track metadata events
     this.player.on(PlayerEvent.Metadata, onMetaData);
+
+    // subscribe to adFinished events. In Case of VPAID we rely on the read player event to track it.
+    this.player.on(PlayerEvent.AdFinished, onAdFinished);
   }
 
   load(source: YospaceSourceConfig, forceTechnology?: string, disableSeeking?: boolean): Promise<void> {
@@ -305,9 +340,24 @@ export class BitmovinYospacePlayer implements PlayerAPI {
   on(eventType: PlayerEvent | YospacePlayerEvent, callback: PlayerEventCallback): void {
     if (!EnumHelper.isYospaceEvent(eventType)) {
       // we need to suppress some events because they need to be modified first. so don't add it to the actual player
-      // TODO: suppress all ad events
-      const suppressedEventTypes = [PlayerEvent.SourceLoaded, PlayerEvent.TimeChanged, PlayerEvent.Paused,
-      PlayerEvent.AdStarted, PlayerEvent.AdBreakStarted];
+      const suppressedEventTypes = [
+        PlayerEvent.SourceLoaded,
+        PlayerEvent.TimeChanged,
+        PlayerEvent.Paused,
+
+        // Suppress all ad events
+        PlayerEvent.AdBreakFinished,
+        PlayerEvent.AdBreakStarted,
+        PlayerEvent.AdClicked,
+        PlayerEvent.AdError,
+        PlayerEvent.AdFinished,
+        PlayerEvent.AdLinearityChanged,
+        PlayerEvent.AdManifestLoaded,
+        PlayerEvent.AdQuartile,
+        PlayerEvent.AdSkipped,
+        PlayerEvent.AdStarted,
+      ];
+
       const event = eventType as PlayerEvent;
       if (!suppressedEventTypes.includes(event)) {
         this.player.on(event, callback);
@@ -556,6 +606,8 @@ export class BitmovinYospacePlayer implements PlayerAPI {
 
     if (currentAd.hasInteractiveUnit()) {
       // Handle VPAID ad
+      this.isVPaidActive = true;
+      this.manager.session.suppressAnalytics(true);
       this.player.ads.schedule({
         tag: {
           url: VastHelper.buildVastXml(currentAd.advert),
