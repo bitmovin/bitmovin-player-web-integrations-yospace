@@ -241,7 +241,6 @@ export class BitmovinYospacePlayer implements PlayerAPI {
             this.yospaceListenerAdapter = new YospaceAdListenerAdapter();
             this.bindYospaceEvent();
             this.manager.registerPlayer(this.yospaceListenerAdapter);
-            // this.vpaidWrapper = new VPAIDAdapter();
 
             // Initialize policy
             if (!this.playerPolicy) {
