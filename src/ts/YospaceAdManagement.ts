@@ -231,9 +231,18 @@ export class BitmovinYospacePlayer implements PlayerAPI {
       this.manager.reportPlayerEvent(YSPlayerEvents.METADATA, yospaceMetadataObject);
     };
 
-    const onAdFinished = (event: AdEvent) => {
+    const onVpaidAdFinished = (event: AdEvent) => {
       this.isVPaidActive = false;
       this.manager.session.suppressAnalytics(false);
+    };
+
+    const onVpaidAdSkipped = (event: AdEvent) => {
+      onVpaidAdFinished(event);
+      this.fireEvent<AdEvent>({
+        timestamp: Date.now(),
+        type: PlayerEvent.AdSkipped,
+        ad: this.mapAd(this.getCurrentAd()),
+      })
     };
 
     this.player.on(PlayerEvent.Playing, onPlay);
@@ -247,8 +256,9 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     // To support ads in live streams we need to track metadata events
     this.player.on(PlayerEvent.Metadata, onMetaData);
 
-    // subscribe to adFinished events. In Case of VPAID we rely on the real player event to track it.
-    this.player.on(PlayerEvent.AdFinished, onAdFinished);
+    // Subscribe to some ad events. In Case of VPAID we rely on the player events to track it.
+    this.player.on(PlayerEvent.AdFinished, onVpaidAdFinished);
+    this.player.on(PlayerEvent.AdSkipped, onVpaidAdSkipped);
   }
 
   load(source: YospaceSourceConfig, forceTechnology?: string, disableSeeking?: boolean): Promise<void> {
