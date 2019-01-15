@@ -125,11 +125,9 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     };
 
     const onPause = (event: PlaybackEvent) => {
-      if (this.isVpaidActive) {
-        return;
+      if (!this.isVpaidActive) {
+        this.manager.reportPlayerEvent(YSPlayerEvents.PAUSE);
       }
-
-      this.manager.reportPlayerEvent(YSPlayerEvents.PAUSE);
 
       if (!this.suppressedEventsController.isSuppressed(PlayerEvent.Paused)) {
         this.fireEvent(event);
