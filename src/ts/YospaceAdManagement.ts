@@ -81,7 +81,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
   private playbackSpeed: number = 1;
 
   // save vpaid status
-  private isVPaidActive = false;
+  private isVpaidActive = false;
 
   constructor(containerElement: HTMLElement, config: PlayerConfig, yospaceConfig: YospaceConfiguration = {}) {
     this.yospaceConfig = yospaceConfig;
@@ -104,7 +104,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
 
     // TODO: combine in something like a reportPlayerState method called for multiple events
     const onPlay = () => {
-      if (this.isVPaidActive) {
+      if (this.isVpaidActive) {
         return;
       }
 
@@ -112,11 +112,9 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     };
 
     const onTimeChanged = (event: TimeChangedEvent) => {
-      if (this.isVPaidActive) {
-        return;
+      if (!this.isVpaidActive) {
+        this.manager.reportPlayerEvent(YSPlayerEvents.POSITION, event.time);
       }
-
-      this.manager.reportPlayerEvent(YSPlayerEvents.POSITION, event.time);
 
       // fire magic time-changed event
       this.fireEvent<TimeChangedEvent>({
@@ -127,7 +125,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     };
 
     const onPause = (event: PlaybackEvent) => {
-      if (this.isVPaidActive) {
+      if (this.isVpaidActive) {
         return;
       }
 
@@ -182,7 +180,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     };
 
     const onSeek = (event: SeekEvent) => {
-      if (this.isVPaidActive) {
+      if (this.isVpaidActive) {
         return;
       }
 
@@ -196,7 +194,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     };
 
     const onSeeked = (event: SeekEvent) => {
-      if (this.isVPaidActive) {
+      if (this.isVpaidActive) {
         return;
       }
 
@@ -210,7 +208,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     };
 
     const onMetaData = (event: MetadataEvent) => {
-      if (this.isVPaidActive) {
+      if (this.isVpaidActive) {
         return;
       }
 
@@ -232,7 +230,16 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     };
 
     const onVpaidAdFinished = (event: AdEvent) => {
-      this.isVPaidActive = false;
+      this.isVpaidActive = false;
+
+      const currentAd = this.getCurrentAd();
+      this.onAdFinished({
+        type: BYSListenerEvent.ADVERT_END,
+        mediaId: currentAd.getMediaID(),
+      });
+
+      const session = this.manager.session;
+      session.currentAdvert = null;
       this.manager.session.suppressAnalytics(false);
     };
 
@@ -243,6 +250,10 @@ export class BitmovinYospacePlayer implements PlayerAPI {
         type: PlayerEvent.AdSkipped,
         ad: this.mapAd(this.getCurrentAd()),
       })
+    };
+
+    const onVpaidAdQuartile = (event: AdQuartileEvent) => {
+      this.handleQuartileEvent(event.quartile);
     };
 
     this.player.on(PlayerEvent.Playing, onPlay);
@@ -259,6 +270,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     // Subscribe to some ad events. In Case of VPAID we rely on the player events to track it.
     this.player.on(PlayerEvent.AdFinished, onVpaidAdFinished);
     this.player.on(PlayerEvent.AdSkipped, onVpaidAdSkipped);
+    this.player.on(PlayerEvent.AdQuartile, onVpaidAdQuartile);
   }
 
   load(source: YospaceSourceConfig, forceTechnology?: string, disableSeeking?: boolean): Promise<void> {
@@ -446,6 +458,11 @@ export class BitmovinYospacePlayer implements PlayerAPI {
   }
 
   getCurrentTime(): number {
+    // Do not calculate magic time in case of Vpaid
+    if (this.isVpaidActive) {
+      return this.player.getCurrentTime();
+    }
+
     if (this.isAdActive()) {
       // return currentTime in AdBreak
       const currentAdPosition = this.player.getCurrentTime();
@@ -456,6 +473,11 @@ export class BitmovinYospacePlayer implements PlayerAPI {
   }
 
   getDuration(): number {
+    // Do not calculate magic time in case of Vpaid
+    if (this.isVpaidActive) {
+      return this.player.getCurrentTime();
+    }
+
     if (this.isAdActive()) {
       return this.getCurrentAd().duration;
     }
@@ -616,8 +638,9 @@ export class BitmovinYospacePlayer implements PlayerAPI {
 
     if (currentAd.hasInteractiveUnit()) {
       // Handle VPAID ad
-      this.isVPaidActive = true;
+      this.isVpaidActive = true;
       this.manager.session.suppressAnalytics(true);
+
       this.player.ads.schedule({
         tag: {
           url: VastHelper.buildVastXml(currentAd.advert),

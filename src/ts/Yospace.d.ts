@@ -93,6 +93,7 @@ declare class YSAdvert {
   setActive(active: boolean): void;
   hasInteractiveUnit(): boolean;
   getInteractiveUnit(): VASTInteractive;
+  getMediaID(): string;
 }
 
 declare class YSAdBreak {
