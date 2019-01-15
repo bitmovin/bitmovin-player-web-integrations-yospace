@@ -643,7 +643,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
 
       this.player.ads.schedule({
         tag: {
-          url: VastHelper.buildVastXml(currentAd.advert),
+          url: VastHelper.buildDataUri(currentAd.advert),
           type: 'vast',
         },
         position: String(this.player.getCurrentTime()),

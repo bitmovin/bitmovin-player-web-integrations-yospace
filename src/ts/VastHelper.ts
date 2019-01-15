@@ -9,7 +9,7 @@ export class VastHelper {
     });
   }
 
-  static buildVastXml(ad: VASTAd): string {
+  static buildDataUri(ad: VASTAd): string {
     // build a valid VAST xml data uri to schedule only the current vpaid ad
     const vastXML = ad.vastXML;
     const vastVersion = vastXML.parentElement.getAttribute('version');
