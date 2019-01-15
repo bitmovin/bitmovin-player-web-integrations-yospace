@@ -37,6 +37,9 @@
             <input type="radio" name="options" id="option-vod" autocomplete="off" checked>Load VOD
           </label>
           <label class="btn btn-outline-secondary">
+            <input type="radio" name="options" id="option-vod-vpaid" autocomplete="off" checked>Load VOD + VPAID
+          </label>
+          <label class="btn btn-outline-secondary">
             <input type="radio" name="options" id="option-live" autocomplete="off">Load Live
           </label>
         </div>
@@ -53,6 +56,7 @@
   var yospacePlayer;
 
   var vodButton = $('#option-vod').parent();
+  var vodVpaidButton = $('#option-vod-vpaid').parent();
   var liveButton = $('#option-live').parent();
 
   vodButton.on('click', function() {
@@ -60,6 +64,13 @@
 
     yospacePlayer.unload();
     yospacePlayer.load(vodSource);
+  });
+
+  vodVpaidButton.on('click', function() {
+    vodVpaidButton.button('toggle');
+
+    yospacePlayer.unload();
+    yospacePlayer.load(vodVpaidSource);
   });
 
   liveButton.on('click', function() {
@@ -80,6 +91,14 @@
   var vodSource = {
     title: 'VOD Stream',
     hls: 'https://csm-e-stg.tls1.yospace.com/csm/access/525947592/cWEvY21hZl9hZHZhbmNlZF9mbXA0X2Zyb21faW50ZXIvcHJvZ19zZWcvbXdjX0NBUkUxMDA5MjYxNzAwMDE4ODUyL2NsZWFyLzNjM2MzYzNjM2MzYzNjM2MzYzNjM2MzYzNjM2MzYzNjL21hc3Rlcl9jbF9ub19pZnJhbWUubTN1OA==?yo.av=2&yo.ad=true',
+
+    // Yospace configuration
+    assetType: bitmovin.player.ads.yospace.YospaceAssetType.VOD
+  };
+
+  var vodVpaidSource = {
+    title: 'VOD Stream',
+    hls: 'https://csm-e-turnerstg-5p30c9t6lfad.tls1.yospace.com/csm/access/525951113/cWEvY21hZl9hZHZhbmNlZF9mbXA0X2Zyb21faW50ZXIvcHJvZ19zZWcvbXdjX0NBUkUxMDA5MjYxNzAwMDE4ODUyL2NsZWFyLzNjM2MzYzNjM2MzYzNjM2MzYzNjM2MzYzNjM2MzYzNjL21hc3Rlcl9jbF9ub19pZnJhbWUubTN1OA==?yo.av=2&yo.ad=true&yo.ac=true',
 
     // Yospace configuration
     assetType: bitmovin.player.ads.yospace.YospaceAssetType.VOD
