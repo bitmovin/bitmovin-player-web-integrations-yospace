@@ -5,7 +5,7 @@ import {
   MetadataType, Player, PlayerAdvertisingAPI, PlayerAPI, PlayerBufferAPI, PlayerConfig, PlayerEvent, PlayerEventBase,
   PlayerEventCallback, PlayerExports, PlayerSubtitlesAPI, PlayerType, PlayerVRAPI, QueryParameters, SeekEvent,
   SegmentMap, Snapshot, SourceConfig, StreamType, Technology, Thumbnail, TimeChangedEvent, TimeRange, VideoQuality,
-  ViewMode, ViewModeOptions, PlaybackEvent, MetadataEvent,
+  ViewMode, ViewModeOptions, PlaybackEvent, MetadataEvent, ErrorEvent, ErrorCode, PlayerError
 } from 'bitmovin-player';
 import {
   BYSAdBreakEvent, BYSAdEvent, BYSAnalyticsFiredEvent, BYSListenerEvent, YospaceAdListenerAdapter,
@@ -647,7 +647,18 @@ export class BitmovinYospacePlayer implements PlayerAPI {
         position: String(this.player.getCurrentTime()),
         replaceContentDuration: currentAd.duration,
       } as AdConfig).catch((reason: string) => {
-        this.handleYospaceError(new YospacePlayerError(YospaceErrorCode.VPAID_ERROR, null, reason));
+        const error = new PlayerError(ErrorCode.MODULE_ADVERTISING_ERROR, {
+          code: 900, // TODO: use VastErrorCode.UNDEFINED_ERROR in 8.2.0-rc1
+          message: reason,
+        });
+
+        this.fireEvent<ErrorEvent>({
+          timestamp: Date.now(),
+          type: PlayerEvent.AdError,
+          code: error.code,
+          name: error.message,
+          data: error.data,
+        });
       });
     }
 
