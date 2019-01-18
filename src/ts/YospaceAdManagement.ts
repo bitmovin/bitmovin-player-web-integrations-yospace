@@ -473,7 +473,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
   getDuration(): number {
     // Do not calculate magic time in case of Vpaid
     if (this.isVpaidActive) {
-      return this.player.getCurrentTime();
+      return this.player.getDuration();
     }
 
     if (this.isAdActive()) {
