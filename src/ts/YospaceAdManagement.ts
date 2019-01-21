@@ -955,7 +955,6 @@ export class BitmovinYospacePlayer implements PlayerAPI {
   // Add default PlayerAPI implementation to the yospacePlayer
   private wrapPlayer(): void {
     // Collect all members of the player (public API methods and properties of the player)
-    // (Object.getOwnPropertyNames(player) does not work with the player TypeScript class starting in 7.2)
     let members: string[] = [];
     for (let member in this.player) {
       members.push(member);
