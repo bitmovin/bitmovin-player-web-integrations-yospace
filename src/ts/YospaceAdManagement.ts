@@ -955,16 +955,16 @@ export class BitmovinYospacePlayer implements PlayerAPI {
   // Add default PlayerAPI implementation to the yospacePlayer
   private wrapPlayer(): void {
     // Collect all members of the player (public API methods and properties of the player)
-    let members: string[] = [];
-    for (let member in this.player) {
+    const members: string[] = [];
+    for (const member in this.player) {
       members.push(member);
     }
 
     // Split the members into methods and properties
-    let methods = <any[]>[];
-    let properties = <any[]>[];
+    const methods = <any[]>[];
+    const properties = <any[]>[];
 
-    for (let member of members) {
+    for (const member of members) {
       if (typeof (<any>this.player)[member] === 'function') {
         methods.push(member);
       } else {
@@ -975,7 +975,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     const player = this.player;
 
     // Add function wrappers for all API methods that do nothing but calling the base method on the player
-    for (let method of methods) {
+    for (const method of methods) {
       // Only add methods that are not already present
       if (typeof (this as any)[method] !== 'function') {
         (this as any)[method] = function () {
@@ -985,12 +985,12 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     }
 
     // Add all public properties of the player to the wrapper
-    for (let property of properties) {
+    for (const property of properties) {
       // Get an eventually existing property descriptor to differentiate between plain properties and properties with
       // getters/setters.
       // Only add properties that are not already present
       if (!(this as any)[property]) {
-        let propertyDescriptor: PropertyDescriptor = Object.getOwnPropertyDescriptor(this.player, property) ||
+        const propertyDescriptor: PropertyDescriptor = Object.getOwnPropertyDescriptor(this.player, property) ||
           Object.getOwnPropertyDescriptor(Object.getPrototypeOf(this.player), property);
 
         // If the property has getters/setters, wrap them accordingly...
@@ -998,7 +998,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
           Object.defineProperty((this as any), property, {
             get: () => propertyDescriptor.get.call(this.player),
             set: (value: any) => propertyDescriptor.set.call(this.player, value),
-            enumerable: true
+            enumerable: true,
           });
         }
         // ... else just transfer the property to the wrapper
