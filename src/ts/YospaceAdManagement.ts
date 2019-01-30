@@ -3,7 +3,7 @@ import {
   AdBreak, AdBreakEvent, AdConfig, AdEvent, AdQuartile, AdQuartileEvent, BufferLevel, BufferType, LinearAd, MediaType,
   Player, PlayerAdvertisingAPI, PlayerAPI, PlayerBufferAPI, PlayerConfig, PlayerEvent, PlayerEventBase,
   PlayerEventCallback, SeekEvent, SourceConfig, TimeChangedEvent, TimeRange, PlaybackEvent, MetadataEvent,
-  VastErrorCode, PlayerError, ErrorCode, ErrorEvent
+  VastErrorCode, PlayerError, ErrorCode, ErrorEvent,
 } from 'bitmovin-player';
 import {
   BYSAdBreakEvent, BYSAdEvent, BYSAnalyticsFiredEvent, BYSListenerEvent, YospaceAdListenerAdapter,
@@ -14,7 +14,7 @@ import bitmovinAdvertisingModule from 'bitmovin-player/modules/bitmovinplayer-ad
 import {
   YospaceErrorCode, YospaceErrorEvent, YospaceEventBase, YospacePlayerError, YospacePlayerEvent,
   YospacePlayerEventCallback, YospacePolicyError, YospacePolicyErrorCode,
-} from "./YospaceError";
+} from './YospaceError';
 import { VastHelper } from './VastHelper';
 
 export enum YospaceAssetType {
@@ -248,7 +248,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
         timestamp: Date.now(),
         type: PlayerEvent.AdSkipped,
         ad: this.mapAd(this.getCurrentAd()),
-      })
+      });
     };
 
     const onVpaidAdQuartile = (event: AdQuartileEvent) => {
@@ -309,7 +309,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
             this.manager = null;
 
             this.handleYospaceError(new YospacePlayerError(YospaceErrorCode.INVALID_SOURCE));
-            reject("Shutting down SDK on non-yospace stream");
+            reject('Shutting down SDK on non-yospace stream');
           }
         } else {
           this.handleYospaceError(new YospacePlayerError(YospaceErrorCode.NO_ANALYTICS));
@@ -919,7 +919,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
             this.player.seek(ad.adBreak.startPosition - 1); // -1 to be sure to don't have a frame of the ad visible
             this.fireEvent({
               timestamp: Date.now(),
-              type: PlayerEvent.PlaybackFinished
+              type: PlayerEvent.PlaybackFinished,
             });
           } else {
             this.player.seek(seekTarget, 'ad-skip');
