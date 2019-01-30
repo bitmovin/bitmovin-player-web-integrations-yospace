@@ -3,6 +3,7 @@ import {
   AdBreak, AdBreakEvent, AdConfig, AdEvent, AdQuartile, AdQuartileEvent, BufferLevel, BufferType, LinearAd, MediaType,
   Player, PlayerAdvertisingAPI, PlayerAPI, PlayerBufferAPI, PlayerConfig, PlayerEvent, PlayerEventBase,
   PlayerEventCallback, SeekEvent, SourceConfig, TimeChangedEvent, TimeRange, PlaybackEvent, MetadataEvent,
+  VastErrorCode, PlayerError, ErrorCode, ErrorEvent
 } from 'bitmovin-player';
 import {
   BYSAdBreakEvent, BYSAdEvent, BYSAnalyticsFiredEvent, BYSListenerEvent, YospaceAdListenerAdapter,
@@ -473,7 +474,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
   getDuration(): number {
     // Do not calculate magic time in case of Vpaid
     if (this.isVpaidActive) {
-      return this.player.getCurrentTime();
+      return this.player.getDuration();
     }
 
     if (this.isAdActive()) {
@@ -647,7 +648,18 @@ export class BitmovinYospacePlayer implements PlayerAPI {
         position: String(this.player.getCurrentTime()),
         replaceContentDuration: currentAd.duration,
       } as AdConfig).catch((reason: string) => {
-        this.handleYospaceError(new YospacePlayerError(YospaceErrorCode.VPAID_ERROR, null, reason));
+        const error = new PlayerError(ErrorCode.MODULE_ADVERTISING_ERROR, {
+          code: VastErrorCode.UNDEFINED_ERROR,
+          message: reason,
+        });
+
+        this.fireEvent<ErrorEvent>({
+          timestamp: Date.now(),
+          type: PlayerEvent.AdError,
+          code: error.code,
+          name: error.message,
+          data: error.data,
+        });
       });
     }
 

@@ -11,7 +11,6 @@ export enum YospaceErrorCode {
   NO_ANALYTICS = 1002,
   NOT_INITIALISED = 1003,
   INVALID_PLAYER = 1004,
-  VPAID_ERROR = 1005,
 }
 
 export enum YospacePolicyErrorCode {
