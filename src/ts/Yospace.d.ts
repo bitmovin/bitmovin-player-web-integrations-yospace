@@ -78,6 +78,7 @@ declare class VASTAd {
    */
   linear: VASTLinear;
   id: string;
+  vastXML: Element;
   Extensions: XMLDocument[];
 }
 
@@ -90,6 +91,9 @@ declare class YSAdvert {
   adPaused(): void;
   adResumed(): void;
   setActive(active: boolean): void;
+  hasInteractiveUnit(): boolean;
+  getInteractiveUnit(): VASTInteractive;
+  getMediaID(): string;
 }
 
 declare class YSAdBreak {
@@ -107,6 +111,7 @@ declare class YSSession {
   timeline: YSTimeline;
 
   getLinearClickthrough(): string;
+  suppressAnalytics(state: boolean): any[];
 }
 
 declare class YSPlayerPolicy {
@@ -162,4 +167,5 @@ declare class YSTimeline {
   getAllElements(): YSTimelineElement[];
 }
 
-
+declare class VASTInteractive {
+}

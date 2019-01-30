@@ -14,16 +14,18 @@
   <script type="text/javascript" src="yospace/yo-ad-management.min.js"></script>
   <script type="text/javascript" src="js/bitmovinplayer-yospace.js"></script>
 
-  <script type="text/javascript" src="//cdn.bitmovin.com/player/web/8.1.0-rc1/bitmovinplayer-ui.js"></script>
-  <link rel="stylesheet" href="//cdn.bitmovin.com/player/web/8.1.0-rc1/bitmovinplayer-ui.css">
+  <script type="text/javascript" src="//cdn.bitmovin.com/player/web/8.2.0-rc2/bitmovinplayer-ui.js"></script>
+  <link rel="stylesheet" href="//cdn.bitmovin.com/player/web/8.2.0-rc2/bitmovinplayer-ui.css">
   <style>
     .player-wrapper {
       margin: 20px auto;
       box-shadow: 0 0 30px rgba(0,0,0,0.7);
     }
     .meta-info {
-      margin: 20px auto;
       text-align: center;
+    }
+    .row {
+      margin: 20px 0;
     }
   </style>
 </head>
@@ -37,8 +39,25 @@
             <input type="radio" name="options" id="option-vod" autocomplete="off" checked>Load VOD
           </label>
           <label class="btn btn-outline-secondary">
+            <input type="radio" name="options" id="option-vod-vpaid" autocomplete="off" checked>Load VOD + VPAID
+          </label>
+          <label class="btn btn-outline-secondary">
             <input type="radio" name="options" id="option-live" autocomplete="off">Load Live
           </label>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col">
+        <div class="input-group mb-3">
+          <input id="steam-stream-url" type="text" class="form-control" placeholder="Custom Stream URL" aria-label="Custom Stream URL">
+          <select class="custom-select col-2" id="stream-type-select">
+            <option value="1" selected>VoD</option>
+            <option value="2">Live</option>
+          </select>
+          <div class="input-group-append">
+            <button id="load-custom-steam" class="btn btn-outline-secondary" type="button">Load</button>
+          </div>
         </div>
       </div>
     </div>
@@ -53,20 +72,51 @@
   var yospacePlayer;
 
   var vodButton = $('#option-vod').parent();
+  var vodVpaidButton = $('#option-vod-vpaid').parent();
   var liveButton = $('#option-live').parent();
+  var customStreamButton = $('#load-custom-steam');
+
+  function deselectCustomLoadButton() {
+    $(customStreamButton).removeClass('active');
+  }
 
   vodButton.on('click', function() {
     vodButton.button('toggle');
+    deselectCustomLoadButton();
 
     yospacePlayer.unload();
     yospacePlayer.load(vodSource);
   });
 
+  vodVpaidButton.on('click', function() {
+    vodVpaidButton.button('toggle');
+    deselectCustomLoadButton();
+
+    yospacePlayer.unload();
+    yospacePlayer.load(vodVpaidSource);
+  });
+
   liveButton.on('click', function() {
     liveButton.button('toggle');
+    deselectCustomLoadButton();
 
     yospacePlayer.unload();
     yospacePlayer.load(liveSource);
+  });
+
+  customStreamButton.on('click', function() {
+    $(customStreamButton).addClass('active');
+
+    // remove active button of group
+    $($('.btn-group-toggle .active')[0]).removeClass('active');
+    var customSource = {
+      title: 'Custom Stream',
+      hls: $('#steam-stream-url').val(),
+
+      assetType: $('#stream-type-select').val() === '1' ? bitmovin.player.ads.yospace.YospaceAssetType.VOD : bitmovin.player.ads.yospace.YospaceAssetType.LINEAR,
+    };
+    yospacePlayer.unload();
+    yospacePlayer.load(customSource);
   });
 
   var liveSource = {
@@ -80,6 +130,14 @@
   var vodSource = {
     title: 'VOD Stream',
     hls: 'https://csm-e-stg.tls1.yospace.com/csm/access/525947592/cWEvY21hZl9hZHZhbmNlZF9mbXA0X2Zyb21faW50ZXIvcHJvZ19zZWcvbXdjX0NBUkUxMDA5MjYxNzAwMDE4ODUyL2NsZWFyLzNjM2MzYzNjM2MzYzNjM2MzYzNjM2MzYzNjM2MzYzNjL21hc3Rlcl9jbF9ub19pZnJhbWUubTN1OA==?yo.av=2&yo.ad=true',
+
+    // Yospace configuration
+    assetType: bitmovin.player.ads.yospace.YospaceAssetType.VOD
+  };
+
+  var vodVpaidSource = {
+    title: 'VOD Stream',
+    hls: 'https://csm-e-turnerstg-5p30c9t6lfad.tls1.yospace.com/csm/access/525951113/cWEvY21hZl9hZHZhbmNlZF9mbXA0X2Zyb21faW50ZXIvcHJvZ19zZWcvbXdjX0NBUkUxMDA5MjYxNzAwMDE4ODUyL2NsZWFyLzNjM2MzYzNjM2MzYzNjM2MzYzNjM2MzYzNjM2MzYzNjL21hc3Rlcl9jbF9ub19pZnJhbWUubTN1OA==?yo.av=2&yo.ad=true&yo.ac=true',
 
     // Yospace configuration
     assetType: bitmovin.player.ads.yospace.YospaceAssetType.VOD
@@ -103,14 +161,16 @@
   yospacePlayer = new bitmovin.player.ads.yospace.BitmovinYospacePlayer(playerContainer, conf, yospaceConfig);
 
   bitmovin.playerui.UIFactory.buildDefaultUI(yospacePlayer);
+
   yospacePlayer.load(vodSource).then(function() {
       console.log('loaded');
   }).catch(function() {
       console.log('gotcha');
   });
-  // bitmovin.player.playerui.UIFactory.buildDefaultUI(yospacePlayer);
 
-  // TODO: test with custom UI
+  yospacePlayer.on('yospaceerror', function(event) {
+    console.error(event);
+  })
 
 </script>
 </body>
