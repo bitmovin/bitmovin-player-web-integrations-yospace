@@ -1,11 +1,9 @@
 ///<reference path='Yospace.d.ts'/>
 import {
-  AdBreak, AdBreakEvent, AdConfig, AdEvent, AdQuartile, AdQuartileEvent, AudioQuality, AudioTrack, BufferLevel,
-  BufferType, DownloadedAudioData, DownloadedVideoData, LinearAd, LogLevel, MediaType, MetadataParsedEvent,
-  MetadataType, Player, PlayerAdvertisingAPI, PlayerAPI, PlayerBufferAPI, PlayerConfig, PlayerEvent, PlayerEventBase,
-  PlayerEventCallback, PlayerExports, PlayerSubtitlesAPI, PlayerType, PlayerVRAPI, QueryParameters, SeekEvent,
-  SegmentMap, Snapshot, SourceConfig, StreamType, Technology, Thumbnail, TimeChangedEvent, TimeRange, VideoQuality,
-  ViewMode, ViewModeOptions, PlaybackEvent, MetadataEvent, ErrorEvent, ErrorCode, PlayerError, VastErrorCode,
+  AdBreak, AdBreakEvent, AdConfig, AdEvent, AdQuartile, AdQuartileEvent, BufferLevel, BufferType, LinearAd, MediaType,
+  Player, PlayerAdvertisingAPI, PlayerAPI, PlayerBufferAPI, PlayerConfig, PlayerEvent, PlayerEventBase,
+  PlayerEventCallback, SeekEvent, SourceConfig, TimeChangedEvent, TimeRange, PlaybackEvent, MetadataEvent,
+  VastErrorCode, PlayerError, ErrorCode, ErrorEvent
 } from 'bitmovin-player';
 import {
   BYSAdBreakEvent, BYSAdEvent, BYSAnalyticsFiredEvent, BYSListenerEvent, YospaceAdListenerAdapter,
@@ -49,6 +47,8 @@ interface LocalLinearAd extends LinearAd {
   extensions: any[];
 }
 
+// It is expected that this does not implement all members of the PlayerAPI cause they will be added dynamically.
+// @ts-ignore
 export class BitmovinYospacePlayer implements PlayerAPI {
   // Bitmovin Player
   private readonly player: PlayerAPI;
@@ -101,6 +101,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     // initialize bitmovin player
     Player.addModule(bitmovinAdvertisingModule);
     this.player = new Player(containerElement, config);
+    this.wrapPlayer();
 
     // TODO: combine in something like a reportPlayerState method called for multiple events
     const onPlay = () => {
@@ -958,268 +959,66 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     return this.player.unload();
   }
 
-  // Default PlayerAPI implementation
-  get version(): string {
-    return this.player.version;
-  }
-
-  get vr(): PlayerVRAPI {
-    return this.player.vr;
-  }
-
-  get subtitles(): PlayerSubtitlesAPI {
-    return this.player.subtitles;
-  }
-
-  /**
-   * @deprecated
-   */
-  get exports(): PlayerExports {
-    return this.player.exports;
-  }
-
-  addMetadata(metadataType: MetadataType.CAST, metadata: any): boolean {
-    return this.player.addMetadata(metadataType, metadata);
-  }
-
-  castStop(): void {
-    this.player.castStop();
-  }
-
-  castVideo(): void {
-    this.player.castVideo();
-  }
-
-  clearQueryParameters(): void {
-    this.player.clearQueryParameters();
-  }
-
-  destroy(): Promise<void> {
-    return this.player.destroy();
-  }
-
-  getAudio(): AudioTrack {
-    return this.player.getAudio();
-  }
-
-  getAudioQuality(): AudioQuality {
-    return this.player.getAudioQuality();
-  }
-
-  getAvailableAudio(): AudioTrack[] {
-    return this.player.getAvailableAudio();
-  }
-
-  getAvailableAudioQualities(): AudioQuality[] {
-    return this.player.getAvailableAudioQualities();
-  }
-
-  getAvailableSegments(): SegmentMap {
-    return this.player.getAvailableSegments();
-  }
-
-  getAvailableVideoQualities(): VideoQuality[] {
-    return this.player.getAvailableVideoQualities();
-  }
-
-  getConfig(mergedConfig?: boolean): PlayerConfig {
-    return this.player.getConfig(mergedConfig);
-  }
-
-  getContainer(): HTMLElement {
-    return this.player.getContainer();
-  }
-
-  getDownloadedAudioData(): DownloadedAudioData {
-    return this.player.getDownloadedAudioData();
-  }
-
-  getDownloadedVideoData(): DownloadedVideoData {
-    return this.player.getDownloadedVideoData();
-  }
-
-  getDroppedVideoFrames(): number {
-    return this.player.getDroppedVideoFrames();
-  }
-
-  getManifest(): string {
-    return this.player.getManifest();
-  }
-
-  getMaxTimeShift(): number {
-    return this.player.getMaxTimeShift();
-  }
-
-  getPlaybackAudioData(): AudioQuality {
-    return this.player.getPlaybackAudioData();
-  }
-
-  getPlaybackSpeed(): number {
-    return this.player.getPlaybackSpeed();
-  }
-
-  getPlaybackVideoData(): VideoQuality {
-    return this.player.getPlaybackVideoData();
-  }
-
-  getPlayerType(): PlayerType {
-    return this.player.getPlayerType();
-  }
-
-  getSeekableRange(): TimeRange {
-    return this.player.getSeekableRange();
-  }
-
-  getSnapshot(type?: string, quality?: number): Snapshot {
-    return this.player.getSnapshot(type, quality);
-  }
-
-  getSource(): SourceConfig | null {
-    return this.player.getSource();
-  }
-
-  getStreamType(): StreamType {
-    return this.player.getStreamType();
-  }
-
-  getSupportedDRM(): Promise<string[]> {
-    return this.player.getSupportedDRM();
-  }
-
-  getSupportedTech(): Technology[] {
-    return this.player.getSupportedTech();
-  }
-
-  getThumbnail(time: number): Thumbnail {
-    return this.player.getThumbnail(time);
-  }
-
-  getTimeShift(): number {
-    return this.player.getTimeShift();
-  }
-
-  getTotalStalledTime(): number {
-    return this.player.getTotalStalledTime();
-  }
-
-  getVideoElement(): HTMLVideoElement | HTMLObjectElement {
-    return this.player.getVideoElement();
-  }
-
-  getVideoQuality(): VideoQuality {
-    return this.player.getVideoQuality();
-  }
-
-  getViewMode(): ViewMode {
-    return this.player.getViewMode();
-  }
-
-  getVolume(): number {
-    return this.player.getVolume();
-  }
-
-  hasEnded(): boolean {
-    return this.player.hasEnded();
-  }
-
-  isAirplayActive(): boolean {
-    return this.player.isAirplayActive();
-  }
-
-  isAirplayAvailable(): boolean {
-    return this.player.isAirplayAvailable();
-  }
-
-  isCastAvailable(): boolean {
-    return this.player.isCastAvailable();
-  }
-
-  isCasting(): boolean {
-    return this.player.isCasting();
-  }
-
-  isDRMSupported(drmSystem: string): Promise<string> {
-    return this.player.isDRMSupported(drmSystem);
-  }
-
+  // Needed in BitmovinYospacePlayerPolicy.ts so keep it here
   isLive(): boolean {
     return this.player.isLive();
   }
 
-  isMuted(): boolean {
-    return this.player.isMuted();
-  }
+  // Add default PlayerAPI implementation to the yospacePlayer
+  private wrapPlayer(): void {
+    // Collect all members of the player (public API methods and properties of the player)
+    const members: string[] = [];
+    for (const member in this.player) {
+      members.push(member);
+    }
 
-  isPaused(): boolean {
-    return this.player.isPaused();
-  }
+    // Split the members into methods and properties
+    const methods = <any[]>[];
+    const properties = <any[]>[];
 
-  isPlaying(): boolean {
-    return this.player.isPlaying();
-  }
+    for (const member of members) {
+      if (typeof (<any>this.player)[member] === 'function') {
+        methods.push(member);
+      } else {
+        properties.push(member);
+      }
+    }
 
-  isStalled(): boolean {
-    return this.player.isStalled();
-  }
+    const player = this.player;
 
-  isViewModeAvailable(viewMode: ViewMode): boolean {
-    return this.player.isViewModeAvailable(viewMode);
-  }
+    // Add function wrappers for all API methods that do nothing but calling the base method on the player
+    for (const method of methods) {
+      // Only add methods that are not already present
+      if (typeof (this as any)[method] !== 'function') {
+        (this as any)[method] = function () {
+          return (player as any)[method].apply(player, arguments);
+        };
+      }
+    }
 
-  preload(): void {
-    this.player.preload();
-  }
+    // Add all public properties of the player to the wrapper
+    for (const property of properties) {
+      // Get an eventually existing property descriptor to differentiate between plain properties and properties with
+      // getters/setters.
+      // Only add properties that are not already present
+      if (!(this as any)[property]) {
+        const propertyDescriptor: PropertyDescriptor = Object.getOwnPropertyDescriptor(this.player, property) ||
+          Object.getOwnPropertyDescriptor(Object.getPrototypeOf(this.player), property);
 
-  setAudio(trackID: string): void {
-    this.player.setAudio(trackID);
-  }
-
-  setAudioQuality(audioQualityID: string): void {
-    this.player.setAudioQuality(audioQualityID);
-  }
-
-  setAuthentication(customData: any): void {
-    this.player.setAuthentication(customData);
-  }
-
-  setLogLevel(level: LogLevel): void {
-    this.player.setLogLevel(level);
-  }
-
-  setPosterImage(url: string, keepPersistent: boolean): void {
-    this.player.setPosterImage(url, keepPersistent);
-  }
-
-  setQueryParameters(queryParameters: QueryParameters): void {
-    this.player.setQueryParameters(queryParameters);
-  }
-
-  setVideoElement(videoElement: HTMLElement): void {
-    this.player.setVideoElement(videoElement);
-  }
-
-  setVideoQuality(videoQualityID: string): void {
-    this.player.setVideoQuality(videoQualityID);
-  }
-
-  setViewMode(viewMode: ViewMode, options?: ViewModeOptions): void {
-    this.player.setViewMode(viewMode, options);
-  }
-
-  setVolume(volume: number, issuer?: string): void {
-    this.player.setVolume(volume);
-  }
-
-  showAirplayTargetPicker(): void {
-    this.player.showAirplayTargetPicker();
-  }
-
-  timeShift(offset: number, issuer?: string): void {
-    this.player.timeShift(offset, issuer);
-  }
-
-  unmute(issuer?: string): void {
-    this.player.unmute(issuer);
+        // If the property has getters/setters, wrap them accordingly...
+        if (propertyDescriptor && (propertyDescriptor.get || propertyDescriptor.set)) {
+          Object.defineProperty((this as any), property, {
+            get: () => propertyDescriptor.get.call(this.player),
+            set: (value: any) => propertyDescriptor.set.call(this.player, value),
+            enumerable: true,
+          });
+        }
+        // ... else just transfer the property to the wrapper
+        else {
+          (this as any)[property] = (<any>this.player)[property];
+        }
+      }
+    }
   }
 }
 
