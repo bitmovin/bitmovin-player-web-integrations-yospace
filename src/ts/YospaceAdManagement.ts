@@ -83,6 +83,9 @@ export class BitmovinYospacePlayer implements PlayerAPI {
   // save vpaid status
   private isVpaidActive = false;
 
+  // save truex ad free status
+  private isTruexAdFree = false;
+
   constructor(containerElement: HTMLElement, config: PlayerConfig, yospaceConfig: YospaceConfiguration = {}) {
     this.yospaceConfig = yospaceConfig;
 
@@ -718,18 +721,22 @@ export class BitmovinYospacePlayer implements PlayerAPI {
   }
 
   private mapAd(ysAd: YSAdvert): LocalLinearAd {
-    return {
-      isLinear: Boolean(ysAd.advert.linear),
-      duration: ysAd.duration,
-      id: ysAd.advert.id,
-      clickThroughUrl: ysAd.advert.linear.clickThrough,
-      mediaFileUrl: ysAd.advert.linear.mediaFiles[0].src,
-      skippableAfter: ysAd.advert.linear.skipOffset,
-      uiConfig: {
-        requestsUi: !ysAd.hasInteractiveUnit(),
-      },
-      extensions: VastHelper.getExtensions(ysAd.advert),
-    };
+    if (ysAd != null) {
+      return {
+        isLinear: Boolean(ysAd.advert.linear),
+        duration: ysAd.duration,
+        id: ysAd.advert.id,
+        clickThroughUrl: ysAd.advert.linear.clickThrough,
+        mediaFileUrl: ysAd.advert.linear.mediaFiles[0].src,
+        skippableAfter: ysAd.advert.linear.skipOffset,
+        uiConfig: {
+          requestsUi: !ysAd.hasInteractiveUnit(),
+        },
+        extensions: VastHelper.getExtensions(ysAd.advert),
+      };
+    } else {
+      return null;
+    }
   }
 
   private mapAdQuartile(quartileEvent: string): AdQuartile {

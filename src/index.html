@@ -8,7 +8,7 @@
 
   <!-- Bitmovin Player -->
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha256-3edrmyuQ0w65f8gfBsqowzjJe2iM6n0nKciPUp8y+7E=" crossorigin="anonymous"></script>
+  <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 
   <script type="text/javascript" src="yospace/yo-ad-management.min.js"></script>
@@ -44,6 +44,9 @@
           <label class="btn btn-outline-secondary">
             <input type="radio" name="options" id="option-live" autocomplete="off">Load Live
           </label>
+          <label class="btn btn-outline-secondary">
+            <input type="radio" name="options" id="option-truex" autocomplete="off">Load TrueX
+          </label>
         </div>
       </div>
     </div>
@@ -74,6 +77,7 @@
   var vodButton = $('#option-vod').parent();
   var vodVpaidButton = $('#option-vod-vpaid').parent();
   var liveButton = $('#option-live').parent();
+  var truexButton = $('#option-truex').parent();
   var customStreamButton = $('#load-custom-steam');
 
   function deselectCustomLoadButton() {
@@ -102,6 +106,14 @@
 
     yospacePlayer.unload();
     yospacePlayer.load(liveSource);
+  });
+
+  truexButton.on('click', function() {
+    truexButton.button('toggle');
+    deselectCustomLoadButton();
+
+    yospacePlayer.unload();
+    yospacePlayer.load(truexSource);
   });
 
   customStreamButton.on('click', function() {
@@ -138,6 +150,14 @@
   var vodVpaidSource = {
     title: 'VOD Stream',
     hls: 'https://csm-e-turnerstg-5p30c9t6lfad.tls1.yospace.com/csm/access/525951113/cWEvY21hZl9hZHZhbmNlZF9mbXA0X2Zyb21faW50ZXIvcHJvZ19zZWcvbXdjX0NBUkUxMDA5MjYxNzAwMDE4ODUyL2NsZWFyLzNjM2MzYzNjM2MzYzNjM2MzYzNjM2MzYzNjM2MzYzNjL21hc3Rlcl9jbF9ub19pZnJhbWUubTN1OA==?yo.av=2&yo.ad=true&yo.ac=true',
+
+    // Yospace configuration
+    assetType: bitmovin.player.ads.yospace.YospaceAssetType.VOD
+  };
+
+  var truexSource = {
+    title: 'TrueX VOD Stream',
+    hls: 'https://csm-e-stg.tls1.yospace.com/csm/access/525943851/cWEvY21hZl9hZHZhbmNlZF9mbXA0X2Zyb21faW50ZXIvcHJvZ19zZWcvbXdjX0NBUkUxMDA5MjYxNzAwMDE4ODUyL2NsZWFyLzNjM2MzYzNjM2MzYzNjM2MzYzNjM2MzYzNjM2MzYzNjL21hc3Rlcl9jbF9ub19pZnJhbWUubTN1OA==?yo.av=2&yo.ad=true\n',
 
     // Yospace configuration
     assetType: bitmovin.player.ads.yospace.YospaceAssetType.VOD
