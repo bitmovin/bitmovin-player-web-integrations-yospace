@@ -938,7 +938,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
 
     getModuleInfo: () => {
       const moduleInfo = this.player.ads.getModuleInfo();
-      moduleInfo.name = moduleInfo.name + '-yospace-integration';
+      moduleInfo.name += '-yospace-integration';
       return moduleInfo;
     },
   };
