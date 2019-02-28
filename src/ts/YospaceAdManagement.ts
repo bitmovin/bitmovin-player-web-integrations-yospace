@@ -284,7 +284,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
 
     this.yospaceSourceConfig = source;
 
-    return new Promise<void>(((resolve, reject) => {
+    return new Promise<void>((resolve, reject) => {
       const onInitComplete = (state: YSSessionResult, result: YSSessionStatus) => {
         if (state === YSSessionResult.INITIALISED) {
           // clone source to not modify passed object
@@ -336,7 +336,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
         default:
           console.error('Undefined YospaceSourceConfig.assetType; Could not obtain session;');
       }
-    }));
+    });
   }
 
   get ads(): PlayerAdvertisingAPI {
