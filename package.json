@@ -4,8 +4,9 @@
   "description": "Yospace integration for the Bitmovin Player",
   "author": "Bitmovin",
   "license": "MIT",
+  "main": "dist/js/bitmovinplayer-yospace.js",
   "devDependencies": {
-    "bitmovin-player": "^8.2.0-rc2",
+    "bitmovin-player": "^8.2.2",
     "bitmovin-player-ui": "^3.3.1",
     "browser-sync": "^2.18.8",
     "browserify": "^14.1.0",
