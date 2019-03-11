@@ -1,7 +1,16 @@
 {
-  "name": "bitmovin-player-web-integration-yospace",
-  "version": "1.0.0",
+  "name": "@bitmovin/player-integration-yospace",
+  "version": "1.0.0-rc1",
   "description": "Yospace integration for the Bitmovin Player",
+  "main": "./dist/js/bitmovin-player-yospace.js",
+  "types": "./dist/js/bitmovin-player-yospace.d.ts",
+  "scripts": {
+    "prepublishOnly": "gulp npm-prepare"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bitmovin/bitmovin-player-web-integrations-yospace"
+  },
   "author": "Bitmovin",
   "license": "MIT",
   "devDependencies": {
@@ -11,6 +20,7 @@
     "browserify": "^14.1.0",
     "del": "^2.2.2",
     "gulp": "^3.9.1",
+    "gulp-file": "^0.4.0",
     "gulp-rename": "^1.4.0",
     "gulp-sourcemaps": "^2.4.1",
     "gulp-tslint": "^8.1.3",
