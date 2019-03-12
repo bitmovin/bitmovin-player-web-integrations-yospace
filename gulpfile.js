@@ -19,6 +19,7 @@ var del = require('del');
 var runSequence = require('run-sequence');
 var browserSync = require('browser-sync');
 var merge = require('merge2');
+var file = file = require('gulp-file');
 
 var paths = {
     source: {
@@ -29,6 +30,7 @@ var paths = {
     target: {
         html: './dist',
         js: './dist/js',
+        jsLib: './dist/js/lib',
     }
 };
 
@@ -84,7 +86,7 @@ gulp.task('browserify', function() {
 
     // Compile output JS file
     var stream = browserifyBundle
-        .pipe(source('bitmovinplayer-yospace.js'))
+        .pipe(source('bitmovin-player-yospace.js'))
         .pipe(buffer())
         .pipe(gulp.dest(paths.target.js));
 
@@ -152,4 +154,19 @@ gulp.task('serve', function() {
         catchBrowserifyErrors = true;
         gulp.watch(paths.source.ts, ['browserify']);
     });
+});
+
+// Prepares the project for a npm release
+// After running this task, the project can be published to npm or installed from this folder.
+gulp.task('npm-prepare', ['build-prod'], function() {
+    // https://www.npmjs.com/package/gulp-typescript
+    var tsProject = ts.createProject('tsconfig.json');
+    var tsResult = gulp.src(paths.source.ts).pipe(tsProject());
+    merge([
+        tsResult.dts.pipe(gulp.dest(paths.target.jsLib)),
+        tsResult.js.pipe(gulp.dest(paths.target.jsLib)),
+    ]);
+
+    return file('bitmovin-player-yospace.d.ts', 'export * from \'./lib/main\';', { src: true })
+        .pipe(gulp.dest(paths.target.js));
 });

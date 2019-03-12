@@ -27,7 +27,7 @@ export interface YospaceErrorEvent extends YospaceEventBase {
   name: string;
 }
 
-export interface YospacePolicyError extends YospaceEventBase {
+export interface YospacePolicyErrorEvent extends YospaceEventBase {
   code: YospacePolicyErrorCode;
   name: string;
 }

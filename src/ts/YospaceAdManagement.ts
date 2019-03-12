@@ -13,7 +13,7 @@ import { ArrayUtils } from 'bitmovin-player-ui/dist/js/framework/arrayutils';
 import bitmovinAdvertisingModule from 'bitmovin-player/modules/bitmovinplayer-advertising-bitmovin';
 import {
   YospaceErrorCode, YospaceErrorEvent, YospaceEventBase, YospacePlayerError, YospacePlayerEvent,
-  YospacePlayerEventCallback, YospacePolicyError, YospacePolicyErrorCode,
+  YospacePlayerEventCallback, YospacePolicyErrorCode, YospacePolicyErrorEvent,
 } from './YospaceError';
 import { VastHelper } from './VastHelper';
 
@@ -356,9 +356,9 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     ArrayUtils.remove(this.eventHandlers[eventType], callback);
   }
 
-  on(eventType: YospacePlayerEvent, callback: PlayerEventCallback): void;
+  on(eventType: YospacePlayerEvent, callback: YospacePlayerEventCallback): void;
   on(eventType: PlayerEvent, callback: PlayerEventCallback): void;
-  on(eventType: PlayerEvent | YospacePlayerEvent, callback: PlayerEventCallback): void {
+  on(eventType: PlayerEvent | YospacePlayerEvent, callback: YospacePlayerEventCallback | PlayerEventCallback): void {
     if (!EnumHelper.isYospaceEvent(eventType)) {
       // we need to suppress some events because they need to be modified first. so don't add it to the actual player
       const suppressedEventTypes = [
@@ -821,7 +821,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
   }
 
   private handleYospacePolicyEvent(code: YospacePolicyErrorCode): void {
-    this.handleYospaceEvent<YospacePolicyError>({
+    this.handleYospaceEvent<YospacePolicyErrorEvent>({
       timestamp: Date.now(),
       type: YospacePlayerEvent.PolicyError,
       code: code,
