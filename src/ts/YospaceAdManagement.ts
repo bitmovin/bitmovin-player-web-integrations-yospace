@@ -1,21 +1,46 @@
 ///<reference path='Yospace.d.ts'/>
 import {
-  AdBreak, AdBreakEvent, AdConfig, AdEvent, AdQuartile, AdQuartileEvent, BufferLevel, BufferType, LinearAd, MediaType,
-  Player, PlayerAdvertisingAPI, PlayerAPI, PlayerBufferAPI, PlayerConfig, PlayerEvent, PlayerEventBase,
-  PlayerEventCallback, SeekEvent, SourceConfig, TimeChangedEvent, TimeRange, PlaybackEvent, MetadataEvent,
-  VastErrorCode, PlayerError, ErrorCode, ErrorEvent,
+  AdBreak, AdBreakEvent, AdConfig, AdEvent, AdQuartileEvent, BufferLevel, LinearAd, PlayerAdvertisingAPI, PlayerAPI,
+  PlayerBufferAPI, PlayerConfig, PlayerEventBase, PlayerEventCallback, SeekEvent, SourceConfig, TimeChangedEvent,
+  TimeRange, PlaybackEvent, MetadataEvent, ErrorEvent,
 } from 'bitmovin-player';
-import {
-  BYSAdBreakEvent, BYSAdEvent, BYSAnalyticsFiredEvent, BYSListenerEvent, YospaceAdListenerAdapter,
-} from './YospaceListenerAdapter';
-import { BitmovinYospacePlayerPolicy, DefaultBitmovinYospacePlayerPolicy } from './BitmovinYospacePlayerPolicy';
+
+import { Player, PlayerError, ErrorCode, AdQuartile, PlayerEvent, BufferType, MediaType } from 'bitmovin-player/modules/bitmovinplayer-core';
+import ABRModule from 'bitmovin-player/modules/bitmovinplayer-abr';
+import AdvertisingBitmovinModule from 'bitmovin-player/modules/bitmovinplayer-advertising-bitmovin';
+import AdvertisingCoreModule from 'bitmovin-player/modules/bitmovinplayer-advertising-core';
+import AnalyticsModule from 'bitmovin-player/modules/bitmovinplayer-analytics';
+import ContainerMP4Module from 'bitmovin-player/modules/bitmovinplayer-container-mp4';
+import ContainerTSModule from 'bitmovin-player/modules/bitmovinplayer-container-ts';
+import CryptoModule from 'bitmovin-player/modules/bitmovinplayer-crypto';
+import DRMModule from 'bitmovin-player/modules/bitmovinplayer-drm';
+import EngineBitmovinModule from 'bitmovin-player/modules/bitmovinplayer-engine-bitmovin';
+import EngineNativeModule from 'bitmovin-player/modules/bitmovinplayer-engine-native';
+import HLSModule from 'bitmovin-player/modules/bitmovinplayer-hls';
+import MSERendererModule from 'bitmovin-player/modules/bitmovinplayer-mserenderer';
+import PatchModule from 'bitmovin-player/modules/bitmovinplayer-patch';
+import PolyfillModule from 'bitmovin-player/modules/bitmovinplayer-polyfill';
+import RemoteControlModule from 'bitmovin-player/modules/bitmovinplayer-remotecontrol';
+import StyleModule from 'bitmovin-player/modules/bitmovinplayer-style';
+import SubtitlesModule from 'bitmovin-player/modules/bitmovinplayer-subtitles';
+import SubtitlesCEA608Module from 'bitmovin-player/modules/bitmovinplayer-subtitles-cea608';
+import SubtitlesNativeModule from 'bitmovin-player/modules/bitmovinplayer-subtitles-native'; // ?
+import SubtitlesTTMLModule from 'bitmovin-player/modules/bitmovinplayer-subtitles-ttml';
+import SubtitlesVTTModule from 'bitmovin-player/modules/bitmovinplayer-subtitles-vtt';
+import ThumbnailModule from 'bitmovin-player/modules/bitmovinplayer-thumbnail';
+import XMLModule from 'bitmovin-player/modules/bitmovinplayer-xml';
+
 import { ArrayUtils } from 'bitmovin-player-ui/dist/js/framework/arrayutils';
-import bitmovinAdvertisingModule from 'bitmovin-player/modules/bitmovinplayer-advertising-bitmovin';
+
+import { BitmovinYospacePlayerPolicy, DefaultBitmovinYospacePlayerPolicy } from './BitmovinYospacePlayerPolicy';
+import { VastHelper } from './VastHelper';
 import {
   YospaceErrorCode, YospaceErrorEvent, YospaceEventBase, YospacePlayerError, YospacePlayerEvent,
   YospacePlayerEventCallback, YospacePolicyErrorCode, YospacePolicyErrorEvent,
 } from './YospaceError';
-import { VastHelper } from './VastHelper';
+import {
+  BYSAdBreakEvent, BYSAdEvent, BYSAnalyticsFiredEvent, BYSListenerEvent, YospaceAdListenerAdapter,
+} from './YospaceListenerAdapter';
 
 export enum YospaceAssetType {
   LINEAR,
@@ -98,8 +123,36 @@ export class BitmovinYospacePlayer implements PlayerAPI {
       config.ui = false;
     }
 
+    // Add modules
+    Player.addModule(PolyfillModule);
+    Player.addModule(PatchModule);
+    Player.addModule(XMLModule);
+    Player.addModule(CryptoModule);
+    Player.addModule(EngineBitmovinModule);
+    Player.addModule(EngineNativeModule);
+    Player.addModule(MSERendererModule);
+    Player.addModule(HLSModule);
+    Player.addModule(ABRModule);
+    Player.addModule(ContainerMP4Module);
+    Player.addModule(ContainerTSModule);
+    Player.addModule(AnalyticsModule);
+    Player.addModule(DRMModule);
+    Player.addModule(RemoteControlModule);
+    Player.addModule(SubtitlesModule);
+    Player.addModule(SubtitlesCEA608Module);
+    Player.addModule(SubtitlesNativeModule);
+    Player.addModule(SubtitlesVTTModule);
+    Player.addModule(SubtitlesTTMLModule);
+    Player.addModule(ThumbnailModule);
+    Player.addModule(AdvertisingCoreModule);
+
+    // REVIEW: Creates issues with bitmovin-player ^8.4.0
+    Player.addModule(StyleModule);
+
+    // REVIEW: Those modules are throwing errors
+    // Player.addModule(AdvertisingBitmovinModule);
+
     // initialize bitmovin player
-    Player.addModule(bitmovinAdvertisingModule);
     this.player = new Player(containerElement, config);
     this.wrapPlayer();
 
@@ -649,7 +702,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
         replaceContentDuration: currentAd.duration,
       } as AdConfig).catch((reason: string) => {
         const error = new PlayerError(ErrorCode.MODULE_ADVERTISING_ERROR, {
-          code: VastErrorCode.UNDEFINED_ERROR,
+          code: AdvertisingCoreModule.VastErrorCode.UNDEFINED_ERROR,
           message: reason,
         });
 
