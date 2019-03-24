@@ -8,3 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added
 - Initial yospace integration
+
+### Changed
+- Make use of the modular player to reduce bundle size
+- Update to bitmovin-player @8.2.0
