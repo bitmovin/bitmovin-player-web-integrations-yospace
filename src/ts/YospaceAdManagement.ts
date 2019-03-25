@@ -1114,7 +1114,7 @@ class AdEventsFactory {
 class EventSuppressController {
   private suppressedEvents: PlayerEvent[] = [];
 
-  add(...items: PlayerEvent[]) {
+  public add(...items: PlayerEvent[]): void {
     for (let item of items) {
       if (!this.isSuppressed(item)) {
         this.suppressedEvents.push(item);
@@ -1122,13 +1122,13 @@ class EventSuppressController {
     }
   }
 
-  remove(...items: PlayerEvent[]) {
+  public remove(...items: PlayerEvent[]): void {
     for (let item of items) {
       ArrayUtils.remove(this.suppressedEvents, item);
     }
   }
 
-  isSuppressed(eventType: PlayerEvent): boolean {
+  public isSuppressed(eventType: PlayerEvent): boolean {
     return this.suppressedEvents.includes(eventType);
   }
 }
