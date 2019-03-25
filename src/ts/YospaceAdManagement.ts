@@ -331,51 +331,48 @@ export class BitmovinYospacePlayer implements PlayerAPI {
       console.error('HLS source missing');
       return;
     }
+
     this.resetState();
-
-    const url = source.hls;
-
     this.yospaceSourceConfig = source;
 
     return new Promise<void>((resolve, reject) => {
-      const onInitComplete = (state: YSSessionResult, result: YSSessionStatus) => {
-        if (state === YSSessionResult.INITIALISED) {
-          // clone source to not modify passed object
-          let clonedSource = {
-            ...source,
-            hls: this.manager.masterPlaylist(), // use received url from yospace
-          };
-
-          if (this.manager.isYospaceStream()) {
-            this.yospaceListenerAdapter = new YospaceAdListenerAdapter();
-            this.bindYospaceEvent();
-            this.manager.registerPlayer(this.yospaceListenerAdapter);
-
-            // Initialize policy
-            if (!this.playerPolicy) {
-              this.playerPolicy = new DefaultBitmovinYospacePlayerPolicy(this);
-            }
-
-            this.player.load(clonedSource, forceTechnology, disableSeeking).then(resolve).catch(reject);
-          } else {
-            this.manager.shutdown();
-            this.manager = null;
-
-            this.handleYospaceError(new YospacePlayerError(YospaceErrorCode.INVALID_SOURCE));
-            reject('Shutting down SDK on non-yospace stream');
-          }
-        } else {
+      const onInitComplete = (state: YSSessionResult, _result: YSSessionStatus) => {
+        // ensure yospace initialization
+        if (state !== YSSessionResult.INITIALISED) {
           this.handleYospaceError(new YospacePlayerError(YospaceErrorCode.NO_ANALYTICS));
           reject();
+          return;
         }
+
+        // ensure yospace stream
+        if (!this.manager.isYospaceStream()) {
+          this.manager.shutdown();
+          this.manager = null;
+          this.handleYospaceError(new YospacePlayerError(YospaceErrorCode.INVALID_SOURCE));
+          reject('Shutting down SDK on non-yospace stream');
+          return;
+        }
+
+        // complete initialization
+        const clonedSource = {
+          ...source,
+          hls: this.manager.masterPlaylist(), // use received url from yospace
+        };
+        this.yospaceListenerAdapter = new YospaceAdListenerAdapter();
+        this.bindYospaceEvent();
+        this.manager.registerPlayer(this.yospaceListenerAdapter);
+        this.playerPolicy = this.playerPolicy || new DefaultBitmovinYospacePlayerPolicy(this);
+        this.player.load(clonedSource, forceTechnology, disableSeeking)
+          .then(resolve)
+          .catch(reject);
       };
 
+      const url = this.yospaceSourceConfig.hls;
       const properties = {
         ...YSSessionManager.DEFAULTS,
         DEBUGGING: Boolean(this.yospaceConfig.debug),
         USE_ID3: source.assetType !== YospaceAssetType.VOD, // Use time based tracking only for VOD
       };
-
       switch (source.assetType) {
         case YospaceAssetType.LINEAR:
           this.manager = YSSessionManager.createForLive(url, properties, onInitComplete);
@@ -388,6 +385,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
           break;
         default:
           console.error('Undefined YospaceSourceConfig.assetType; Could not obtain session;');
+          break;
       }
     });
   }
