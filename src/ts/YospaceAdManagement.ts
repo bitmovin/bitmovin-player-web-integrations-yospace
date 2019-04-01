@@ -145,11 +145,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     Player.addModule(SubtitlesTTMLModule);
     Player.addModule(ThumbnailModule);
     Player.addModule(AdvertisingCoreModule);
-
-    // REVIEW: Creates issues with bitmovin-player ^8.4.0
     Player.addModule(StyleModule);
-
-    // REVIEW: Those modules are throwing errors
     // Player.addModule(AdvertisingBitmovinModule);
 
     // initialize bitmovin player
