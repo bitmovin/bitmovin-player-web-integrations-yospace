@@ -24,7 +24,7 @@ import RemoteControlModule from 'bitmovin-player/modules/bitmovinplayer-remoteco
 import StyleModule from 'bitmovin-player/modules/bitmovinplayer-style';
 import SubtitlesModule from 'bitmovin-player/modules/bitmovinplayer-subtitles';
 import SubtitlesCEA608Module from 'bitmovin-player/modules/bitmovinplayer-subtitles-cea608';
-import SubtitlesNativeModule from 'bitmovin-player/modules/bitmovinplayer-subtitles-native'; // ?
+import SubtitlesNativeModule from 'bitmovin-player/modules/bitmovinplayer-subtitles-native';
 import SubtitlesTTMLModule from 'bitmovin-player/modules/bitmovinplayer-subtitles-ttml';
 import SubtitlesVTTModule from 'bitmovin-player/modules/bitmovinplayer-subtitles-vtt';
 import ThumbnailModule from 'bitmovin-player/modules/bitmovinplayer-thumbnail';
