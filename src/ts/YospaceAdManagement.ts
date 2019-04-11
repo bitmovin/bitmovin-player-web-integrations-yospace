@@ -1,16 +1,42 @@
 ///<reference path='Yospace.d.ts'/>
 import {
-  AdBreak, AdBreakEvent, AdConfig, AdEvent, AdQuartile, AdQuartileEvent, BufferLevel, BufferType, LinearAd, MediaType,
-  Player, PlayerAdvertisingAPI, PlayerAPI, PlayerBufferAPI, PlayerConfig, PlayerEvent, PlayerEventBase,
+  AdBreakEvent, AdEvent, AdQuartile, AdQuartileEvent, BufferLevel, BufferType, MediaType, Player,
+  PlayerAPI, PlayerBufferAPI, PlayerConfig, PlayerEvent, PlayerEventBase,
   PlayerEventCallback, SeekEvent, SourceConfig, TimeChangedEvent, TimeRange, PlaybackEvent, MetadataEvent,
-  VastErrorCode, PlayerError, ErrorCode, ErrorEvent,
-} from 'bitmovin-player';
+  PlayerError, ErrorCode, ErrorEvent,
+} from 'bitmovin-player/modules/bitmovinplayer-core';
+
+import ABRModule from 'bitmovin-player/modules/bitmovinplayer-abr';
+import AdvertisingCoreModule, {
+  AdBreak, AdConfig, LinearAd, PlayerAdvertisingAPI, VastErrorCode,
+} from 'bitmovin-player/modules/bitmovinplayer-advertising-core';
+import AdvertisingBitmovinModule from 'bitmovin-player/modules/bitmovinplayer-advertising-bitmovin';
+import XMLModule from 'bitmovin-player/modules/bitmovinplayer-xml';
+import StyleModule from 'bitmovin-player/modules/bitmovinplayer-style';
+import MSERendererModule from 'bitmovin-player/modules/bitmovinplayer-mserenderer';
+import EngineBitmovinModule from 'bitmovin-player/modules/bitmovinplayer-engine-bitmovin';
+import HLSModule from 'bitmovin-player/modules/bitmovinplayer-hls';
+import ContainerTSModule from 'bitmovin-player/modules/bitmovinplayer-container-ts';
+import ContainerMP4Module from 'bitmovin-player/modules/bitmovinplayer-container-mp4';
+import SubtitlesModule from 'bitmovin-player/modules/bitmovinplayer-subtitles';
+import SubtitlesCEA608Module from 'bitmovin-player/modules/bitmovinplayer-subtitles-cea608';
+import SubtitlesNativeModule from 'bitmovin-player/modules/bitmovinplayer-subtitles-native';
+import SubtitlesTTMLModule from 'bitmovin-player/modules/bitmovinplayer-subtitles-ttml';
+import SubtitlesVTTModule from 'bitmovin-player/modules/bitmovinplayer-subtitles-vtt';
+import ThumbnailModule from 'bitmovin-player/modules/bitmovinplayer-thumbnail';
+import CryptoModule from 'bitmovin-player/modules/bitmovinplayer-crypto';
+import PatchModule from 'bitmovin-player/modules/bitmovinplayer-patch';
+import PolyfillModule from 'bitmovin-player/modules/bitmovinplayer-polyfill';
+import AnalyticsModule from 'bitmovin-player/modules/bitmovinplayer-analytics';
+import EngineNativeModule from 'bitmovin-player/modules/bitmovinplayer-engine-native';
+import DRMModule from 'bitmovin-player/modules/bitmovinplayer-drm';
+import RemoteControlModule from 'bitmovin-player/modules/bitmovinplayer-remotecontrol';
+
 import {
   BYSAdBreakEvent, BYSAdEvent, BYSAnalyticsFiredEvent, BYSListenerEvent, YospaceAdListenerAdapter,
 } from './YospaceListenerAdapter';
 import { BitmovinYospacePlayerPolicy, DefaultBitmovinYospacePlayerPolicy } from './BitmovinYospacePlayerPolicy';
 import { ArrayUtils } from 'bitmovin-player-ui/dist/js/framework/arrayutils';
-import bitmovinAdvertisingModule from 'bitmovin-player/modules/bitmovinplayer-advertising-bitmovin';
 import {
   YospaceErrorCode, YospaceErrorEvent, YospaceEventBase, YospacePlayerError, YospacePlayerEvent,
   YospacePlayerEventCallback, YospacePolicyErrorCode, YospacePolicyErrorEvent,
@@ -99,7 +125,29 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     }
 
     // initialize bitmovin player
-    Player.addModule(bitmovinAdvertisingModule);
+    Player.addModule(XMLModule);
+    Player.addModule(StyleModule);
+    Player.addModule(AdvertisingCoreModule);
+    Player.addModule(AdvertisingBitmovinModule);
+    Player.addModule(MSERendererModule);
+    Player.addModule(EngineBitmovinModule);
+    Player.addModule(HLSModule);
+    Player.addModule(ABRModule);
+    Player.addModule(ContainerMP4Module);
+    Player.addModule(ContainerTSModule);
+    Player.addModule(SubtitlesModule);
+    Player.addModule(SubtitlesCEA608Module);
+    Player.addModule(SubtitlesNativeModule);
+    Player.addModule(SubtitlesVTTModule);
+    Player.addModule(SubtitlesTTMLModule);
+    Player.addModule(ThumbnailModule);
+    Player.addModule(CryptoModule);
+    Player.addModule(PatchModule);
+    Player.addModule(PolyfillModule);
+    Player.addModule(AnalyticsModule);
+    Player.addModule(EngineNativeModule);
+    Player.addModule(DRMModule);
+    Player.addModule(RemoteControlModule);
     this.player = new Player(containerElement, config);
     this.wrapPlayer();
 
