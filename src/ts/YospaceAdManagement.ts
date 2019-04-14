@@ -770,6 +770,8 @@ export class BitmovinYospacePlayer implements PlayerAPI {
       isLinear: Boolean(ysAd.advert.linear),
       duration: ysAd.duration,
       id: ysAd.advert.id,
+      height: 720,
+      width: 1280,
       clickThroughUrl: ysAd.advert.linear.clickThrough,
       mediaFileUrl: ysAd.advert.linear.mediaFiles[0].src,
       skippableAfter: ysAd.advert.linear.skipOffset,
