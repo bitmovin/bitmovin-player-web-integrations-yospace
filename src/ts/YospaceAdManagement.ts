@@ -295,7 +295,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
       this.fireEvent<AdEvent>({
         timestamp: Date.now(),
         type: PlayerEvent.AdSkipped,
-        ad: this.mapAd(this.getCurrentAd()),
+        ad: AdTranslator.mapYsAdvert(this.getCurrentAd()),
       });
     };
 
@@ -761,22 +761,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     return {
       id: ysAdBreak.adBreakIdentifier, // can be null
       scheduleTime: this.toMagicTime(ysAdBreak.startPosition),
-      ads: ysAdBreak.adverts.map(this.mapAd),
-    };
-  }
-
-  private mapAd(ysAd: YSAdvert): LocalLinearAd {
-    return {
-      isLinear: Boolean(ysAd.advert.linear),
-      duration: ysAd.duration,
-      id: ysAd.advert.id,
-      clickThroughUrl: ysAd.advert.linear.clickThrough,
-      mediaFileUrl: ysAd.advert.linear.mediaFiles[0].src,
-      skippableAfter: ysAd.advert.linear.skipOffset,
-      uiConfig: {
-        requestsUi: !ysAd.hasInteractiveUnit(),
-      },
-      extensions: VastHelper.getExtensions(ysAd.advert),
+      ads: ysAdBreak.adverts.map(AdTranslator.mapYsAdvert),
     };
   }
 
@@ -933,7 +918,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
         return undefined;
       }
 
-      return this.mapAd(this.getCurrentAd());
+      return AdTranslator.mapYsAdvert(this.getCurrentAd());
     },
 
     isLinearAdActive: () => {
@@ -976,7 +961,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
           this.fireEvent({
             timestamp: Date.now(),
             type: PlayerEvent.AdSkipped,
-            ad: this.mapAd(ad),
+            ad: AdTranslator.mapYsAdvert(ad),
           } as AdEvent);
         } else {
           this.handleYospacePolicyEvent(YospacePolicyErrorCode.SKIP_NOT_ALLOWED);
@@ -1072,6 +1057,27 @@ export class BitmovinYospacePlayer implements PlayerAPI {
   }
 }
 
+class AdTranslator {
+  static mapYsAdvert(ysAd: YSAdvert): LinearAd {
+    const mediaFile = ysAd.advert.linear.mediaFiles[0];
+
+    return {
+      isLinear: Boolean(ysAd.advert.linear),
+      duration: ysAd.duration,
+      id: ysAd.advert.id,
+      height: mediaFile && mediaFile.height && parseInt(mediaFile.height),
+      width: mediaFile && mediaFile.width && parseInt(mediaFile.width),
+      clickThroughUrl: ysAd.advert.linear.clickThrough,
+      mediaFileUrl: mediaFile.src,
+      skippableAfter: ysAd.advert.linear.skipOffset,
+      uiConfig: {
+        requestsUi: !ysAd.hasInteractiveUnit(),
+      },
+      extensions: VastHelper.getExtensions(ysAd.advert),
+    } as LocalLinearAd;
+  }
+}
+
 class AdEventsFactory {
   static createAdBreakEvent(player: PlayerAPI, adBreak: YSAdBreak, type: PlayerEvent): AdBreakEvent {
     return {
@@ -1089,18 +1095,10 @@ class AdEventsFactory {
       timestamp: Date.now(),
       type: type,
       ad: {
-        id: ad.advert.id,
-        isLinear: true,
-        duration: ad.duration,
-        skippableAfter: player.isLive() ? -1 : ad.advert.linear.skipOffset,
-        clickThroughUrl: manager.session.getLinearClickthrough(),
         clickThroughUrlOpened: () => {
           manager.reportPlayerEvent(YSPlayerEvents.CLICK);
         },
-        uiConfig: {
-          requestsUi: !ad.hasInteractiveUnit(),
-        },
-        extensions: VastHelper.getExtensions(ad.advert),
+        ...AdTranslator.mapYsAdvert(ad),
       } as LocalLinearAd,
     };
   }
