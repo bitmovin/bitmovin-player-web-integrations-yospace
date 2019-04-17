@@ -1068,7 +1068,7 @@ class AdTranslator {
       height: mediaFile && mediaFile.height && parseInt(mediaFile.height),
       width: mediaFile && mediaFile.width && parseInt(mediaFile.width),
       clickThroughUrl: ysAd.advert.linear.clickThrough,
-      mediaFileUrl: mediaFile.src,
+      mediaFileUrl: mediaFile && mediaFile.src,
       skippableAfter: ysAd.advert.linear.skipOffset,
       uiConfig: {
         requestsUi: !ysAd.hasInteractiveUnit(),
