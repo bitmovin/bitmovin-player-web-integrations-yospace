@@ -712,12 +712,16 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     }
 
     const playerEvent = AdEventsFactory.createAdEvent(this.player, PlayerEvent.AdStarted, this.manager, this.getCurrentAd());
-    this.fireEvent<AdEvent>(playerEvent);
 
+    // Need to be set before fireEvent is fired as the UI will call getCurrentTime in the callback of the
+    // AdStarted event
     if (this.isLive()) {
       // save start position of an ad within a live stream to calculate the current time within the ad
       this.adStartedTimestamp = this.player.getCurrentTime();
     }
+
+    this.fireEvent<AdEvent>(playerEvent);
+
     // TODO: autoskip if available
   };
 
