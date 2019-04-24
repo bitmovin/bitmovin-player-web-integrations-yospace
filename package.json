@@ -1,6 +1,6 @@
 {
   "name": "@bitmovin/player-integration-yospace",
-  "version": "1.0.0-rc4",
+  "version": "1.0.0-rc5",
   "description": "Yospace integration for the Bitmovin Player",
   "main": "./dist/js/bitmovin-player-yospace.js",
   "types": "./dist/js/bitmovin-player-yospace.d.ts",
