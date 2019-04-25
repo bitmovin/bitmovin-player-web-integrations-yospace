@@ -157,11 +157,13 @@ export class BitmovinYospacePlayer implements PlayerAPI {
         return;
       }
 
-      this.manager.reportPlayerEvent(YSPlayerEvents.START);
+      if (this.manager) {
+        this.manager.reportPlayerEvent(YSPlayerEvents.START);
+      }
     };
 
     const onTimeChanged = (event: TimeChangedEvent) => {
-      if (!this.isVpaidActive) {
+      if (!this.isVpaidActive && this.manager) {
         this.manager.reportPlayerEvent(YSPlayerEvents.POSITION, event.time);
       }
 
@@ -174,7 +176,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     };
 
     const onPause = (event: PlaybackEvent) => {
-      if (!this.isVpaidActive) {
+      if (!this.isVpaidActive && this.manager) {
         this.manager.reportPlayerEvent(YSPlayerEvents.PAUSE);
       }
 
@@ -218,6 +220,8 @@ export class BitmovinYospacePlayer implements PlayerAPI {
               break;
           }
         });
+      } else {
+        this.contentDuration = this.player.getDuration();
       }
 
       this.fireEvent({
@@ -231,12 +235,16 @@ export class BitmovinYospacePlayer implements PlayerAPI {
         return;
       }
 
-      this.manager.reportPlayerEvent(YSPlayerEvents.SEEK_START, this.player.getCurrentTime());
+      if (this.manager) {
+        this.manager.reportPlayerEvent(YSPlayerEvents.SEEK_START, this.player.getCurrentTime());
 
-      if (!this.suppressedEventsController.isSuppressed(PlayerEvent.Seek)) {
-        this.fireEvent(event);
+        if (!this.suppressedEventsController.isSuppressed(PlayerEvent.Seek)) {
+          this.fireEvent(event);
+        } else {
+          this.suppressedEventsController.remove(PlayerEvent.Seek);
+        }
       } else {
-        this.suppressedEventsController.remove(PlayerEvent.Seek);
+        this.fireEvent(event);
       }
     };
 
@@ -245,12 +253,16 @@ export class BitmovinYospacePlayer implements PlayerAPI {
         return;
       }
 
-      this.manager.reportPlayerEvent(YSPlayerEvents.SEEK_END, this.player.getCurrentTime());
+      if (this.manager) {
+        this.manager.reportPlayerEvent(YSPlayerEvents.SEEK_END, this.player.getCurrentTime());
 
-      if (!this.suppressedEventsController.isSuppressed(PlayerEvent.Seeked)) {
-        this.fireEvent(event);
+        if (!this.suppressedEventsController.isSuppressed(PlayerEvent.Seeked)) {
+          this.fireEvent(event);
+        } else {
+          this.suppressedEventsController.remove(PlayerEvent.Seeked);
+        }
       } else {
-        this.suppressedEventsController.remove(PlayerEvent.Seeked);
+        this.fireEvent(event);
       }
     };
 
@@ -273,7 +285,9 @@ export class BitmovinYospacePlayer implements PlayerAPI {
         yospaceMetadataObject = this.mapEmsgToId3Tags(event);
       }
 
-      this.manager.reportPlayerEvent(YSPlayerEvents.METADATA, yospaceMetadataObject);
+      if (this.manager) {
+        this.manager.reportPlayerEvent(YSPlayerEvents.METADATA, yospaceMetadataObject);
+      }
     };
 
     const onVpaidAdFinished = (event: AdEvent) => {
@@ -285,9 +299,11 @@ export class BitmovinYospacePlayer implements PlayerAPI {
         mediaId: currentAd.getMediaID(),
       });
 
-      const session = this.manager.session;
-      session.currentAdvert = null;
-      this.manager.session.suppressAnalytics(false);
+      if (this.manager) {
+        const session = this.manager.session;
+        session.currentAdvert = null;
+        this.manager.session.suppressAnalytics(false);
+      }
     };
 
     const onVpaidAdSkipped = (event: AdEvent) => {
@@ -382,7 +398,8 @@ export class BitmovinYospacePlayer implements PlayerAPI {
           this.manager = YSSessionManager.createForNonLinear(url, properties, onInitComplete);
           break;
         default:
-          console.error('Undefined YospaceSourceConfig.assetType; Could not obtain session;');
+          console.warn('Undefined YospaceSourceConfig.assetType; Loading a source without Yospace initialization');
+          this.player.load(source, forceTechnology, disableSeeking);
       }
     });
   }
@@ -454,6 +471,11 @@ export class BitmovinYospacePlayer implements PlayerAPI {
   }
 
   pause(issuer?: string): void {
+    if (!this.manager) {
+      this.player.pause();
+      return;
+    }
+
     if (this.playerPolicy.canPause()) {
       if (this.isAdActive() && this.player.isPlaying()) {
         // track ad paused
@@ -466,6 +488,11 @@ export class BitmovinYospacePlayer implements PlayerAPI {
   }
 
   mute(issuer?: string): void {
+    if (!this.manager) {
+      this.player.mute(issuer);
+      return;
+    }
+
     if (this.playerPolicy.canMute()) {
       this.player.mute();
     } else {
@@ -478,6 +505,12 @@ export class BitmovinYospacePlayer implements PlayerAPI {
    * position after the ads finished / skipped
    */
   seek(time: number, issuer?: string): boolean {
+
+    // if we do not have a yopsace session, just seek
+    if (!this.manager) {
+      return this.player.seek(time, issuer);
+    }
+
     // do not use this seek method for seeking within ads (skip) use player.seek(…) instead
     if (!this.playerPolicy.canSeek()) {
       this.handleYospacePolicyEvent(YospacePolicyErrorCode.SEEK_NOT_ALLOWED);
@@ -633,6 +666,11 @@ export class BitmovinYospacePlayer implements PlayerAPI {
   }
 
   setPlaybackSpeed(speed: number): void {
+    if (!this.manager) {
+      this.player.setPlaybackSpeed(speed);
+      return;
+    }
+
     if (!this.playerPolicy.canChangePlaybackSpeed()) {
       this.handleYospacePolicyEvent(YospacePolicyErrorCode.CHANGE_PLAYBACK_SPEED_NOT_ALLOWED);
       return;
