@@ -676,7 +676,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     this.player.setPlaybackSpeed(1);
 
     const adBreak = event.adBreak;
-    const playerEvent = AdEventsFactory.createAdBreakEvent(this.player, adBreak, PlayerEvent.AdBreakStarted);
+    const playerEvent = AdEventsFactory.createAdBreakEvent(this.player, adBreak.adBreakIdentifier, this.toMagicTime(adBreak.startPosition), PlayerEvent.AdBreakStarted);
     this.fireEvent<AdBreakEvent>(playerEvent);
   };
 
@@ -733,7 +733,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
 
   private onAdBreakFinished = (event: BYSAdBreakEvent) => {
     const adBreak = event.adBreak;
-    const playerEvent = AdEventsFactory.createAdBreakEvent(this.player, adBreak, PlayerEvent.AdBreakFinished);
+    const playerEvent = AdEventsFactory.createAdBreakEvent(this.player, adBreak.adBreakIdentifier, this.toMagicTime(adBreak.startPosition), PlayerEvent.AdBreakFinished);
     this.fireEvent<AdBreakEvent>(playerEvent);
 
     if (this.cachedSeekTarget) {
@@ -1083,13 +1083,13 @@ class AdTranslator {
 }
 
 class AdEventsFactory {
-  static createAdBreakEvent(player: PlayerAPI, adBreak: YSAdBreak, type: PlayerEvent): AdBreakEvent {
+  static createAdBreakEvent(player: PlayerAPI, adBreakId: string, scheduleTime: number, type: PlayerEvent): AdBreakEvent {
     return {
       timestamp: Date.now(),
       type: type,
       adBreak: {
-        id: adBreak.adBreakIdentifier, // can be null
-        scheduleTime: adBreak.startPosition,
+        id: adBreakId, // can be null
+        scheduleTime: scheduleTime,
       },
     };
   }
