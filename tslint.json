@@ -60,7 +60,7 @@
         "multiline": {
           "arrays": "always",
           "exports": "always",
-          "functions": "never",
+          "functions": "always",
           "imports": "always",
           "objects": "always",
           "typeLiterals": "always"
