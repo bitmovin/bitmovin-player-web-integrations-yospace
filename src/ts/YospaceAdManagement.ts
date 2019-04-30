@@ -676,7 +676,12 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     this.player.setPlaybackSpeed(1);
 
     const adBreak = event.adBreak;
-    const playerEvent = AdEventsFactory.createAdBreakEvent(this.player, adBreak, PlayerEvent.AdBreakStarted);
+    const playerEvent = AdEventsFactory.createAdBreakEvent(
+      this.player,
+      adBreak.adBreakIdentifier,
+      this.toMagicTime(adBreak.startPosition),
+      PlayerEvent.AdBreakStarted,
+    );
     this.fireEvent<AdBreakEvent>(playerEvent);
   };
 
@@ -711,7 +716,12 @@ export class BitmovinYospacePlayer implements PlayerAPI {
       });
     }
 
-    const playerEvent = AdEventsFactory.createAdEvent(this.player, PlayerEvent.AdStarted, this.manager, this.getCurrentAd());
+    const playerEvent = AdEventsFactory.createAdEvent(
+      this.player,
+      PlayerEvent.AdStarted,
+      this.manager,
+      this.getCurrentAd(),
+    );
 
     // Need to be set before fireEvent is fired as the UI will call getCurrentTime in the callback of the
     // AdStarted event
@@ -726,14 +736,24 @@ export class BitmovinYospacePlayer implements PlayerAPI {
   };
 
   private onAdFinished = (event: BYSAdEvent) => {
-    const playerEvent = AdEventsFactory.createAdEvent(this.player, PlayerEvent.AdFinished, this.manager, this.getCurrentAd());
+    const playerEvent = AdEventsFactory.createAdEvent(
+      this.player,
+      PlayerEvent.AdFinished,
+      this.manager,
+      this.getCurrentAd(),
+    );
     this.fireEvent<AdEvent>(playerEvent);
     this.adStartedTimestamp = null;
   };
 
   private onAdBreakFinished = (event: BYSAdBreakEvent) => {
     const adBreak = event.adBreak;
-    const playerEvent = AdEventsFactory.createAdBreakEvent(this.player, adBreak, PlayerEvent.AdBreakFinished);
+    const playerEvent = AdEventsFactory.createAdBreakEvent(
+      this.player,
+      adBreak.adBreakIdentifier,
+      this.toMagicTime(adBreak.startPosition),
+      PlayerEvent.AdBreakFinished,
+    );
     this.fireEvent<AdBreakEvent>(playerEvent);
 
     if (this.cachedSeekTarget) {
@@ -1083,13 +1103,18 @@ class AdTranslator {
 }
 
 class AdEventsFactory {
-  static createAdBreakEvent(player: PlayerAPI, adBreak: YSAdBreak, type: PlayerEvent): AdBreakEvent {
+  static createAdBreakEvent(
+    player: PlayerAPI,
+    adBreakId: string,
+    scheduleTime: number,
+    type: PlayerEvent,
+  ): AdBreakEvent {
     return {
       timestamp: Date.now(),
       type: type,
       adBreak: {
-        id: adBreak.adBreakIdentifier, // can be null
-        scheduleTime: adBreak.startPosition,
+        id: adBreakId, // can be null
+        scheduleTime: scheduleTime,
       },
     };
   }
