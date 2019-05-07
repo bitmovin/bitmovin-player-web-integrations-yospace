@@ -94,7 +94,7 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     return new Promise<void>((resolve, reject) => {
       const switchPlayer = (toType: PlayerType) => {
         this.player.unload().then(() => {
-          this.clearPlayerWrap(['load', 'wrapPlayer', 'clearPlayerWrap', 'eventHandlers', 'on', 'off', 'player', 'setPolicy']);
+          this.clearPlayerWrap(['load', 'wrapPlayer', 'clearPlayerWrap', 'eventHandlers', 'on', 'off', 'player', 'setPolicy', 'getCurrentPlayerType']);
 
           const oldPlayer = this.player;
           if (toType === PlayerType.Bitmovin) {
