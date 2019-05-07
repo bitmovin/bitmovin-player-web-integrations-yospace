@@ -157,6 +157,27 @@
       debug: true
   };
 
+  var sampleYospacePlayerPolicy = {
+    canMute: () => {
+      return true;
+    },
+    canSeek: () => {
+      return true;
+    },
+    canSeekTo: (seekTarget) => {
+      return seekTarget;
+    },
+    canSkip: () => {
+      return true;
+    },
+    canPause: () => {
+      return true;
+    },
+    canChangePlaybackSpeed: () => {
+      return true;
+    },
+  };
+
   var playerContainer = document.getElementById('player');
   yospacePlayer = new bitmovin.player.ads.yospace.BitmovinYospacePlayer(playerContainer, conf, yospaceConfig);
 
