@@ -1,6 +1,5 @@
-export {
-  BitmovinYospacePlayer, YospaceAssetType, YospaceConfiguration, YospaceSourceConfig,
-} from './YospaceAdManagement';
+export { BitmovinYospacePlayer } from './BitmovinYospacePlayer';
+export { YospaceAssetType, YospaceConfiguration, YospaceSourceConfig } from './InternalBitmovinYospacePlayer';
 export { BitmovinYospacePlayerPolicy } from './BitmovinYospacePlayerPolicy';
 export {
   YospaceErrorEvent, YospaceEventBase, YospacePlayerEvent, YospacePolicyErrorEvent, YospacePolicyErrorCode,
