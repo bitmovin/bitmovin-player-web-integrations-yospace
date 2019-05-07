@@ -73,9 +73,13 @@ interface LocalLinearAd extends LinearAd {
   extensions: any[];
 }
 
+export interface BitmovinYospacePlayerAPI extends PlayerAPI {
+  setPolicy(policy: BitmovinYospacePlayerPolicy): void;
+}
+
 // It is expected that this does not implement all members of the PlayerAPI cause they will be added dynamically.
 // @ts-ignore
-export class BitmovinYospacePlayer implements PlayerAPI {
+export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   // Bitmovin Player
   private readonly player: PlayerAPI;
   private eventHandlers: { [eventType: string]: YospacePlayerEventCallback[]; } = {};
