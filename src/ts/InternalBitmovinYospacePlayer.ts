@@ -352,7 +352,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 
             // Initialize policy
             if (!this.playerPolicy) {
-              this.playerPolicy = new DefaultBitmovinYospacePlayerPolicy(this);
+              this.playerPolicy = new DefaultBitmovinYospacePlayerPolicy(this as any);
             }
 
             this.player.load(clonedSource, forceTechnology, disableSeeking).then(resolve).catch(reject);
