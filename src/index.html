@@ -104,6 +104,18 @@
     yospacePlayer.load(liveSource);
   });
 
+  artOfMotionButton.on('click', () => {
+    artOfMotionButton.button('toggle');
+    deselectCustomLoadButton();
+
+    yospacePlayer.unload();
+    yospacePlayer.load(artOfMotionSource).then(() => {
+      console.log('[log] Non yospace source loaded');
+    }).catch(() => {
+      console.log('[log] Loading non yospace source failed');
+    });
+  })
+
   customStreamButton.on('click', function() {
     $(customStreamButton).addClass('active');
 
@@ -141,6 +153,13 @@
 
     // Yospace configuration
     assetType: bitmovin.player.ads.yospace.YospaceAssetType.VOD
+  };
+
+  var artOfMotionSource = {
+    title: 'Art Of Motion',
+    hls: '//bitdash-a.akamaihd.net/content/MI201109210084_1/m3u8s/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.m3u8',
+
+    // No Yospace config
   };
 
   var conf = {
