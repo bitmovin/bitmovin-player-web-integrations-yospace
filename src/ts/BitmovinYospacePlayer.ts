@@ -30,6 +30,7 @@ import AnalyticsModule from 'bitmovin-player/modules/bitmovinplayer-analytics';
 import EngineNativeModule from 'bitmovin-player/modules/bitmovinplayer-engine-native';
 import DRMModule from 'bitmovin-player/modules/bitmovinplayer-drm';
 import RemoteControlModule from 'bitmovin-player/modules/bitmovinplayer-remotecontrol';
+import { ArrayUtils } from 'bitmovin-player-ui';
 
 enum PlayerType {
   Bitmovin,
@@ -93,7 +94,7 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     return new Promise<void>((resolve, reject) => {
       const switchPlayer = (toType: PlayerType) => {
         this.player.unload().then(() => {
-          this.clearPlayerWrap(['load', 'wrapPlayer', 'clearPlayerWrap', 'eventHandlers', 'on', 'player', 'setPolicy']);
+          this.clearPlayerWrap(['load', 'wrapPlayer', 'clearPlayerWrap', 'eventHandlers', 'on', 'off', 'player', 'setPolicy']);
 
           const oldPlayer = this.player;
           if (toType === PlayerType.Bitmovin) {
@@ -135,6 +136,11 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     this.eventHandlers[eventType].push(callback);
 
     this.player.on(eventType as any, callback);
+  }
+
+  off(eventType: PlayerEvent, callback: PlayerEventCallback): void {
+    this.player.off(eventType, callback);
+    ArrayUtils.remove(this.eventHandlers[eventType], callback);
   }
 
   // Since this is not in the PlayerAPI it will be gone when using the BitmovinPlayer so we need a custom implementation
