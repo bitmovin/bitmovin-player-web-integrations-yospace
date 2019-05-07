@@ -333,21 +333,21 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     this.yospaceSourceConfig = source;
 
     return new Promise<void>((resolve, reject) => {
-      const onInitComplete = (state: YSSessionResult, result: YSSessionStatus) => {
-        const getYospaceError = (state: YSSessionResult, result: YSSessionStatus): YospacePlayerError => {
+      const onInitComplete = (result: YSSessionResult, state: YSSessionStatus) => {
+        const getYospaceError = (result: YSSessionResult, state: YSSessionStatus): YospacePlayerError => {
           let errorCode: YospaceErrorCode;
           let detailedErrorCode: YospaceErrorCode;
           let detailedErrorMessage: string;
 
           // Detect general error
-          if (state === YSSessionResult.NO_ANALYTICS) {
+          if (result === YSSessionResult.NO_ANALYTICS) {
             errorCode = YospaceErrorCode.NO_ANALYTICS;
-          } else if (state === YSSessionResult.NOT_INITIALISED) {
+          } else if (result === YSSessionResult.NOT_INITIALISED) {
             errorCode = YospaceErrorCode.NOT_INITIALISED;
           }
 
           // Collect error details
-          switch (result) {
+          switch (state) {
             case YSSessionStatus.CONNECTION_ERROR:
               detailedErrorCode = YospaceErrorCode.CONNECTION_ERROR;
               break;
@@ -365,7 +365,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
               break;
             default:
               // if the result is an number and greater than 0 it represents the http status code
-              detailedErrorMessage = result > 0 ? `HTTP status code ${result}` : undefined;
+              detailedErrorMessage = state > 0 ? `HTTP status code ${state}` : undefined;
               detailedErrorCode = YospaceErrorCode.UNKNOWN_ERROR;
           }
 
@@ -375,7 +375,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
           });
         };
 
-        if (state === YSSessionResult.INITIALISED) {
+        if (result === YSSessionResult.INITIALISED) {
           // clone source to not modify passed object
           let clonedSource = {
             ...source,
@@ -395,7 +395,7 @@ export class BitmovinYospacePlayer implements PlayerAPI {
           this.manager.shutdown();
           this.manager = null;
 
-          this.handleYospaceError(getYospaceError(state, result));
+          this.handleYospaceError(getYospaceError(result, state));
           reject();
         }
       };
