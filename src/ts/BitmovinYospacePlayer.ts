@@ -1,15 +1,18 @@
 import {
-  Player, PlayerAPI, PlayerConfig, PlayerEvent, PlayerEventCallback,
+  AudioQuality, DownloadedAudioData, DownloadedVideoData, LogLevel, LowLatencyAPI, MetadataType, Player, PlayerAPI,
+  PlayerBufferAPI, PlayerConfig, PlayerEvent, PlayerEventCallback, PlayerExports, QueryParameters, SegmentMap, Snapshot,
+  SourceConfig, SupportedTechnologyMode, Technology, Thumbnail, TimeRange, VideoQuality, ViewMode, ViewModeOptions,
+  AudioTrack,
 } from 'bitmovin-player/modules/bitmovinplayer-core';
 import {
   BitmovinYospacePlayerAPI, InternalBitmovinYospacePlayer, YospaceConfiguration, YospaceSourceConfig,
 } from './InternalBitmovinYospacePlayer';
-import { YospacePlayerEventCallback } from './YospaceError';
+import { YospacePlayerEvent, YospacePlayerEventCallback } from './YospaceError';
 import { BitmovinYospacePlayerPolicy } from './BitmovinYospacePlayerPolicy';
 
 import XMLModule from 'bitmovin-player/modules/bitmovinplayer-xml';
 import StyleModule from 'bitmovin-player/modules/bitmovinplayer-style';
-import AdvertisingCoreModule from 'bitmovin-player/modules/bitmovinplayer-advertising-core';
+import AdvertisingCoreModule, { PlayerAdvertisingAPI } from 'bitmovin-player/modules/bitmovinplayer-advertising-core';
 import AdvertisingBitmovinModule from 'bitmovin-player/modules/bitmovinplayer-advertising-bitmovin';
 import MSERendererModule from 'bitmovin-player/modules/bitmovinplayer-mserenderer';
 import EngineBitmovinModule from 'bitmovin-player/modules/bitmovinplayer-engine-bitmovin';
@@ -17,7 +20,7 @@ import HLSModule from 'bitmovin-player/modules/bitmovinplayer-hls';
 import ABRModule from 'bitmovin-player/modules/bitmovinplayer-abr';
 import ContainerMP4Module from 'bitmovin-player/modules/bitmovinplayer-container-mp4';
 import ContainerTSModule from 'bitmovin-player/modules/bitmovinplayer-container-ts';
-import SubtitlesModule from 'bitmovin-player/modules/bitmovinplayer-subtitles';
+import SubtitlesModule, { PlayerSubtitlesAPI } from 'bitmovin-player/modules/bitmovinplayer-subtitles';
 import SubtitlesCEA608Module from 'bitmovin-player/modules/bitmovinplayer-subtitles-cea608';
 import SubtitlesNativeModule from 'bitmovin-player/modules/bitmovinplayer-subtitles-native';
 import SubtitlesVTTModule from 'bitmovin-player/modules/bitmovinplayer-subtitles-vtt';
@@ -31,18 +34,18 @@ import EngineNativeModule from 'bitmovin-player/modules/bitmovinplayer-engine-na
 import DRMModule from 'bitmovin-player/modules/bitmovinplayer-drm';
 import RemoteControlModule from 'bitmovin-player/modules/bitmovinplayer-remotecontrol';
 import { ArrayUtils } from 'bitmovin-player-ui';
+import { PlayerVRAPI } from 'bitmovin-player';
 
-enum PlayerType {
+export enum YospacePlayerType {
   Bitmovin,
   BitmovinYospace,
 }
 
-// @ts-ignore
 export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
-  private player: PlayerAPI;
+  private player: BitmovinYospacePlayerAPI;
   private readonly bitmovinYospacePlayer: BitmovinYospacePlayerAPI;
   private readonly bitmovinPlayer: PlayerAPI;
-  private currentPlayerType: PlayerType = PlayerType.BitmovinYospace;
+  private currentPlayerType: YospacePlayerType = YospacePlayerType.BitmovinYospace;
 
   private containerElement: HTMLElement;
   private config: PlayerConfig;
@@ -58,7 +61,11 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 
     // To ensure proper transitions between the different players we need to create both at the beginning.
     // This will ensure the right position within the DOM (under the UI).
-    this.bitmovinYospacePlayer = new InternalBitmovinYospacePlayer(containerElement, config, yospaceConfig) as any;
+    this.bitmovinYospacePlayer = new InternalBitmovinYospacePlayer(
+      containerElement,
+      config,
+      yospaceConfig,
+    ) as any as BitmovinYospacePlayerAPI;
 
     // initialize bitmovin player
     Player.addModule(XMLModule);
@@ -85,31 +92,26 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     Player.addModule(DRMModule);
     Player.addModule(RemoteControlModule);
     this.bitmovinPlayer = new Player(containerElement, config);
-    this.player = this.bitmovinYospacePlayer as any;
-
-    this.wrapPlayer();
+    this.player = this.bitmovinYospacePlayer;
   }
 
-  load(source: YospaceSourceConfig, forceTechnology?: string, disableSeeking?: boolean): Promise<void> {
+  load(source: SourceConfig | YospaceSourceConfig, forceTechnology?: string, disableSeeking?: boolean): Promise<void> {
     return new Promise<void>((resolve, reject) => {
-      const switchPlayer = (toType: PlayerType) => {
+      const switchPlayer = (toType: YospacePlayerType) => {
         this.player.unload().then(() => {
-          this.clearPlayerWrap(['load', 'wrapPlayer', 'clearPlayerWrap', 'eventHandlers', 'on', 'off', 'player', 'setPolicy', 'getCurrentPlayerType']);
-
-          const oldPlayer = this.player;
-          if (toType === PlayerType.Bitmovin) {
-            this.player = this.bitmovinPlayer;
+          const oldPlayer: BitmovinYospacePlayerAPI = this.player;
+          if (toType === YospacePlayerType.Bitmovin) {
+            this.player = this.bitmovinPlayer as BitmovinYospacePlayerAPI;
           } else {
-            this.player = this.bitmovinYospacePlayer as any;
+            this.player = this.bitmovinYospacePlayer;
           }
 
           this.currentPlayerType = toType;
-          this.wrapPlayer();
 
-          for (let eventType of Object.keys(this.eventHandlers) as PlayerEvent[]) {
+          for (let eventType of Object.keys(this.eventHandlers)) {
             for (let eventCallback of this.eventHandlers[eventType]) {
-              oldPlayer.off(eventType, eventCallback);
-              this.player.on(eventType, eventCallback);
+              oldPlayer.off(eventType as YospacePlayerEvent, eventCallback);
+              this.player.on(eventType as YospacePlayerEvent, eventCallback);
             }
           }
 
@@ -118,10 +120,10 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       };
 
       // Only switch player when necessary
-      if (!source.assetType && this.currentPlayerType === PlayerType.BitmovinYospace) {
-        switchPlayer(PlayerType.Bitmovin);
-      } else if (source.assetType && this.currentPlayerType === PlayerType.Bitmovin) {
-        switchPlayer(PlayerType.BitmovinYospace);
+      if (!(source as YospaceSourceConfig).assetType && this.currentPlayerType === YospacePlayerType.BitmovinYospace) {
+        switchPlayer(YospacePlayerType.Bitmovin);
+      } else if ((source as YospaceSourceConfig).assetType && this.currentPlayerType === YospacePlayerType.Bitmovin) {
+        switchPlayer(YospacePlayerType.BitmovinYospace);
       } else {
         // Else load the source in the current player
         this.player.load(source, forceTechnology, disableSeeking).then(resolve).catch(reject);
@@ -129,16 +131,20 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     });
   }
 
-  on(eventType: PlayerEvent, callback: PlayerEventCallback): void {
+  on(eventType: PlayerEvent, callback: PlayerEventCallback): void;
+  on(eventType: YospacePlayerEvent, callback: YospacePlayerEventCallback): void;
+  on(eventType: PlayerEvent | YospacePlayerEvent, callback: YospacePlayerEventCallback | PlayerEventCallback): void {
     if (!this.eventHandlers[eventType]) {
       this.eventHandlers[eventType] = [];
     }
     this.eventHandlers[eventType].push(callback);
 
-    this.player.on(eventType as any, callback);
+    this.player.on(eventType, callback);
   }
 
-  off(eventType: PlayerEvent, callback: PlayerEventCallback): void {
+  off(eventType: PlayerEvent, callback: PlayerEventCallback): void;
+  off(eventType: YospacePlayerEvent, callback: YospacePlayerEventCallback): void;
+  off(eventType: PlayerEvent | YospacePlayerEvent, callback: YospacePlayerEventCallback | PlayerEventCallback): void {
     this.player.off(eventType, callback);
     ArrayUtils.remove(this.eventHandlers[eventType], callback);
   }
@@ -146,7 +152,7 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   // Since this is not in the PlayerAPI it will be gone when using the BitmovinPlayer so we need a custom implementation
   // here to ensure the feature during the live time of the BitmovinYospacePlayer
   setPolicy(policy: BitmovinYospacePlayerPolicy): void {
-    if (this.getCurrentPlayerType() === PlayerType.Bitmovin) {
+    if (this.getCurrentPlayerType() === YospacePlayerType.Bitmovin) {
       console.log('[BitmovinYospacePlayer] Policy does not apply for Bitmovin Player but is saved for further ' +
         'BitmovinYospace Player usage');
     }
@@ -154,96 +160,324 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     this.bitmovinYospacePlayer.setPolicy(policy);
   }
 
-  getCurrentPlayerType(): PlayerType {
+  getCurrentPlayerType(): YospacePlayerType {
     return this.currentPlayerType;
   }
 
-  private wrapPlayer(): void {
-    // Collect all members of the player (public API methods and properties of the player)
-    const members: string[] = [];
-    for (const member in this.player) {
-      members.push(member);
-    }
-
-    // Split the members into methods and properties
-    const methods = <any[]>[];
-    const properties = <any[]>[];
-
-    for (const member of members) {
-      if (typeof (<any>this.player)[member] === 'function') {
-        methods.push(member);
-      } else {
-        properties.push(member);
-      }
-    }
-
-    const player = this.player;
-
-    // Add function wrappers for all API methods that do nothing but calling the base method on the player
-    for (const method of methods) {
-      // Only add methods that are not already present
-      if (typeof (this as any)[method] !== 'function') {
-        (this as any)[method] = function () {
-          return (player as any)[method].apply(player, arguments);
-        };
-      }
-    }
-
-    // Add all public properties of the player to the wrapper
-    for (const property of properties) {
-      // Get an eventually existing property descriptor to differentiate between plain properties and properties with
-      // getters/setters.
-      // Only add properties that are not already present
-      if (!(this as any)[property]) {
-        const propertyDescriptor: PropertyDescriptor = Object.getOwnPropertyDescriptor(this.player, property) ||
-          Object.getOwnPropertyDescriptor(Object.getPrototypeOf(this.player), property);
-
-        // If the property has getters/setters, wrap them accordingly...
-        if (propertyDescriptor && (propertyDescriptor.get || propertyDescriptor.set)) {
-          Object.defineProperty((this as any), property, {
-            get: () => propertyDescriptor.get.call(this.player),
-            set: (value: any) => propertyDescriptor.set.call(this.player, value),
-            enumerable: true,
-            configurable: true,
-          });
-        }
-        // ... else just transfer the property to the wrapper
-        else {
-          (this as any)[property] = (<any>this.player)[property];
-        }
-      }
-    }
+  // Default methods propagated to this.player
+  get ads(): PlayerAdvertisingAPI {
+    return this.player.ads;
   }
 
-  private clearPlayerWrap(except: string[]) {
-    // Collect all members of the player (public API methods and properties of the player)
-    const members: string[] = [];
-    for (const member in this.player) {
-      members.push(member);
-    }
+  get buffer(): PlayerBufferAPI {
+    return this.player.buffer;
+  }
 
-    // Split the members into methods and properties
-    const methods = <any[]>[];
-    const properties = <any[]>[];
+  get exports(): PlayerExports {
+    return this.player.exports;
+  }
 
-    for (const member of members) {
-      if (typeof (<any>this.player)[member] === 'function') {
-        methods.push(member);
-      } else {
-        properties.push(member);
-      }
-    }
+  get lowlatency(): LowLatencyAPI {
+    return this.player.lowlatency;
+  }
 
-    for (const method of methods) {
-      if (!except.includes(method)) {
-        (this as any)[method] = undefined;
-      }
-    }
+  get subtitles(): PlayerSubtitlesAPI {
+    return this.player.subtitles;
+  }
 
-    for (const property of properties) {
-      if (!except.includes(property)) {
-        delete (this as any)[property];
-      }
-    }
+  get version(): string {
+    return this.player.version;
+  }
+
+  get vr(): PlayerVRAPI {
+    return this.player.vr;
+  }
+
+  addMetadata(metadataType: MetadataType.CAST, metadata: any): boolean {
+    return this.player.addMetadata(metadataType, metadata);
+  }
+
+  castStop(): void {
+    return this.player.castStop();
+  }
+
+  castVideo(): void {
+    return this.player.castVideo();
+  }
+
+  clearQueryParameters(): void {
+    return this.player.clearQueryParameters();
+  }
+
+  destroy(): Promise<void> {
+    return this.player.destroy();
+  }
+
+  getAudio(): AudioTrack {
+    return this.player.getAudio();
+  }
+
+  getAudioBufferLength(): number | null {
+    return this.player.getAudioBufferLength();
+  }
+
+  getAudioQuality(): AudioQuality {
+    return this.player.getAudioQuality();
+  }
+
+  getAvailableAudio(): AudioTrack[] {
+    return this.player.getAvailableAudio();
+  }
+
+  getAvailableAudioQualities(): AudioQuality[] {
+    return this.player.getAvailableAudioQualities();
+  }
+
+  getAvailableSegments(): SegmentMap {
+    return this.player.getAvailableSegments();
+  }
+
+  getAvailableVideoQualities(): VideoQuality[] {
+    return this.player.getAvailableVideoQualities();
+  }
+
+  getBufferedRanges(): TimeRange[] {
+    return this.player.getBufferedRanges();
+  }
+
+  getConfig(mergedConfig?: boolean): PlayerConfig {
+    return this.player.getConfig();
+  }
+
+  getContainer(): HTMLElement {
+    return this.player.getContainer();
+  }
+
+  getCurrentTime(): number {
+    return this.player.getCurrentTime();
+  }
+
+  getDownloadedAudioData(): DownloadedAudioData {
+    return this.player.getDownloadedAudioData();
+  }
+
+  getDownloadedVideoData(): DownloadedVideoData {
+    return this.player.getDownloadedVideoData();
+  }
+
+  getDroppedVideoFrames(): number {
+    return this.player.getDroppedVideoFrames();
+  }
+
+  getDuration(): number {
+    return this.player.getDuration();
+  }
+
+  getManifest(): string {
+    return this.player.getManifest();
+  }
+
+  getMaxTimeShift(): number {
+    return this.player.getMaxTimeShift();
+  }
+
+  getPlaybackAudioData(): AudioQuality {
+    return this.player.getPlaybackAudioData();
+  }
+
+  getPlaybackSpeed(): number {
+    return this.player.getPlaybackSpeed();
+  }
+
+  getPlaybackVideoData(): VideoQuality {
+    return this.player.getPlaybackVideoData();
+  }
+
+  getPlayerType(): 'html5' | 'flash' | 'native' | 'native-flash' | 'unknown' {
+    return this.player.getPlayerType();
+  }
+
+  getSeekableRange(): TimeRange {
+    return this.player.getSeekableRange();
+  }
+
+  getSnapshot(type?: string, quality?: number): Snapshot {
+    return this.player.getSnapshot();
+  }
+
+  getSource(): SourceConfig | null {
+    return this.player.getSource();
+  }
+
+  getStreamType(): 'progressive' | 'dash' | 'hls' | 'smooth' | 'unknown' {
+    return this.player.getStreamType();
+  }
+
+  getSupportedDRM(): Promise<string[]> {
+    return this.player.getSupportedDRM();
+  }
+
+  getSupportedTech(mode?: SupportedTechnologyMode): Technology[] {
+    return this.player.getSupportedTech();
+  }
+
+  getThumbnail(time: number): Thumbnail {
+    return this.player.getThumbnail(time);
+  }
+
+  getTimeShift(): number {
+    return this.player.getTimeShift();
+  }
+
+  getTotalStalledTime(): number {
+    return this.player.getTotalStalledTime();
+  }
+
+  getVideoBufferLength(): number | null {
+    return this.player.getVideoBufferLength();
+  }
+
+  getVideoElement(): HTMLVideoElement | HTMLObjectElement {
+    return this.player.getVideoElement();
+  }
+
+  getVideoQuality(): VideoQuality {
+    return this.player.getVideoQuality();
+  }
+
+  getViewMode(): ViewMode {
+    return this.player.getViewMode();
+  }
+
+  getVolume(): number {
+    return this.player.getVolume();
+  }
+
+  hasEnded(): boolean {
+    return this.player.hasEnded();
+  }
+
+  isAirplayActive(): boolean {
+    return this.player.isAirplayActive();
+  }
+
+  isAirplayAvailable(): boolean {
+    return this.player.isAirplayAvailable();
+  }
+
+  isCastAvailable(): boolean {
+    return this.player.isCastAvailable();
+  }
+
+  isCasting(): boolean {
+    return this.player.isCasting();
+  }
+
+  isDRMSupported(drmSystem: string): Promise<string> {
+    return this.player.isDRMSupported(drmSystem);
+  }
+
+  isLive(): boolean {
+    return this.player.isLive();
+  }
+
+  isMuted(): boolean {
+    return this.player.isMuted();
+  }
+
+  isPaused(): boolean {
+    return this.player.isPaused();
+  }
+
+  isPlaying(): boolean {
+    return this.player.isPlaying();
+  }
+
+  isStalled(): boolean {
+    return this.player.isStalled();
+  }
+
+  isViewModeAvailable(viewMode: ViewMode): boolean {
+    return this.player.isViewModeAvailable(viewMode);
+  }
+
+  mute(issuer?: string): void {
+    return this.player.mute();
+  }
+
+  pause(issuer?: string): void {
+    return this.player.pause();
+  }
+
+  play(issuer?: string): Promise<void> {
+    return this.player.play(issuer);
+  }
+
+  preload(): void {
+    return this.player.preload();
+  }
+
+  seek(time: number, issuer?: string): boolean {
+    return this.player.seek(time, issuer);
+  }
+
+  setAudio(trackID: string): void {
+    return this.player.setAudio(trackID);
+  }
+
+  setAudioQuality(audioQualityID: string): void {
+    return this.player.setAudioQuality(audioQualityID);
+  }
+
+  setAuthentication(customData: any): void {
+    return this.player.setAuthentication(customData);
+  }
+
+  setLogLevel(level: LogLevel): void {
+    return this.player.setLogLevel(level);
+  }
+
+  setPlaybackSpeed(speed: number): void {
+    return this.player.setPlaybackSpeed(speed);
+  }
+
+  setPosterImage(url: string, keepPersistent: boolean): void {
+    return this.player.setPosterImage(url, keepPersistent);
+  }
+
+  setQueryParameters(queryParameters: QueryParameters): void {
+    return this.player.setQueryParameters(queryParameters);
+  }
+
+  setVideoElement(videoElement: HTMLElement): void {
+    return this.player.setVideoElement(videoElement);
+  }
+
+  setVideoQuality(videoQualityID: string): void {
+    return this.player.setVideoQuality(videoQualityID);
+  }
+
+  setViewMode(viewMode: ViewMode, options?: ViewModeOptions): void {
+    return this.player.setViewMode(viewMode, options);
+  }
+
+  setVolume(volume: number, issuer?: string): void {
+    return this.player.setVolume(volume, issuer);
+  }
+
+  showAirplayTargetPicker(): void {
+    return this.player.showAirplayTargetPicker();
+  }
+
+  timeShift(offset: number, issuer?: string): void {
+    return this.player.timeShift(offset, issuer);
+  }
+
+  unload(): Promise<void> {
+    return this.player.unload();
+  }
+
+  unmute(issuer?: string): void {
+    return this.player.unmute();
   }
 }
