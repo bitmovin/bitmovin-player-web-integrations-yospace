@@ -42,7 +42,7 @@ import {
   BitmovinYospacePlayerAPI, BitmovinYospacePlayerPolicy,
   YospaceAssetType,
   YospaceConfiguration, YospaceErrorCode, YospaceErrorEvent, YospaceEventBase, YospacePlayerEvent,
-  YospacePlayerEventCallback, YospacePolicyErrorCode, YospacePolicyErrorEvent, YospaceSourceConfig
+  YospacePlayerEventCallback, YospacePolicyErrorCode, YospacePolicyErrorEvent, YospaceSourceConfig,
 } from './BitmovinYospacePlayerAPI';
 import { YospacePlayerError } from './YospaceError';
 
