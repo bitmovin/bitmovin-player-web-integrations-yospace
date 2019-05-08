@@ -164,6 +164,14 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     return this.currentPlayerType;
   }
 
+  destroy(): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      this.bitmovinPlayer.destroy().then(() => {
+        this.bitmovinYospacePlayer.destroy().then(resolve).catch(reject);
+      });
+    });
+  }
+
   // Default methods propagated to this.player
   get ads(): PlayerAdvertisingAPI {
     return this.player.ads;
@@ -207,10 +215,6 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 
   clearQueryParameters(): void {
     return this.player.clearQueryParameters();
-  }
-
-  destroy(): Promise<void> {
-    return this.player.destroy();
   }
 
   getAudio(): AudioTrack {
