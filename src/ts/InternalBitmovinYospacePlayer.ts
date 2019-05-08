@@ -42,6 +42,7 @@ import {
   YospacePlayerEventCallback, YospacePolicyErrorCode, YospacePolicyErrorEvent,
 } from './YospaceError';
 import { VastHelper } from './VastHelper';
+import { YospacePlayerType } from './BitmovinYospacePlayer';
 
 export enum YospaceAssetType {
   LINEAR,
@@ -74,7 +75,11 @@ interface LocalLinearAd extends LinearAd {
 }
 
 export interface BitmovinYospacePlayerAPI extends PlayerAPI {
+  load(source: SourceConfig | YospaceSourceConfig, forceTechnology?: string, disableSeeking?: boolean): Promise<void>;
+  on(eventType: PlayerEvent | YospacePlayerEvent, callback: YospacePlayerEventCallback | PlayerEventCallback): void;
+  off(eventType: PlayerEvent | YospacePlayerEvent, callback: YospacePlayerEventCallback | PlayerEventCallback): void;
   setPolicy(policy: BitmovinYospacePlayerPolicy): void;
+  getCurrentPlayerType(): YospacePlayerType;
 }
 
 // It is expected that this does not implement all members of the PlayerAPI cause they will be added dynamically.
@@ -352,7 +357,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 
             // Initialize policy
             if (!this.playerPolicy) {
-              this.playerPolicy = new DefaultBitmovinYospacePlayerPolicy(this as any);
+              this.playerPolicy = new DefaultBitmovinYospacePlayerPolicy(this as any as BitmovinYospacePlayerAPI);
             }
 
             this.player.load(clonedSource, forceTechnology, disableSeeking).then(resolve).catch(reject);
@@ -403,8 +408,12 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     this.playerPolicy = policy;
   }
 
-  off(eventType: PlayerEvent, callback: PlayerEventCallback): void {
-    this.player.off(eventType, callback);
+  off(eventType: PlayerEvent, callback: PlayerEventCallback): void;
+  off(eventType: YospacePlayerEvent, callback: YospacePlayerEventCallback): void;
+  off(eventType: PlayerEvent | YospacePlayerEvent, callback:  YospacePlayerEventCallback | PlayerEventCallback): void {
+    if (!EnumHelper.isYospaceEvent(eventType)) {
+      this.player.off(eventType as PlayerEvent, callback);
+    }
     ArrayUtils.remove(this.eventHandlers[eventType], callback);
   }
 
