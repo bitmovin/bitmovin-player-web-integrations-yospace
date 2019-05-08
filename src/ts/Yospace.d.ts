@@ -40,6 +40,7 @@ declare class YSSessionManager {
 
   masterPlaylist(): string;
   registerPlayer(cb_obj: Object): void;
+  /** @deprecated */
   isYospaceStream(): boolean;
   reportPlayerEvent(evt: YSPlayerEvents, data?: any): void;
   shutdown(): void;
