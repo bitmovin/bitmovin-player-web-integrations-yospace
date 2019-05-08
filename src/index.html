@@ -130,6 +130,7 @@
   var vodSource = {
     title: 'VOD Stream',
     hls: 'https://csm-e-stg.tls1.yospace.com/csm/access/525947592/cWEvY21hZl9hZHZhbmNlZF9mbXA0X2Zyb21faW50ZXIvcHJvZ19zZWcvbXdjX0NBUkUxMDA5MjYxNzAwMDE4ODUyL2NsZWFyLzNjM2MzYzNjM2MzYzNjM2MzYzNjM2MzYzNjM2MzYzNjL21hc3Rlcl9jbF9ub19pZnJhbWUubTN1OA==?yo.av=2&yo.ad=true',
+    // hls: 'http://csm-e.cds1.yospace.com/access/d/400/u/0/1/130782300?f=0000130753172&format=vmap',
 
     // Yospace configuration
     assetType: bitmovin.player.ads.yospace.YospaceAssetType.VOD
@@ -163,9 +164,9 @@
   bitmovin.playerui.UIFactory.buildDefaultUI(yospacePlayer);
 
   yospacePlayer.load(vodSource).then(function() {
-      console.log('loaded');
+      console.log('Source successfully loaded');
   }).catch(function() {
-      console.log('gotcha');
+      console.log('Error while loading the source');
   });
 
   yospacePlayer.on('yospaceerror', function(event) {

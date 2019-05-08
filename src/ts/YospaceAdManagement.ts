@@ -333,34 +333,69 @@ export class BitmovinYospacePlayer implements PlayerAPI {
     this.yospaceSourceConfig = source;
 
     return new Promise<void>((resolve, reject) => {
-      const onInitComplete = (state: YSSessionResult, result: YSSessionStatus) => {
-        if (state === YSSessionResult.INITIALISED) {
+      const onInitComplete = (result: YSSessionResult, state: YSSessionStatus) => {
+        const getYospaceError = (result: YSSessionResult, state: YSSessionStatus): YospacePlayerError => {
+          let errorCode: YospaceErrorCode;
+          let detailedErrorCode: YospaceErrorCode;
+          let detailedErrorMessage: string;
+
+          // Detect general error
+          if (result === YSSessionResult.NO_ANALYTICS) {
+            errorCode = YospaceErrorCode.NO_ANALYTICS;
+          } else if (result === YSSessionResult.NOT_INITIALISED) {
+            errorCode = YospaceErrorCode.NOT_INITIALISED;
+          }
+
+          // Collect error details
+          switch (state) {
+            case YSSessionStatus.CONNECTION_ERROR:
+              detailedErrorCode = YospaceErrorCode.CONNECTION_ERROR;
+              break;
+            case YSSessionStatus.CONNECTION_TIMEOUT:
+              detailedErrorCode = YospaceErrorCode.CONNECTION_TIMEOUT;
+              break;
+            case YSSessionStatus.MALFORMED_URL:
+              detailedErrorCode = YospaceErrorCode.MALFORMED_URL;
+              break;
+            case YSSessionStatus.NO_LIVEPAUSE:
+              detailedErrorCode = YospaceErrorCode.NO_LIVEPAUSE;
+              break;
+            case YSSessionStatus.NON_YOSPACE_URL:
+              detailedErrorCode = YospaceErrorCode.NON_YOSPACE_URL;
+              break;
+            default:
+              // if the result is an number and greater than 0 it represents the http status code
+              detailedErrorMessage = state > 0 ? `HTTP status code ${state}` : undefined;
+              detailedErrorCode = YospaceErrorCode.UNKNOWN_ERROR;
+          }
+
+          return new YospacePlayerError(errorCode, {
+            errorCode: detailedErrorCode,
+            errorMessage: detailedErrorMessage || `${errorCode}/${YospaceErrorCode[detailedErrorCode]}`,
+          });
+        };
+
+        if (result === YSSessionResult.INITIALISED) {
           // clone source to not modify passed object
           let clonedSource = {
             ...source,
             hls: this.manager.masterPlaylist(), // use received url from yospace
           };
+          this.yospaceListenerAdapter = new YospaceAdListenerAdapter();
+          this.bindYospaceEvent();
+          this.manager.registerPlayer(this.yospaceListenerAdapter);
 
-          if (this.manager.isYospaceStream()) {
-            this.yospaceListenerAdapter = new YospaceAdListenerAdapter();
-            this.bindYospaceEvent();
-            this.manager.registerPlayer(this.yospaceListenerAdapter);
-
-            // Initialize policy
-            if (!this.playerPolicy) {
-              this.playerPolicy = new DefaultBitmovinYospacePlayerPolicy(this);
-            }
-
-            this.player.load(clonedSource, forceTechnology, disableSeeking).then(resolve).catch(reject);
-          } else {
-            this.manager.shutdown();
-            this.manager = null;
-
-            this.handleYospaceError(new YospacePlayerError(YospaceErrorCode.INVALID_SOURCE));
-            reject('Shutting down SDK on non-yospace stream');
+          // Initialize policy
+          if (!this.playerPolicy) {
+            this.playerPolicy = new DefaultBitmovinYospacePlayerPolicy(this);
           }
+
+          this.player.load(clonedSource, forceTechnology, disableSeeking).then(resolve).catch(reject);
         } else {
-          this.handleYospaceError(new YospacePlayerError(YospaceErrorCode.NO_ANALYTICS));
+          this.manager.shutdown();
+          this.manager = null;
+
+          this.handleYospaceError(getYospaceError(result, state));
           reject();
         }
       };
@@ -874,6 +909,8 @@ export class BitmovinYospacePlayer implements PlayerAPI {
       type: YospacePlayerEvent.YospaceError,
       code: error.code,
       name: error.name,
+      message: error.message,
+      data: error.data,
     });
   }
 

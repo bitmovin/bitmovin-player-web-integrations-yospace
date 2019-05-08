@@ -10,7 +10,12 @@ export enum YospaceErrorCode {
   INVALID_SOURCE = 1001,
   NO_ANALYTICS = 1002,
   NOT_INITIALISED = 1003,
-  INVALID_PLAYER = 1004,
+  INVALID_PLAYER = 1004, // Unused
+  CONNECTION_ERROR = 1005,
+  CONNECTION_TIMEOUT = 1006,
+  MALFORMED_URL = 1007,
+  NO_LIVEPAUSE = 1008,
+  NON_YOSPACE_URL = 1009,
 }
 
 export enum YospacePolicyErrorCode {
@@ -25,6 +30,8 @@ export enum YospacePolicyErrorCode {
 export interface YospaceErrorEvent extends YospaceEventBase {
   code: YospaceErrorCode;
   name: string;
+  message: string;
+  data: { [key: string]: any };
 }
 
 export interface YospacePolicyErrorEvent extends YospaceEventBase {
