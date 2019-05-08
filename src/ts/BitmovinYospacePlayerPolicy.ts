@@ -1,26 +1,5 @@
-import { BitmovinYospacePlayerAPI, InternalBitmovinYospacePlayer } from './InternalBitmovinYospacePlayer';
 import { LinearAd } from 'bitmovin-player';
-
-export interface BitmovinYospacePlayerPolicy {
-  canMute(): boolean;
-  canSeek(): boolean;
-  /**
-   * Determine whether the player is permitted to seek to a point in the stream.
-   * Based on the provided location, the nearest permissible location is returned which should be
-   * used by the player to override the viewers chosen seek location.
-   * This provides the ability to prevent skipping over adverts.
-   * @param seekTarget
-   * @return The closest available seek target. Default start time of last ad which would be skipped.
-   */
-  canSeekTo(seekTarget: number): number;
-  /**
-   * @return 0+ if skip is permitted
-   * the value is the delay in seconds before skip is permitted, otherwise -1 which means the advert is not skippable
-   */
-  canSkip(): number;
-  canPause(): boolean;
-  canChangePlaybackSpeed(): boolean;
-}
+import { BitmovinYospacePlayerAPI, BitmovinYospacePlayerPolicy } from './BitmovinYospacePlayerAPI';
 
 export class DefaultBitmovinYospacePlayerPolicy implements BitmovinYospacePlayerPolicy {
   private player: BitmovinYospacePlayerAPI;

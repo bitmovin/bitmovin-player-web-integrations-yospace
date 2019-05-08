@@ -3,7 +3,7 @@ import {
   AdBreakEvent, AdEvent, AdQuartile, AdQuartileEvent, BufferLevel, BufferType, MediaType, Player,
   PlayerAPI, PlayerBufferAPI, PlayerConfig, PlayerEvent, PlayerEventBase,
   PlayerEventCallback, SeekEvent, SourceConfig, TimeChangedEvent, TimeRange, PlaybackEvent, MetadataEvent,
-  PlayerError, ErrorCode, ErrorEvent,
+  PlayerError, ErrorCode, ErrorEvent, PlayerExports,
 } from 'bitmovin-player/modules/bitmovinplayer-core';
 
 import ABRModule from 'bitmovin-player/modules/bitmovinplayer-abr';
@@ -35,28 +35,16 @@ import RemoteControlModule from 'bitmovin-player/modules/bitmovinplayer-remoteco
 import {
   BYSAdBreakEvent, BYSAdEvent, BYSAnalyticsFiredEvent, BYSListenerEvent, YospaceAdListenerAdapter,
 } from './YospaceListenerAdapter';
-import { BitmovinYospacePlayerPolicy, DefaultBitmovinYospacePlayerPolicy } from './BitmovinYospacePlayerPolicy';
+import { DefaultBitmovinYospacePlayerPolicy } from './BitmovinYospacePlayerPolicy';
 import { ArrayUtils } from 'bitmovin-player-ui/dist/js/framework/arrayutils';
-import {
-  YospaceErrorCode, YospaceErrorEvent, YospaceEventBase, YospacePlayerError, YospacePlayerEvent,
-  YospacePlayerEventCallback, YospacePolicyErrorCode, YospacePolicyErrorEvent,
-} from './YospaceError';
 import { VastHelper } from './VastHelper';
-import { YospacePlayerType } from './BitmovinYospacePlayer';
-
-export enum YospaceAssetType {
-  LINEAR,
-  VOD,
-  LINEAR_START_OVER,
-}
-
-export interface YospaceSourceConfig extends SourceConfig {
-  assetType: YospaceAssetType;
-}
-
-export interface YospaceConfiguration {
-  debug?: boolean;
-}
+import {
+  BitmovinYospacePlayerAPI, BitmovinYospacePlayerPolicy,
+  YospaceAssetType,
+  YospaceConfiguration, YospaceErrorCode, YospaceErrorEvent, YospaceEventBase, YospacePlayerEvent,
+  YospacePlayerEventCallback, YospacePolicyErrorCode, YospacePolicyErrorEvent, YospaceSourceConfig
+} from './BitmovinYospacePlayerAPI';
+import { YospacePlayerError } from './YospaceError';
 
 interface StreamPart {
   start: number;
@@ -72,14 +60,6 @@ interface StreamPartMapping {
 // TODO: remove this when it's available in the Player
 interface LocalLinearAd extends LinearAd {
   extensions: any[];
-}
-
-export interface BitmovinYospacePlayerAPI extends PlayerAPI {
-  load(source: SourceConfig | YospaceSourceConfig, forceTechnology?: string, disableSeeking?: boolean): Promise<void>;
-  on(eventType: PlayerEvent | YospacePlayerEvent, callback: YospacePlayerEventCallback | PlayerEventCallback): void;
-  off(eventType: PlayerEvent | YospacePlayerEvent, callback: YospacePlayerEventCallback | PlayerEventCallback): void;
-  setPolicy(policy: BitmovinYospacePlayerPolicy): void;
-  getCurrentPlayerType(): YospacePlayerType;
 }
 
 // It is expected that this does not implement all members of the PlayerAPI cause they will be added dynamically.
