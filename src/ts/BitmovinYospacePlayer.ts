@@ -10,6 +10,7 @@ import {
 import { YospacePlayerEvent, YospacePlayerEventCallback } from './YospaceError';
 import { BitmovinYospacePlayerPolicy } from './BitmovinYospacePlayerPolicy';
 
+import PolyfillModule from 'bitmovin-player/modules/bitmovinplayer-polyfill';
 import XMLModule from 'bitmovin-player/modules/bitmovinplayer-xml';
 import StyleModule from 'bitmovin-player/modules/bitmovinplayer-style';
 import AdvertisingCoreModule, { PlayerAdvertisingAPI } from 'bitmovin-player/modules/bitmovinplayer-advertising-core';
@@ -28,7 +29,6 @@ import SubtitlesTTMLModule from 'bitmovin-player/modules/bitmovinplayer-subtitle
 import ThumbnailModule from 'bitmovin-player/modules/bitmovinplayer-thumbnail';
 import CryptoModule from 'bitmovin-player/modules/bitmovinplayer-crypto';
 import PatchModule from 'bitmovin-player/modules/bitmovinplayer-patch';
-import PolyfillModule from 'bitmovin-player/modules/bitmovinplayer-polyfill';
 import AnalyticsModule from 'bitmovin-player/modules/bitmovinplayer-analytics';
 import EngineNativeModule from 'bitmovin-player/modules/bitmovinplayer-engine-native';
 import DRMModule from 'bitmovin-player/modules/bitmovinplayer-drm';
@@ -68,6 +68,7 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     ) as any as BitmovinYospacePlayerAPI;
 
     // initialize bitmovin player
+    Player.addModule(PolyfillModule);
     Player.addModule(XMLModule);
     Player.addModule(StyleModule);
     Player.addModule(AdvertisingCoreModule);
@@ -86,7 +87,6 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     Player.addModule(ThumbnailModule);
     Player.addModule(CryptoModule);
     Player.addModule(PatchModule);
-    Player.addModule(PolyfillModule);
     Player.addModule(AnalyticsModule);
     Player.addModule(EngineNativeModule);
     Player.addModule(DRMModule);
