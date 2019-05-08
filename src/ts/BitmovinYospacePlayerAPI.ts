@@ -103,6 +103,8 @@ export enum YospacePolicyErrorCode {
 export interface YospaceErrorEvent extends YospaceEventBase {
   code: YospaceErrorCode;
   name: string;
+  message: string;
+  data: { [key: string]: any };
 }
 
 export interface YospacePolicyErrorEvent extends YospaceEventBase {
