@@ -173,8 +173,15 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     return this.player.buffer;
   }
 
-  get exports(): PlayerExports {
-    return this.player.exports;
+  get exports(): BitmovinYospacePlayerExports {
+    return {
+      ...this.player.exports,
+      YospacePolicyErrorCode: YospacePolicyErrorCode,
+      YospacePlayerType: YospacePlayerType,
+      YospaceErrorCode: YospaceErrorCode,
+      YospaceAssetType: YospaceAssetType,
+      YospacePlayerEvent: YospacePlayerEvent,
+    };
   }
 
   get lowlatency(): LowLatencyAPI {
