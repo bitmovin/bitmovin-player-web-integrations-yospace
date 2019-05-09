@@ -59,7 +59,18 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     this.config = config;
     this.yospaceConfig = yospaceConfig;
 
+    // Clear advertising config
+    if (config.advertising) {
+      console.warn('Client side advertising config is not supported. If you are using the BitmovinPlayer as' +
+        'fallback please use player.ads.schedule');
+    }
+    // add advertising again to load ads module
+    config.advertising = {};
 
+    if (config.ui === undefined || config.ui) {
+      console.warn('Please setup the UI after initializing the yospace player');
+      config.ui = false;
+    }
 
     // initialize bitmovin player
     Player.addModule(PolyfillModule);

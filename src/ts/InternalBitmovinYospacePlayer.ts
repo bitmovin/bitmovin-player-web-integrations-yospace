@@ -96,18 +96,6 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   constructor(containerElement: HTMLElement, player: PlayerAPI, yospaceConfig: YospaceConfiguration = {}) {
     this.yospaceConfig = yospaceConfig;
 
-    // Clear advertising config
-    // if (config.advertising) {
-    //   console.warn('Client side advertising config is not supported');
-    // }
-    // // add advertising again to load ads module
-    // config.advertising = {};
-    //
-    // if (config.ui === undefined || config.ui) {
-    //   console.warn('Please setup the UI after initializing the yospace player');
-    //   config.ui = false;
-    // }
-
     this.player = player;
     this.wrapPlayer();
   }
