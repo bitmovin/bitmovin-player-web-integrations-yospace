@@ -113,20 +113,20 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   }
 
   load(source: YospaceSourceConfig, forceTechnology?: string, disableSeeking?: boolean): Promise<void> {
-    // for now we only support hls source
-    if (!source.hls) {
-      this.resetState();
-      this.handleYospaceError(new YospacePlayerError(YospaceErrorCode.HLS_SOURCE_MISSING));
-      return;
-    }
-    this.resetState();
-    this.registerPlayerEvents();
-
-    const url = source.hls;
-
-    this.yospaceSourceConfig = source;
-
     return new Promise<void>((resolve, reject) => {
+      // for now we only support hls source
+      if (!source.hls) {
+        this.resetState();
+        this.handleYospaceError(new YospacePlayerError(YospaceErrorCode.HLS_SOURCE_MISSING));
+        reject();
+        return;
+      }
+      this.resetState();
+      this.registerPlayerEvents();
+
+      const url = source.hls;
+
+      this.yospaceSourceConfig = source;
       const onInitComplete = (result: YSSessionResult, state: YSSessionStatus) => {
         const getYospaceError = (result: YSSessionResult, state: YSSessionStatus): YospacePlayerError => {
           let errorCode: YospaceErrorCode;
