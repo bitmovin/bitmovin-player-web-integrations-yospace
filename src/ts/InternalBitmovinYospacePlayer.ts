@@ -1,36 +1,10 @@
 ///<reference path='Yospace.d.ts'/>
 import {
-  AdBreakEvent, AdEvent, AdQuartile, AdQuartileEvent, BufferLevel, BufferType, MediaType, Player,
-  PlayerAPI, PlayerBufferAPI, PlayerConfig, PlayerEvent, PlayerEventBase,
+  AdBreakEvent, AdEvent, AdQuartile, AdQuartileEvent, BufferLevel, BufferType, MediaType,
+  PlayerAPI, PlayerBufferAPI, PlayerEvent, PlayerEventBase,
   PlayerEventCallback, SeekEvent, SourceConfig, TimeChangedEvent, TimeRange, PlaybackEvent, MetadataEvent,
   PlayerError, ErrorCode, ErrorEvent,
 } from 'bitmovin-player/modules/bitmovinplayer-core';
-
-import ABRModule from 'bitmovin-player/modules/bitmovinplayer-abr';
-import AdvertisingCoreModule, {
-  AdBreak, AdConfig, LinearAd, PlayerAdvertisingAPI, VastErrorCode,
-} from 'bitmovin-player/modules/bitmovinplayer-advertising-core';
-import PolyfillModule from 'bitmovin-player/modules/bitmovinplayer-polyfill';
-import AdvertisingBitmovinModule from 'bitmovin-player/modules/bitmovinplayer-advertising-bitmovin';
-import XMLModule from 'bitmovin-player/modules/bitmovinplayer-xml';
-import StyleModule from 'bitmovin-player/modules/bitmovinplayer-style';
-import MSERendererModule from 'bitmovin-player/modules/bitmovinplayer-mserenderer';
-import EngineBitmovinModule from 'bitmovin-player/modules/bitmovinplayer-engine-bitmovin';
-import HLSModule from 'bitmovin-player/modules/bitmovinplayer-hls';
-import ContainerTSModule from 'bitmovin-player/modules/bitmovinplayer-container-ts';
-import ContainerMP4Module from 'bitmovin-player/modules/bitmovinplayer-container-mp4';
-import SubtitlesModule from 'bitmovin-player/modules/bitmovinplayer-subtitles';
-import SubtitlesCEA608Module from 'bitmovin-player/modules/bitmovinplayer-subtitles-cea608';
-import SubtitlesNativeModule from 'bitmovin-player/modules/bitmovinplayer-subtitles-native';
-import SubtitlesTTMLModule from 'bitmovin-player/modules/bitmovinplayer-subtitles-ttml';
-import SubtitlesVTTModule from 'bitmovin-player/modules/bitmovinplayer-subtitles-vtt';
-import ThumbnailModule from 'bitmovin-player/modules/bitmovinplayer-thumbnail';
-import CryptoModule from 'bitmovin-player/modules/bitmovinplayer-crypto';
-import PatchModule from 'bitmovin-player/modules/bitmovinplayer-patch';
-import AnalyticsModule from 'bitmovin-player/modules/bitmovinplayer-analytics';
-import EngineNativeModule from 'bitmovin-player/modules/bitmovinplayer-engine-native';
-import DRMModule from 'bitmovin-player/modules/bitmovinplayer-drm';
-import RemoteControlModule from 'bitmovin-player/modules/bitmovinplayer-remotecontrol';
 
 import {
   BYSAdBreakEvent, BYSAdEvent, BYSAnalyticsFiredEvent, BYSListenerEvent, YospaceAdListenerAdapter,
@@ -43,6 +17,7 @@ import {
 } from './YospaceError';
 import { VastHelper } from './VastHelper';
 import { YospacePlayerType } from './BitmovinYospacePlayer';
+import { AdBreak, AdConfig, LinearAd, PlayerAdvertisingAPI, VastErrorCode } from 'bitmovin-player';
 
 export enum YospaceAssetType {
   LINEAR,
@@ -118,46 +93,22 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   // save vpaid status
   private isVpaidActive = false;
 
-  constructor(containerElement: HTMLElement, config: PlayerConfig, yospaceConfig: YospaceConfiguration = {}) {
+  constructor(containerElement: HTMLElement, player: PlayerAPI, yospaceConfig: YospaceConfiguration = {}) {
     this.yospaceConfig = yospaceConfig;
 
     // Clear advertising config
-    if (config.advertising) {
-      console.warn('Client side advertising config is not supported');
-    }
-    // add advertising again to load ads module
-    config.advertising = {};
+    // if (config.advertising) {
+    //   console.warn('Client side advertising config is not supported');
+    // }
+    // // add advertising again to load ads module
+    // config.advertising = {};
+    //
+    // if (config.ui === undefined || config.ui) {
+    //   console.warn('Please setup the UI after initializing the yospace player');
+    //   config.ui = false;
+    // }
 
-    if (config.ui === undefined || config.ui) {
-      console.warn('Please setup the UI after initializing the yospace player');
-      config.ui = false;
-    }
-
-    // initialize bitmovin player
-    Player.addModule(PolyfillModule);
-    Player.addModule(XMLModule);
-    Player.addModule(StyleModule);
-    Player.addModule(AdvertisingCoreModule);
-    Player.addModule(AdvertisingBitmovinModule);
-    Player.addModule(MSERendererModule);
-    Player.addModule(EngineBitmovinModule);
-    Player.addModule(HLSModule);
-    Player.addModule(ABRModule);
-    Player.addModule(ContainerMP4Module);
-    Player.addModule(ContainerTSModule);
-    Player.addModule(SubtitlesModule);
-    Player.addModule(SubtitlesCEA608Module);
-    Player.addModule(SubtitlesNativeModule);
-    Player.addModule(SubtitlesVTTModule);
-    Player.addModule(SubtitlesTTMLModule);
-    Player.addModule(ThumbnailModule);
-    Player.addModule(CryptoModule);
-    Player.addModule(PatchModule);
-    Player.addModule(AnalyticsModule);
-    Player.addModule(EngineNativeModule);
-    Player.addModule(DRMModule);
-    Player.addModule(RemoteControlModule);
-    this.player = new Player(containerElement, config);
+    this.player = player;
     this.wrapPlayer();
 
     // TODO: combine in something like a reportPlayerState method called for multiple events

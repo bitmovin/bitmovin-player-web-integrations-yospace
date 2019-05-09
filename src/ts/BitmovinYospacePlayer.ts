@@ -59,13 +59,7 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     this.config = config;
     this.yospaceConfig = yospaceConfig;
 
-    // To ensure proper transitions between the different players we need to create both at the beginning.
-    // This will ensure the right position within the DOM (under the UI).
-    this.bitmovinYospacePlayer = new InternalBitmovinYospacePlayer(
-      containerElement,
-      config,
-      yospaceConfig,
-    ) as any as BitmovinYospacePlayerAPI;
+
 
     // initialize bitmovin player
     Player.addModule(PolyfillModule);
@@ -92,6 +86,15 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     Player.addModule(DRMModule);
     Player.addModule(RemoteControlModule);
     this.bitmovinPlayer = new Player(containerElement, config);
+
+    // To ensure proper transitions between the different players we need to create both at the beginning.
+    // This will ensure the right position within the DOM (under the UI).
+    this.bitmovinYospacePlayer = new InternalBitmovinYospacePlayer(
+      containerElement,
+      this.bitmovinPlayer,
+      yospaceConfig,
+    ) as any as BitmovinYospacePlayerAPI;
+
     this.player = this.bitmovinYospacePlayer;
   }
 
