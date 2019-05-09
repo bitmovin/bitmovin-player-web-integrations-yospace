@@ -115,7 +115,8 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   load(source: YospaceSourceConfig, forceTechnology?: string, disableSeeking?: boolean): Promise<void> {
     // for now we only support hls source
     if (!source.hls) {
-      console.error('HLS source missing');
+      this.resetState();
+      this.handleYospaceError(new YospacePlayerError(YospaceErrorCode.HLS_SOURCE_MISSING));
       return;
     }
     this.resetState();
