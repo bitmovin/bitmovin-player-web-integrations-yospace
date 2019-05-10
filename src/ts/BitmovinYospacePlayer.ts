@@ -1,14 +1,9 @@
 import {
-  AudioQuality, DownloadedAudioData, DownloadedVideoData, LogLevel, LowLatencyAPI, MetadataType, Player, PlayerAPI,
-  PlayerBufferAPI, PlayerConfig, PlayerEvent, PlayerEventCallback, PlayerExports, QueryParameters, SegmentMap, Snapshot,
+  AudioQuality, AudioTrack, DownloadedAudioData, DownloadedVideoData, LogLevel, LowLatencyAPI, MetadataType, Player,
+  PlayerAPI, PlayerBufferAPI, PlayerConfig, PlayerEvent, PlayerEventCallback, QueryParameters, SegmentMap, Snapshot,
   SourceConfig, SupportedTechnologyMode, Technology, Thumbnail, TimeRange, VideoQuality, ViewMode, ViewModeOptions,
-  AudioTrack,
 } from 'bitmovin-player/modules/bitmovinplayer-core';
-import {
-  BitmovinYospacePlayerAPI, InternalBitmovinYospacePlayer, YospaceConfiguration, YospaceSourceConfig,
-} from './InternalBitmovinYospacePlayer';
-import { YospacePlayerEvent, YospacePlayerEventCallback } from './YospaceError';
-import { BitmovinYospacePlayerPolicy } from './BitmovinYospacePlayerPolicy';
+import { InternalBitmovinYospacePlayer } from './InternalBitmovinYospacePlayer';
 
 import PolyfillModule from 'bitmovin-player/modules/bitmovinplayer-polyfill';
 import XMLModule from 'bitmovin-player/modules/bitmovinplayer-xml';
@@ -33,13 +28,13 @@ import AnalyticsModule from 'bitmovin-player/modules/bitmovinplayer-analytics';
 import EngineNativeModule from 'bitmovin-player/modules/bitmovinplayer-engine-native';
 import DRMModule from 'bitmovin-player/modules/bitmovinplayer-drm';
 import RemoteControlModule from 'bitmovin-player/modules/bitmovinplayer-remotecontrol';
-import { ArrayUtils } from 'bitmovin-player-ui';
+import { ArrayUtils } from 'bitmovin-player-ui/dist/js/framework/arrayutils';
 import { PlayerVRAPI } from 'bitmovin-player';
-
-export enum YospacePlayerType {
-  Bitmovin,
-  BitmovinYospace,
-}
+import {
+  BitmovinYospacePlayerAPI, BitmovinYospacePlayerExports, BitmovinYospacePlayerPolicy, YospaceAssetType,
+  YospaceConfiguration, YospaceErrorCode, YospacePlayerEvent, YospacePlayerEventCallback, YospacePlayerType,
+  YospacePolicyErrorCode, YospaceSourceConfig,
+} from './BitmovinYospacePlayerAPI';
 
 export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   private player: BitmovinYospacePlayerAPI;
@@ -193,8 +188,15 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     return this.player.buffer;
   }
 
-  get exports(): PlayerExports {
-    return this.player.exports;
+  get exports(): BitmovinYospacePlayerExports {
+    return {
+      ...this.player.exports,
+      YospacePolicyErrorCode: YospacePolicyErrorCode,
+      YospacePlayerType: YospacePlayerType,
+      YospaceErrorCode: YospaceErrorCode,
+      YospaceAssetType: YospaceAssetType,
+      YospacePlayerEvent: YospacePlayerEvent,
+    };
   }
 
   get lowlatency(): LowLatencyAPI {

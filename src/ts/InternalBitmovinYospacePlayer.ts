@@ -2,36 +2,25 @@
 import {
   AdBreakEvent, AdEvent, AdQuartile, AdQuartileEvent, BufferLevel, BufferType, MediaType,
   PlayerAPI, PlayerBufferAPI, PlayerEvent, PlayerEventBase,
-  PlayerEventCallback, SeekEvent, SourceConfig, TimeChangedEvent, TimeRange, PlaybackEvent, MetadataEvent,
-  PlayerError, ErrorCode, ErrorEvent,
+  PlayerEventCallback, SeekEvent, TimeChangedEvent, TimeRange, PlaybackEvent, MetadataEvent,
+  PlayerError, ErrorEvent,
 } from 'bitmovin-player/modules/bitmovinplayer-core';
 
 import {
   BYSAdBreakEvent, BYSAdEvent, BYSAnalyticsFiredEvent, BYSListenerEvent, YospaceAdListenerAdapter,
 } from './YospaceListenerAdapter';
-import { BitmovinYospacePlayerPolicy, DefaultBitmovinYospacePlayerPolicy } from './BitmovinYospacePlayerPolicy';
+import { DefaultBitmovinYospacePlayerPolicy } from './BitmovinYospacePlayerPolicy';
 import { ArrayUtils } from 'bitmovin-player-ui/dist/js/framework/arrayutils';
-import {
-  YospaceErrorCode, YospaceErrorEvent, YospaceEventBase, YospacePlayerError, YospacePlayerEvent,
-  YospacePlayerEventCallback, YospacePolicyErrorCode, YospacePolicyErrorEvent,
-} from './YospaceError';
 import { VastHelper } from './VastHelper';
-import { YospacePlayerType } from './BitmovinYospacePlayer';
-import { AdBreak, AdConfig, LinearAd, PlayerAdvertisingAPI, VastErrorCode } from 'bitmovin-player';
-
-export enum YospaceAssetType {
-  LINEAR,
-  VOD,
-  LINEAR_START_OVER,
-}
-
-export interface YospaceSourceConfig extends SourceConfig {
-  assetType: YospaceAssetType;
-}
-
-export interface YospaceConfiguration {
-  debug?: boolean;
-}
+import {
+  BitmovinYospacePlayerAPI, BitmovinYospacePlayerPolicy, UNDEFINED_VAST_ERROR_CODE, YospaceAssetType,
+  YospaceConfiguration, YospaceErrorCode, YospaceErrorEvent, YospaceEventBase, YospacePlayerEvent,
+  YospacePlayerEventCallback, YospacePolicyErrorCode, YospacePolicyErrorEvent, YospaceSourceConfig,
+} from './BitmovinYospacePlayerAPI';
+import { YospacePlayerError } from './YospaceError';
+import {
+  AdBreak, AdConfig, LinearAd, PlayerAdvertisingAPI,
+} from 'bitmovin-player/modules/bitmovinplayer-advertising-core';
 
 interface StreamPart {
   start: number;
@@ -48,18 +37,6 @@ interface StreamPartMapping {
 interface LocalLinearAd extends LinearAd {
   extensions: any[];
 }
-
-export interface BitmovinYospacePlayerAPI extends PlayerAPI {
-  load(source: SourceConfig | YospaceSourceConfig, forceTechnology?: string, disableSeeking?: boolean): Promise<void>;
-  on(eventType: PlayerEvent | YospacePlayerEvent, callback: YospacePlayerEventCallback | PlayerEventCallback): void;
-  off(eventType: PlayerEvent | YospacePlayerEvent, callback: YospacePlayerEventCallback | PlayerEventCallback): void;
-  setPolicy(policy: BitmovinYospacePlayerPolicy): void;
-  getCurrentPlayerType(): YospacePlayerType;
-}
-
-// The ads API of the player does not export the VastErrorCodes. As they are standardised we can hard code the undefined
-// error code here.
-export const UNDEFINED_VAST_ERROR_CODE = 900;
 
 // It is expected that this does not implement all members of the PlayerAPI cause they will be added dynamically.
 // @ts-ignore
