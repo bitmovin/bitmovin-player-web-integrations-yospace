@@ -57,6 +57,7 @@
           <select class="custom-select col-2" id="stream-type-select">
             <option value="1" selected>VoD</option>
             <option value="2">Live</option>
+            <option value="3">None</option>
           </select>
           <div class="input-group-append">
             <button id="load-custom-steam" class="btn btn-outline-secondary" type="button">Load</button>
@@ -79,6 +80,7 @@
   var liveButton = $('#option-live').parent();
   var artOfMotionButton = $('#option-aom').parent();
   var customStreamButton = $('#load-custom-steam');
+  var customStreamTypeSelect = $('#stream-type-select');
 
   function deselectCustomLoadButton() {
     $(customStreamButton).removeClass('active');
@@ -128,9 +130,14 @@
     var customSource = {
       title: 'Custom Stream',
       hls: $('#steam-stream-url').val(),
-
-      assetType: $('#stream-type-select').val() === '1' ? bitmovin.player.ads.yospace.YospaceAssetType.VOD : bitmovin.player.ads.yospace.YospaceAssetType.LINEAR,
     };
+
+    if (customStreamTypeSelect.val() === '1') {
+      customSource.assetType = bitmovin.player.ads.yospace.YospaceAssetType.VOD;
+    } else if (customStreamTypeSelect.val() === '2') {
+      customSource.assetType = bitmovin.player.ads.yospace.YospaceAssetType.LINEAR;
+    }
+
     yospacePlayer.unload();
     yospacePlayer.load(customSource);
   });
