@@ -5,6 +5,7 @@ import {
 } from 'bitmovin-player/modules/bitmovinplayer-core';
 import { InternalBitmovinYospacePlayer } from './InternalBitmovinYospacePlayer';
 
+import PolyfillModule from 'bitmovin-player/modules/bitmovinplayer-polyfill';
 import XMLModule from 'bitmovin-player/modules/bitmovinplayer-xml';
 import StyleModule from 'bitmovin-player/modules/bitmovinplayer-style';
 import AdvertisingCoreModule, { PlayerAdvertisingAPI } from 'bitmovin-player/modules/bitmovinplayer-advertising-core';
@@ -23,12 +24,11 @@ import SubtitlesTTMLModule from 'bitmovin-player/modules/bitmovinplayer-subtitle
 import ThumbnailModule from 'bitmovin-player/modules/bitmovinplayer-thumbnail';
 import CryptoModule from 'bitmovin-player/modules/bitmovinplayer-crypto';
 import PatchModule from 'bitmovin-player/modules/bitmovinplayer-patch';
-import PolyfillModule from 'bitmovin-player/modules/bitmovinplayer-polyfill';
 import AnalyticsModule from 'bitmovin-player/modules/bitmovinplayer-analytics';
 import EngineNativeModule from 'bitmovin-player/modules/bitmovinplayer-engine-native';
 import DRMModule from 'bitmovin-player/modules/bitmovinplayer-drm';
 import RemoteControlModule from 'bitmovin-player/modules/bitmovinplayer-remotecontrol';
-import { ArrayUtils } from 'bitmovin-player-ui';
+import { ArrayUtils } from 'bitmovin-player-ui/dist/js/framework/arrayutils';
 import { PlayerVRAPI } from 'bitmovin-player';
 import {
   BitmovinYospacePlayerAPI, BitmovinYospacePlayerExports, BitmovinYospacePlayerPolicy, YospaceAssetType,
@@ -54,15 +54,21 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     this.config = config;
     this.yospaceConfig = yospaceConfig;
 
-    // To ensure proper transitions between the different players we need to create both at the beginning.
-    // This will ensure the right position within the DOM (under the UI).
-    this.bitmovinYospacePlayer = new InternalBitmovinYospacePlayer(
-      containerElement,
-      config,
-      yospaceConfig,
-    ) as any as BitmovinYospacePlayerAPI;
+    // Clear advertising config
+    if (config.advertising) {
+      console.warn('Client side advertising config is not supported. If you are using the BitmovinPlayer as' +
+        'fallback please use player.ads.schedule');
+    }
+    // add advertising again to load ads module
+    config.advertising = {};
+
+    if (config.ui === undefined || config.ui) {
+      console.warn('Please setup the UI after initializing the yospace player');
+      config.ui = false;
+    }
 
     // initialize bitmovin player
+    Player.addModule(PolyfillModule);
     Player.addModule(XMLModule);
     Player.addModule(StyleModule);
     Player.addModule(AdvertisingCoreModule);
@@ -81,12 +87,18 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     Player.addModule(ThumbnailModule);
     Player.addModule(CryptoModule);
     Player.addModule(PatchModule);
-    Player.addModule(PolyfillModule);
     Player.addModule(AnalyticsModule);
     Player.addModule(EngineNativeModule);
     Player.addModule(DRMModule);
     Player.addModule(RemoteControlModule);
     this.bitmovinPlayer = new Player(containerElement, config);
+
+    this.bitmovinYospacePlayer = new InternalBitmovinYospacePlayer(
+      containerElement,
+      this.bitmovinPlayer,
+      yospaceConfig,
+    ) as any as BitmovinYospacePlayerAPI;
+
     this.player = this.bitmovinYospacePlayer;
   }
 
@@ -159,6 +171,14 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     return this.currentPlayerType;
   }
 
+  destroy(): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      this.bitmovinPlayer.destroy().then(() => {
+        this.bitmovinYospacePlayer.destroy().then(resolve).catch(reject);
+      });
+    });
+  }
+
   // Default methods propagated to this.player
   get ads(): PlayerAdvertisingAPI {
     return this.player.ads;
@@ -209,10 +229,6 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 
   clearQueryParameters(): void {
     return this.player.clearQueryParameters();
-  }
-
-  destroy(): Promise<void> {
-    return this.player.destroy();
   }
 
   getAudio(): AudioTrack {

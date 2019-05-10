@@ -20,6 +20,12 @@ export enum YospacePlayerType {
   BitmovinYospace,
 }
 
+// Constants
+
+// The ads API of the player does not export the VastErrorCodes. As they are standardised we can hard code the undefined
+// error code here.
+export const UNDEFINED_VAST_ERROR_CODE = 900;
+
 // Public API
 
 export interface BitmovinYospacePlayerAPI extends PlayerAPI {
@@ -89,6 +95,7 @@ export enum YospaceErrorCode {
   MALFORMED_URL = 1007,
   NO_LIVEPAUSE = 1008,
   NON_YOSPACE_URL = 1009,
+  HLS_SOURCE_MISSING = 1010,
 }
 
 export enum YospacePolicyErrorCode {
