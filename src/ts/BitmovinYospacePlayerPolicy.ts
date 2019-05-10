@@ -1,4 +1,4 @@
-import { BitmovinYospacePlayer } from './YospaceAdManagement';
+import { BitmovinYospacePlayerAPI, InternalBitmovinYospacePlayer } from './InternalBitmovinYospacePlayer';
 import { LinearAd } from 'bitmovin-player';
 
 export interface BitmovinYospacePlayerPolicy {
@@ -23,9 +23,9 @@ export interface BitmovinYospacePlayerPolicy {
 }
 
 export class DefaultBitmovinYospacePlayerPolicy implements BitmovinYospacePlayerPolicy {
-  private player: BitmovinYospacePlayer;
+  private player: BitmovinYospacePlayerAPI;
 
-  constructor(player: BitmovinYospacePlayer) {
+  constructor(player: BitmovinYospacePlayerAPI) {
     this.player = player;
   }
 

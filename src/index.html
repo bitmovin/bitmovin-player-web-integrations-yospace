@@ -44,6 +44,9 @@
           <label class="btn btn-outline-secondary">
             <input type="radio" name="options" id="option-live" autocomplete="off">Load Live
           </label>
+          <label class="btn btn-outline-secondary">
+            <input type="radio" name="options" id="option-aom" autocomplete="off">Art of motion
+          </label>
         </div>
       </div>
     </div>
@@ -54,6 +57,7 @@
           <select class="custom-select col-2" id="stream-type-select">
             <option value="1" selected>VoD</option>
             <option value="2">Live</option>
+            <option value="3">None</option>
           </select>
           <div class="input-group-append">
             <button id="load-custom-steam" class="btn btn-outline-secondary" type="button">Load</button>
@@ -74,7 +78,9 @@
   var vodButton = $('#option-vod').parent();
   var vodVpaidButton = $('#option-vod-vpaid').parent();
   var liveButton = $('#option-live').parent();
+  var artOfMotionButton = $('#option-aom').parent();
   var customStreamButton = $('#load-custom-steam');
+  var customStreamTypeSelect = $('#stream-type-select');
 
   function deselectCustomLoadButton() {
     $(customStreamButton).removeClass('active');
@@ -104,6 +110,18 @@
     yospacePlayer.load(liveSource);
   });
 
+  artOfMotionButton.on('click', () => {
+    artOfMotionButton.button('toggle');
+    deselectCustomLoadButton();
+
+    yospacePlayer.unload();
+    yospacePlayer.load(artOfMotionSource).then(() => {
+      console.log('[log] Non yospace source loaded');
+    }).catch(() => {
+      console.log('[log] Loading non yospace source failed');
+    });
+  })
+
   customStreamButton.on('click', function() {
     $(customStreamButton).addClass('active');
 
@@ -112,9 +130,14 @@
     var customSource = {
       title: 'Custom Stream',
       hls: $('#steam-stream-url').val(),
-
-      assetType: $('#stream-type-select').val() === '1' ? bitmovin.player.ads.yospace.YospaceAssetType.VOD : bitmovin.player.ads.yospace.YospaceAssetType.LINEAR,
     };
+
+    if (customStreamTypeSelect.val() === '1') {
+      customSource.assetType = bitmovin.player.ads.yospace.YospaceAssetType.VOD;
+    } else if (customStreamTypeSelect.val() === '2') {
+      customSource.assetType = bitmovin.player.ads.yospace.YospaceAssetType.LINEAR;
+    }
+
     yospacePlayer.unload();
     yospacePlayer.load(customSource);
   });
@@ -144,6 +167,13 @@
     assetType: bitmovin.player.ads.yospace.YospaceAssetType.VOD
   };
 
+  var artOfMotionSource = {
+    title: 'Art Of Motion',
+    hls: '//bitdash-a.akamaihd.net/content/MI201109210084_1/m3u8s/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.m3u8',
+
+    // No Yospace config
+  };
+
   var conf = {
     key: 'YOUR-PLAYER-KEY',
     playback: {
@@ -156,6 +186,27 @@
   // Yospace configuration
   var yospaceConfig = {
       debug: true
+  };
+
+  var sampleYospacePlayerPolicy = {
+    canMute: () => {
+      return true;
+    },
+    canSeek: () => {
+      return true;
+    },
+    canSeekTo: (seekTarget) => {
+      return seekTarget;
+    },
+    canSkip: () => {
+      return true;
+    },
+    canPause: () => {
+      return true;
+    },
+    canChangePlaybackSpeed: () => {
+      return true;
+    },
   };
 
   var playerContainer = document.getElementById('player');

@@ -16,6 +16,7 @@ export enum YospaceErrorCode {
   MALFORMED_URL = 1007,
   NO_LIVEPAUSE = 1008,
   NON_YOSPACE_URL = 1009,
+  HLS_SOURCE_MISSING = 1010,
 }
 
 export enum YospacePolicyErrorCode {
