@@ -57,6 +57,10 @@ export interface BitmovinYospacePlayerAPI extends PlayerAPI {
   getCurrentPlayerType(): YospacePlayerType;
 }
 
+// The ads API of the player does not export the VastErrorCodes. As they are standardised we can hard code the undefined
+// error code here.
+export const UNDEFINED_VAST_ERROR_CODE = 900;
+
 // It is expected that this does not implement all members of the PlayerAPI cause they will be added dynamically.
 // @ts-ignore
 export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
@@ -231,21 +235,21 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     if (!EnumHelper.isYospaceEvent(eventType)) {
       // we need to suppress some events because they need to be modified first. so don't add it to the actual player
       const suppressedEventTypes = [
-        PlayerEvent.SourceLoaded,
-        PlayerEvent.TimeChanged,
-        PlayerEvent.Paused,
+        this.player.exports.PlayerEvent.SourceLoaded,
+        this.player.exports.PlayerEvent.TimeChanged,
+        this.player.exports.PlayerEvent.Paused,
 
         // Suppress all ad events
-        PlayerEvent.AdBreakFinished,
-        PlayerEvent.AdBreakStarted,
-        PlayerEvent.AdClicked,
-        PlayerEvent.AdError,
-        PlayerEvent.AdFinished,
-        PlayerEvent.AdLinearityChanged,
-        PlayerEvent.AdManifestLoaded,
-        PlayerEvent.AdQuartile,
-        PlayerEvent.AdSkipped,
-        PlayerEvent.AdStarted,
+        this.player.exports.PlayerEvent.AdBreakFinished,
+        this.player.exports.PlayerEvent.AdBreakStarted,
+        this.player.exports.PlayerEvent.AdClicked,
+        this.player.exports.PlayerEvent.AdError,
+        this.player.exports.PlayerEvent.AdFinished,
+        this.player.exports.PlayerEvent.AdLinearityChanged,
+        this.player.exports.PlayerEvent.AdManifestLoaded,
+        this.player.exports.PlayerEvent.AdQuartile,
+        this.player.exports.PlayerEvent.AdSkipped,
+        this.player.exports.PlayerEvent.AdStarted,
       ];
 
       const event = eventType as PlayerEvent;
@@ -262,7 +266,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 
   play(issuer?: string): Promise<void> {
     if (this.isPlaybackFinished) {
-      this.suppressedEventsController.add(PlayerEvent.Seek, PlayerEvent.Seeked);
+      this.suppressedEventsController.add(this.player.exports.PlayerEvent.Seek, this.player.exports.PlayerEvent.Seeked);
       this.player.seek(0);
       this.isPlaybackFinished = false;
     }
@@ -362,14 +366,14 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
    * @deprecated Use {@link PlayerBufferAPI.getLevel} instead.
    */
   getVideoBufferLength(): number | null {
-    return this.buffer.getLevel(BufferType.ForwardDuration, MediaType.Video).level;
+    return this.buffer.getLevel(this.player.exports.BufferType.ForwardDuration, this.player.exports.MediaType.Video).level;
   }
 
   /**
    * @deprecated Use {@link PlayerBufferAPI.getLevel} instead.
    */
   getAudioBufferLength(): number | null {
-    return this.buffer.getLevel(BufferType.ForwardDuration, MediaType.Audio).level;
+    return this.buffer.getLevel(this.player.exports.BufferType.ForwardDuration, this.player.exports.MediaType.Audio).level;
   }
 
   getBufferedRanges(): TimeRange[] {
@@ -501,7 +505,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       this.player,
       adBreak.adBreakIdentifier,
       this.toMagicTime(adBreak.startPosition),
-      PlayerEvent.AdBreakStarted,
+      this.player.exports.PlayerEvent.AdBreakStarted,
     );
     this.fireEvent<AdBreakEvent>(playerEvent);
   };
@@ -522,14 +526,14 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
         position: String(this.player.getCurrentTime()),
         replaceContentDuration: currentAd.duration,
       } as AdConfig).catch((reason: string) => {
-        const error = new PlayerError(ErrorCode.MODULE_ADVERTISING_ERROR, {
-          code: VastErrorCode.UNDEFINED_ERROR,
+        const error = new PlayerError(this.player.exports.ErrorCode.MODULE_ADVERTISING_ERROR, {
+          code: UNDEFINED_VAST_ERROR_CODE,
           message: reason,
         });
 
         this.fireEvent<ErrorEvent>({
           timestamp: Date.now(),
-          type: PlayerEvent.AdError,
+          type: this.player.exports.PlayerEvent.AdError,
           code: error.code,
           name: error.message,
           data: error.data,
@@ -539,7 +543,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 
     const playerEvent = AdEventsFactory.createAdEvent(
       this.player,
-      PlayerEvent.AdStarted,
+      this.player.exports.PlayerEvent.AdStarted,
       this.manager,
       this.getCurrentAd(),
     );
@@ -559,7 +563,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   private onAdFinished = (event: BYSAdEvent) => {
     const playerEvent = AdEventsFactory.createAdEvent(
       this.player,
-      PlayerEvent.AdFinished,
+      this.player.exports.PlayerEvent.AdFinished,
       this.manager,
       this.getCurrentAd(),
     );
@@ -573,7 +577,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       this.player,
       adBreak.adBreakIdentifier,
       this.toMagicTime(adBreak.startPosition),
-      PlayerEvent.AdBreakFinished,
+      this.player.exports.PlayerEvent.AdBreakFinished,
     );
     this.fireEvent<AdBreakEvent>(playerEvent);
 
@@ -613,11 +617,11 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   private mapAdQuartile(quartileEvent: string): AdQuartile {
     switch (quartileEvent) {
       case 'firstQuartile':
-        return AdQuartile.FIRST_QUARTILE;
+        return this.player.exports.AdQuartile.FIRST_QUARTILE;
       case 'midpoint':
-        return AdQuartile.MIDPOINT;
+        return this.player.exports.AdQuartile.MIDPOINT;
       case 'thirdQuartile':
-        return AdQuartile.THIRD_QUARTILE;
+        return this.player.exports.AdQuartile.THIRD_QUARTILE;
     }
   }
 
@@ -683,7 +687,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   private handleQuartileEvent(adQuartileEventName: string): void {
     const playerEvent: AdQuartileEvent = {
       timestamp: Date.now(),
-      type: PlayerEvent.AdQuartile,
+      type: this.player.exports.PlayerEvent.AdQuartile,
       quartile: this.mapAdQuartile(adQuartileEventName),
     };
 
@@ -795,12 +799,12 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 
           if (seekTarget >= this.player.getDuration()) {
             this.isPlaybackFinished = true;
-            this.suppressedEventsController.add(PlayerEvent.Paused, PlayerEvent.Seek, PlayerEvent.Seeked);
+            this.suppressedEventsController.add(this.player.exports.PlayerEvent.Paused, this.player.exports.PlayerEvent.Seek, this.player.exports.PlayerEvent.Seeked);
             this.player.pause();
             this.player.seek(ad.adBreak.startPosition - 1); // -1 to be sure to don't have a frame of the ad visible
             this.fireEvent({
               timestamp: Date.now(),
-              type: PlayerEvent.PlaybackFinished,
+              type: this.player.exports.PlayerEvent.PlaybackFinished,
             });
           } else {
             this.player.seek(seekTarget, 'ad-skip');
@@ -808,7 +812,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 
           this.fireEvent({
             timestamp: Date.now(),
-            type: PlayerEvent.AdSkipped,
+            type: this.player.exports.PlayerEvent.AdSkipped,
             ad: AdTranslator.mapYsAdvert(ad),
           } as AdEvent);
         } else {
@@ -825,39 +829,39 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   };
 
   private registerPlayerEvents(): void {
-    this.player.on(PlayerEvent.Playing, this.onPlay);
-    this.player.on(PlayerEvent.TimeChanged, this.onTimeChanged);
-    this.player.on(PlayerEvent.Paused, this.onPause);
+    this.player.on(this.player.exports.PlayerEvent.Playing, this.onPlay);
+    this.player.on(this.player.exports.PlayerEvent.TimeChanged, this.onTimeChanged);
+    this.player.on(this.player.exports.PlayerEvent.Paused, this.onPause);
 
-    this.player.on(PlayerEvent.Seek, this.onSeek);
-    this.player.on(PlayerEvent.Seeked, this.onSeeked);
+    this.player.on(this.player.exports.PlayerEvent.Seek, this.onSeek);
+    this.player.on(this.player.exports.PlayerEvent.Seeked, this.onSeeked);
 
-    this.player.on(PlayerEvent.SourceLoaded, this.onSourceLoaded);
+    this.player.on(this.player.exports.PlayerEvent.SourceLoaded, this.onSourceLoaded);
     // To support ads in live streams we need to track metadata events
-    this.player.on(PlayerEvent.Metadata, this.onMetaData);
+    this.player.on(this.player.exports.PlayerEvent.Metadata, this.onMetaData);
 
     // Subscribe to some ad events. In Case of VPAID we rely on the player events to track it.
-    this.player.on(PlayerEvent.AdFinished, this.onVpaidAdFinished);
-    this.player.on(PlayerEvent.AdSkipped, this.onVpaidAdSkipped);
-    this.player.on(PlayerEvent.AdQuartile, this.onVpaidAdQuartile);
+    this.player.on(this.player.exports.PlayerEvent.AdFinished, this.onVpaidAdFinished);
+    this.player.on(this.player.exports.PlayerEvent.AdSkipped, this.onVpaidAdSkipped);
+    this.player.on(this.player.exports.PlayerEvent.AdQuartile, this.onVpaidAdQuartile);
   }
 
   private unregisterPlayerEvents(): void {
-    this.player.off(PlayerEvent.Playing, this.onPlay);
-    this.player.off(PlayerEvent.TimeChanged, this.onTimeChanged);
-    this.player.off(PlayerEvent.Paused, this.onPause);
+    this.player.off(this.player.exports.PlayerEvent.Playing, this.onPlay);
+    this.player.off(this.player.exports.PlayerEvent.TimeChanged, this.onTimeChanged);
+    this.player.off(this.player.exports.PlayerEvent.Paused, this.onPause);
 
-    this.player.off(PlayerEvent.Seek, this.onSeek);
-    this.player.off(PlayerEvent.Seeked, this.onSeeked);
+    this.player.off(this.player.exports.PlayerEvent.Seek, this.onSeek);
+    this.player.off(this.player.exports.PlayerEvent.Seeked, this.onSeeked);
 
-    this.player.off(PlayerEvent.SourceLoaded, this.onSourceLoaded);
+    this.player.off(this.player.exports.PlayerEvent.SourceLoaded, this.onSourceLoaded);
     // To support ads in live streams we need to track metadata events
-    this.player.off(PlayerEvent.Metadata, this.onMetaData);
+    this.player.off(this.player.exports.PlayerEvent.Metadata, this.onMetaData);
 
     // Subscribe to some ad events. In Case of VPAID we rely on the player events to track it.
-    this.player.off(PlayerEvent.AdFinished, this.onVpaidAdFinished);
-    this.player.off(PlayerEvent.AdSkipped, this.onVpaidAdSkipped);
-    this.player.off(PlayerEvent.AdQuartile, this.onVpaidAdQuartile);
+    this.player.off(this.player.exports.PlayerEvent.AdFinished, this.onVpaidAdFinished);
+    this.player.off(this.player.exports.PlayerEvent.AdSkipped, this.onVpaidAdSkipped);
+    this.player.off(this.player.exports.PlayerEvent.AdQuartile, this.onVpaidAdQuartile);
   }
 
   // TODO: combine in something like a reportPlayerState method called for multiple events
@@ -877,7 +881,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     // fire magic time-changed event
     this.fireEvent<TimeChangedEvent>({
       timestamp: Date.now(),
-      type: PlayerEvent.TimeChanged,
+      type: this.player.exports.PlayerEvent.TimeChanged,
       time: this.getCurrentTime(),
     });
   };
@@ -887,10 +891,10 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       this.manager.reportPlayerEvent(YSPlayerEvents.PAUSE);
     }
 
-    if (!this.suppressedEventsController.isSuppressed(PlayerEvent.Paused)) {
+    if (!this.suppressedEventsController.isSuppressed(this.player.exports.PlayerEvent.Paused)) {
       this.fireEvent(event);
     } else {
-      this.suppressedEventsController.remove(PlayerEvent.Paused);
+      this.suppressedEventsController.remove(this.player.exports.PlayerEvent.Paused);
     }
   };
 
@@ -931,7 +935,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 
     this.fireEvent({
       timestamp: Date.now(),
-      type: PlayerEvent.SourceLoaded,
+      type: this.player.exports.PlayerEvent.SourceLoaded,
     });
   };
 
@@ -942,10 +946,10 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 
     this.manager.reportPlayerEvent(YSPlayerEvents.SEEK_START, this.player.getCurrentTime());
 
-    if (!this.suppressedEventsController.isSuppressed(PlayerEvent.Seek)) {
+    if (!this.suppressedEventsController.isSuppressed(this.player.exports.PlayerEvent.Seek)) {
       this.fireEvent(event);
     } else {
-      this.suppressedEventsController.remove(PlayerEvent.Seek);
+      this.suppressedEventsController.remove(this.player.exports.PlayerEvent.Seek);
     }
   };
 
@@ -956,10 +960,10 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 
     this.manager.reportPlayerEvent(YSPlayerEvents.SEEK_END, this.player.getCurrentTime());
 
-    if (!this.suppressedEventsController.isSuppressed(PlayerEvent.Seeked)) {
+    if (!this.suppressedEventsController.isSuppressed(this.player.exports.PlayerEvent.Seeked)) {
       this.fireEvent(event);
     } else {
-      this.suppressedEventsController.remove(PlayerEvent.Seeked);
+      this.suppressedEventsController.remove(this.player.exports.PlayerEvent.Seeked);
     }
   };
 
@@ -1003,7 +1007,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     this.onVpaidAdFinished(event);
     this.fireEvent<AdEvent>({
       timestamp: Date.now(),
-      type: PlayerEvent.AdSkipped,
+      type: this.player.exports.PlayerEvent.AdSkipped,
       ad: AdTranslator.mapYsAdvert(this.getCurrentAd()),
     });
   };
