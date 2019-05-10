@@ -98,8 +98,6 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     Player.addModule(RemoteControlModule);
     this.bitmovinPlayer = new Player(containerElement, config);
 
-    // To ensure proper transitions between the different players we need to create both at the beginning.
-    // This will ensure the right position within the DOM (under the UI).
     this.bitmovinYospacePlayer = new InternalBitmovinYospacePlayer(
       containerElement,
       this.bitmovinPlayer,
