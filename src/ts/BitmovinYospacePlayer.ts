@@ -104,6 +104,10 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 
   load(source: SourceConfig | YospaceSourceConfig, forceTechnology?: string, disableSeeking?: boolean): Promise<void> {
     return new Promise<void>((resolve, reject) => {
+      const isAssetTypePresent = (): boolean => {
+        return source.hasOwnProperty('assetType') && (source as YospaceSourceConfig).assetType !== undefined;
+      };
+
       const switchPlayer = (toType: YospacePlayerType) => {
         this.player.unload().then(() => {
           const oldPlayer: BitmovinYospacePlayerAPI = this.player;
@@ -127,9 +131,9 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       };
 
       // Only switch player when necessary
-      if (!(source as YospaceSourceConfig).assetType && this.currentPlayerType === YospacePlayerType.BitmovinYospace) {
+      if (!isAssetTypePresent() && this.currentPlayerType === YospacePlayerType.BitmovinYospace) {
         switchPlayer(YospacePlayerType.Bitmovin);
-      } else if ((source as YospaceSourceConfig).assetType && this.currentPlayerType === YospacePlayerType.Bitmovin) {
+      } else if (isAssetTypePresent() && this.currentPlayerType === YospacePlayerType.Bitmovin) {
         switchPlayer(YospacePlayerType.BitmovinYospace);
       } else {
         // Else load the source in the current player
