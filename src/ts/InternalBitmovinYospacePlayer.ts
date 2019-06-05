@@ -13,7 +13,8 @@ import { DefaultBitmovinYospacePlayerPolicy } from './BitmovinYospacePlayerPolic
 import { ArrayUtils } from 'bitmovin-player-ui/dist/js/framework/arrayutils';
 import { VastHelper } from './VastHelper';
 import {
-  BitmovinYospacePlayerAPI, BitmovinYospacePlayerPolicy, UNDEFINED_VAST_ERROR_CODE, YospaceAssetType,
+  BitmovinYospacePlayerAPI, BitmovinYospacePlayerPolicy, UNDEFINED_VAST_ERROR_CODE, YospaceAdBreak, YospaceAdBreakEvent,
+  YospaceAssetType,
   YospaceConfiguration, YospaceErrorCode, YospaceErrorEvent, YospaceEventBase, YospacePlayerEvent,
   YospacePlayerEventCallback, YospacePolicyErrorCode, YospacePolicyErrorEvent, YospaceSourceConfig,
 } from './BitmovinYospacePlayerAPI';
@@ -483,6 +484,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       adBreak.adBreakIdentifier,
       this.toMagicTime(adBreak.startPosition),
       this.player.exports.PlayerEvent.AdBreakStarted,
+      adBreak.getDuration(),
     );
     this.fireEvent<AdBreakEvent>(playerEvent);
   };
@@ -555,6 +557,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       adBreak.adBreakIdentifier,
       this.toMagicTime(adBreak.startPosition),
       this.player.exports.PlayerEvent.AdBreakFinished,
+      adBreak.getDuration(),
     );
     this.fireEvent<AdBreakEvent>(playerEvent);
 
@@ -583,11 +586,12 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     }
   };
 
-  private mapAdBreak(ysAdBreak: YSAdBreak): AdBreak {
+  private mapAdBreak(ysAdBreak: YSAdBreak): YospaceAdBreak {
     return {
       id: ysAdBreak.adBreakIdentifier, // can be null
       scheduleTime: this.toMagicTime(ysAdBreak.startPosition),
       ads: ysAdBreak.adverts.map(AdTranslator.mapYsAdvert),
+      duration: ysAdBreak.getDuration(),
     };
   }
 
@@ -1101,13 +1105,15 @@ class AdEventsFactory {
     adBreakId: string,
     scheduleTime: number,
     type: PlayerEvent,
-  ): AdBreakEvent {
+    duration: number,
+  ): YospaceAdBreakEvent {
     return {
       timestamp: Date.now(),
       type: type,
       adBreak: {
         id: adBreakId, // can be null
         scheduleTime: scheduleTime,
+        duration: duration,
       },
     };
   }

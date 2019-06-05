@@ -5,6 +5,7 @@ import {
   PlayerEventCallback,
   PlayerExports,
   SourceConfig,
+  AdBreak, AdBreakEvent,
 } from 'bitmovin-player';
 
 // Enums
@@ -40,6 +41,14 @@ export interface BitmovinYospacePlayerAPI extends PlayerAPI {
 
 export interface YospaceSourceConfig extends SourceConfig {
   assetType: YospaceAssetType;
+}
+
+export interface YospaceAdBreak extends AdBreak {
+  duration: number;
+}
+
+export interface YospaceAdBreakEvent extends PlayerEventBase {
+  adBreak: YospaceAdBreak;
 }
 
 export interface YospaceConfiguration {
