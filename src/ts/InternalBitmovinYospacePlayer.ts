@@ -39,6 +39,7 @@ interface LocalLinearAd extends LinearAd {
   extensions: any[];
 }
 
+// Enums for yospace related vpaid ad tracking strings
 enum VpaidTrackingEvent {
   AdSkipped = 'skip',
   AdStarted = 'creativeView',
@@ -47,11 +48,13 @@ enum VpaidTrackingEvent {
   AdVideoMidpoint = 'midpoint',
   AdVideoThirdQuartile = 'thirdQuartile',
   AdVideoComplete = 'complete',
+  AdPaused = 'pause',
+  AdPlaying = 'resume',
+
+  // Unused as not supported by our player
   AdUserAcceptInvitation = 'acceptInvitation',
   AdUserMinimize = 'collapse',
   AdUserClose = 'close',
-  AdPaused = 'pause',
-  AdPlaying = 'resume',
 }
 
 // It is expected that this does not implement all members of the PlayerAPI cause they will be added dynamically.
@@ -1000,6 +1003,8 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   };
 
   private onVpaidAdFinished = (event: AdEvent) => {
+    // We have a guard statement in trackVpaidEvent so we need to track it before setting the
+    // isVpaidActive flag to false.
     this.trackVpaidEvent(VpaidTrackingEvent.AdVideoComplete);
     this.isVpaidActive = false;
 
