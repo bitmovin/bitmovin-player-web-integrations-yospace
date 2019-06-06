@@ -1052,7 +1052,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     }
 
     const currentAd = this.getCurrentAd();
-    const currentBreak = this.getCurrentAd().adBreak;
+    const currentBreak = currentAd.adBreak;
 
     currentAd.getInteractiveUnit().track(
       event,
