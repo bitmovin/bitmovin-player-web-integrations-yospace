@@ -863,6 +863,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   // TODO: combine in something like a reportPlayerState method called for multiple events
   private onPlay = () => {
     if (this.isVpaidActive) {
+      this.trackVpaidEvent(VpaidTrackingEvent.AdPlaying);
       return;
     }
 
