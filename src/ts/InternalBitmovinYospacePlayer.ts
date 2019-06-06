@@ -1012,6 +1012,22 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     this.handleQuartileEvent(event.quartile);
   };
 
+  private trackVpaidEvent(event: VpaidTrackingEvent) {
+    if (!this.isVpaidActive) {
+      return;
+    }
+
+    const currentAd = this.getCurrentAd();
+    const currentBreak = this.getCurrentAd().adBreak;
+
+    currentAd.getInteractiveUnit().track(
+      event,
+      this.player.getCurrentTime(), // The VPAID ad needs to implement the VPAID API otherwise we will report 0 here
+      '', // We don't know the asset url as the VPAID is loading this
+      currentBreak.getDuration() + '', // Yospace want it as string
+    );
+  }
+
   private bufferApi: PlayerBufferAPI = {
     setTargetLevel: (type: BufferType, value: number, media: MediaType) => {
       this.player.buffer.setTargetLevel(type, value, media);
