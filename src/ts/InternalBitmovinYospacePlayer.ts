@@ -837,6 +837,8 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     this.player.on(this.player.exports.PlayerEvent.Metadata, this.onMetaData);
 
     // Subscribe to some ad events. In Case of VPAID we rely on the player events to track it.
+    this.player.on(this.player.exports.PlayerEvent.AdBreakStarted, this.onVpaidAdBreakStarted);
+    this.player.on(this.player.exports.PlayerEvent.AdStarted, this.onVpaidAdStarted);
     this.player.on(this.player.exports.PlayerEvent.AdFinished, this.onVpaidAdFinished);
     this.player.on(this.player.exports.PlayerEvent.AdSkipped, this.onVpaidAdSkipped);
     this.player.on(this.player.exports.PlayerEvent.AdQuartile, this.onVpaidAdQuartile);
@@ -855,6 +857,8 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     this.player.off(this.player.exports.PlayerEvent.Metadata, this.onMetaData);
 
     // Subscribe to some ad events. In Case of VPAID we rely on the player events to track it.
+    this.player.off(this.player.exports.PlayerEvent.AdBreakStarted, this.onVpaidAdBreakStarted);
+    this.player.off(this.player.exports.PlayerEvent.AdStarted, this.onVpaidAdStarted);
     this.player.off(this.player.exports.PlayerEvent.AdFinished, this.onVpaidAdFinished);
     this.player.off(this.player.exports.PlayerEvent.AdSkipped, this.onVpaidAdSkipped);
     this.player.off(this.player.exports.PlayerEvent.AdQuartile, this.onVpaidAdQuartile);
