@@ -825,7 +825,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   };
 
   private registerPlayerEvents(): void {
-    this.player.on(this.player.exports.PlayerEvent.Playing, this.onPlay);
+    this.player.on(this.player.exports.PlayerEvent.Playing, this.onPlaying);
     this.player.on(this.player.exports.PlayerEvent.TimeChanged, this.onTimeChanged);
     this.player.on(this.player.exports.PlayerEvent.Paused, this.onPause);
 
@@ -843,7 +843,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   }
 
   private unregisterPlayerEvents(): void {
-    this.player.off(this.player.exports.PlayerEvent.Playing, this.onPlay);
+    this.player.off(this.player.exports.PlayerEvent.Playing, this.onPlaying);
     this.player.off(this.player.exports.PlayerEvent.TimeChanged, this.onTimeChanged);
     this.player.off(this.player.exports.PlayerEvent.Paused, this.onPause);
 
@@ -861,7 +861,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   }
 
   // TODO: combine in something like a reportPlayerState method called for multiple events
-  private onPlay = () => {
+  private onPlaying = () => {
     if (this.isVpaidActive) {
       this.trackVpaidEvent(VpaidTrackingEvent.AdPlaying);
       return;
