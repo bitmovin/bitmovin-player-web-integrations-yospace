@@ -1011,6 +1011,18 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   };
 
   private onVpaidAdQuartile = (event: AdQuartileEvent) => {
+    const mapAdQuartile = (quartileEvent: AdQuartileEvent): VpaidTrackingEvent => {
+      switch (quartileEvent.quartile) {
+        case this.player.exports.AdQuartile.FIRST_QUARTILE:
+          return VpaidTrackingEvent.AdVideoFirstQuartile;
+        case this.player.exports.AdQuartile.MIDPOINT:
+          return VpaidTrackingEvent.AdVideoMidpoint;
+        case this.player.exports.AdQuartile.THIRD_QUARTILE:
+          return VpaidTrackingEvent.AdVideoThirdQuartile;
+      }
+    };
+
+    this.trackVpaidEvent(mapAdQuartile(event));
     this.handleQuartileEvent(event.quartile);
   };
 
