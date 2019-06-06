@@ -39,6 +39,21 @@ interface LocalLinearAd extends LinearAd {
   extensions: any[];
 }
 
+enum VpaidTrackingEvent {
+  AdSkipped = 'skip',
+  AdStarted = 'creativeView',
+  AdVideoStart = 'start',
+  AdVideoFirstQuartile = 'firstQuartile',
+  AdVideoMidpoint = 'midpoint',
+  AdVideoThirdQuartile = 'thirdQuartile',
+  AdVideoComplete = 'complete',
+  AdUserAcceptInvitation = 'acceptInvitation',
+  AdUserMinimize = 'collapse',
+  AdUserClose = 'close',
+  AdPaused = 'pause',
+  AdPlaying = 'resume',
+}
+
 // It is expected that this does not implement all members of the PlayerAPI cause they will be added dynamically.
 // @ts-ignore
 export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
