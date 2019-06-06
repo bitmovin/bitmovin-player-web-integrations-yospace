@@ -989,6 +989,10 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     this.trackVpaidEvent(VpaidTrackingEvent.AdStarted);
   };
 
+  private onVpaidAdStarted = (event: AdEvent) => {
+    this.trackVpaidEvent(VpaidTrackingEvent.AdVideoStart);
+  };
+
   private onVpaidAdFinished = (event: AdEvent) => {
     this.isVpaidActive = false;
 
