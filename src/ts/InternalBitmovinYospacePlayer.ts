@@ -1000,6 +1000,8 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   };
 
   private onVpaidAdSkipped = (event: AdEvent) => {
+    this.trackVpaidEvent(VpaidTrackingEvent.AdSkipped);
+
     this.onVpaidAdFinished(event);
     this.fireEvent<AdEvent>({
       timestamp: Date.now(),
