@@ -883,7 +883,9 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   };
 
   private onPause = (event: PlaybackEvent) => {
-    if (!this.isVpaidActive) {
+    if (this.isVpaidActive) {
+      this.trackVpaidEvent(VpaidTrackingEvent.AdPaused);
+    } else {
       this.manager.reportPlayerEvent(YSPlayerEvents.PAUSE);
     }
 
