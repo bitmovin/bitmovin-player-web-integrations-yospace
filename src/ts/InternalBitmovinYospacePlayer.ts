@@ -39,6 +39,24 @@ interface LocalLinearAd extends LinearAd {
   extensions: any[];
 }
 
+// Enums for yospace related vpaid ad tracking strings
+enum VpaidTrackingEvent {
+  AdSkipped = 'skip',
+  AdStarted = 'creativeView',
+  AdVideoStart = 'start',
+  AdVideoFirstQuartile = 'firstQuartile',
+  AdVideoMidpoint = 'midpoint',
+  AdVideoThirdQuartile = 'thirdQuartile',
+  AdVideoComplete = 'complete',
+  AdPaused = 'pause',
+  AdPlaying = 'resume',
+
+  // Unused as not supported by our player
+  AdUserAcceptInvitation = 'acceptInvitation',
+  AdUserMinimize = 'collapse',
+  AdUserClose = 'close',
+}
+
 // It is expected that this does not implement all members of the PlayerAPI cause they will be added dynamically.
 // @ts-ignore
 export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
@@ -810,7 +828,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   };
 
   private registerPlayerEvents(): void {
-    this.player.on(this.player.exports.PlayerEvent.Playing, this.onPlay);
+    this.player.on(this.player.exports.PlayerEvent.Playing, this.onPlaying);
     this.player.on(this.player.exports.PlayerEvent.TimeChanged, this.onTimeChanged);
     this.player.on(this.player.exports.PlayerEvent.Paused, this.onPause);
 
@@ -822,13 +840,15 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     this.player.on(this.player.exports.PlayerEvent.Metadata, this.onMetaData);
 
     // Subscribe to some ad events. In Case of VPAID we rely on the player events to track it.
+    this.player.on(this.player.exports.PlayerEvent.AdBreakStarted, this.onVpaidAdBreakStarted);
+    this.player.on(this.player.exports.PlayerEvent.AdStarted, this.onVpaidAdStarted);
     this.player.on(this.player.exports.PlayerEvent.AdFinished, this.onVpaidAdFinished);
     this.player.on(this.player.exports.PlayerEvent.AdSkipped, this.onVpaidAdSkipped);
     this.player.on(this.player.exports.PlayerEvent.AdQuartile, this.onVpaidAdQuartile);
   }
 
   private unregisterPlayerEvents(): void {
-    this.player.off(this.player.exports.PlayerEvent.Playing, this.onPlay);
+    this.player.off(this.player.exports.PlayerEvent.Playing, this.onPlaying);
     this.player.off(this.player.exports.PlayerEvent.TimeChanged, this.onTimeChanged);
     this.player.off(this.player.exports.PlayerEvent.Paused, this.onPause);
 
@@ -840,14 +860,16 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     this.player.off(this.player.exports.PlayerEvent.Metadata, this.onMetaData);
 
     // Subscribe to some ad events. In Case of VPAID we rely on the player events to track it.
+    this.player.off(this.player.exports.PlayerEvent.AdBreakStarted, this.onVpaidAdBreakStarted);
+    this.player.off(this.player.exports.PlayerEvent.AdStarted, this.onVpaidAdStarted);
     this.player.off(this.player.exports.PlayerEvent.AdFinished, this.onVpaidAdFinished);
     this.player.off(this.player.exports.PlayerEvent.AdSkipped, this.onVpaidAdSkipped);
     this.player.off(this.player.exports.PlayerEvent.AdQuartile, this.onVpaidAdQuartile);
   }
 
-  // TODO: combine in something like a reportPlayerState method called for multiple events
-  private onPlay = () => {
+  private onPlaying = () => {
     if (this.isVpaidActive) {
+      this.trackVpaidEvent(VpaidTrackingEvent.AdPlaying);
       return;
     }
 
@@ -868,7 +890,9 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   };
 
   private onPause = (event: PlaybackEvent) => {
-    if (!this.isVpaidActive) {
+    if (this.isVpaidActive) {
+      this.trackVpaidEvent(VpaidTrackingEvent.AdPaused);
+    } else {
       this.manager.reportPlayerEvent(YSPlayerEvents.PAUSE);
     }
 
@@ -970,7 +994,18 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     this.manager.reportPlayerEvent(YSPlayerEvents.METADATA, yospaceMetadataObject);
   };
 
+  private onVpaidAdBreakStarted = (event: AdBreakEvent) => {
+    this.trackVpaidEvent(VpaidTrackingEvent.AdStarted);
+  };
+
+  private onVpaidAdStarted = (event: AdEvent) => {
+    this.trackVpaidEvent(VpaidTrackingEvent.AdVideoStart);
+  };
+
   private onVpaidAdFinished = (event: AdEvent) => {
+    // We have a guard statement in trackVpaidEvent so we need to track it before setting the
+    // isVpaidActive flag to false.
+    this.trackVpaidEvent(VpaidTrackingEvent.AdVideoComplete);
     this.isVpaidActive = false;
 
     const currentAd = this.getCurrentAd();
@@ -985,6 +1020,8 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   };
 
   private onVpaidAdSkipped = (event: AdEvent) => {
+    this.trackVpaidEvent(VpaidTrackingEvent.AdSkipped);
+
     this.onVpaidAdFinished(event);
     this.fireEvent<AdEvent>({
       timestamp: Date.now(),
@@ -994,8 +1031,36 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   };
 
   private onVpaidAdQuartile = (event: AdQuartileEvent) => {
+    const mapAdQuartile = (quartileEvent: AdQuartileEvent): VpaidTrackingEvent => {
+      switch (quartileEvent.quartile) {
+        case this.player.exports.AdQuartile.FIRST_QUARTILE:
+          return VpaidTrackingEvent.AdVideoFirstQuartile;
+        case this.player.exports.AdQuartile.MIDPOINT:
+          return VpaidTrackingEvent.AdVideoMidpoint;
+        case this.player.exports.AdQuartile.THIRD_QUARTILE:
+          return VpaidTrackingEvent.AdVideoThirdQuartile;
+      }
+    };
+
+    this.trackVpaidEvent(mapAdQuartile(event));
     this.handleQuartileEvent(event.quartile);
   };
+
+  private trackVpaidEvent(event: VpaidTrackingEvent) {
+    if (!this.isVpaidActive) {
+      return;
+    }
+
+    const currentAd = this.getCurrentAd();
+    const currentBreak = currentAd.adBreak;
+
+    currentAd.getInteractiveUnit().track(
+      event,
+      this.player.getCurrentTime(), // The VPAID ad needs to implement the VPAID API otherwise we will report 0 here
+      '', // We don't know the asset url as the VPAID is loading this
+      currentBreak.getDuration() + '', // Yospace want it as string
+    );
+  }
 
   private bufferApi: PlayerBufferAPI = {
     setTargetLevel: (type: BufferType, value: number, media: MediaType) => {
