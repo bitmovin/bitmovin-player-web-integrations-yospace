@@ -1,9 +1,8 @@
 ///<reference path='Yospace.d.ts'/>
 import {
-  AdBreakEvent, AdEvent, AdQuartile, AdQuartileEvent, BufferLevel, BufferType, MediaType,
-  PlayerAPI, PlayerBufferAPI, PlayerEvent, PlayerEventBase,
-  PlayerEventCallback, SeekEvent, TimeChangedEvent, TimeRange, PlaybackEvent, MetadataEvent,
-  PlayerError, ErrorEvent,
+  AdBreakEvent, AdEvent, AdQuartile, AdQuartileEvent, BufferLevel, BufferType, ErrorEvent, MediaType, MetadataEvent,
+  PlaybackEvent, PlayerAPI, PlayerBufferAPI, PlayerError, PlayerEvent, PlayerEventBase, PlayerEventCallback, SeekEvent,
+  TimeChangedEvent, TimeRange,
 } from 'bitmovin-player/modules/bitmovinplayer-core';
 
 import {
@@ -14,14 +13,11 @@ import { ArrayUtils } from 'bitmovin-player-ui/dist/js/framework/arrayutils';
 import { VastHelper } from './VastHelper';
 import {
   BitmovinYospacePlayerAPI, BitmovinYospacePlayerPolicy, UNDEFINED_VAST_ERROR_CODE, YospaceAdBreak, YospaceAdBreakEvent,
-  YospaceAssetType,
-  YospaceConfiguration, YospaceErrorCode, YospaceErrorEvent, YospaceEventBase, YospacePlayerEvent,
+  YospaceAssetType, YospaceConfiguration, YospaceErrorCode, YospaceErrorEvent, YospaceEventBase, YospacePlayerEvent,
   YospacePlayerEventCallback, YospacePolicyErrorCode, YospacePolicyErrorEvent, YospaceSourceConfig,
 } from './BitmovinYospacePlayerAPI';
 import { YospacePlayerError } from './YospaceError';
-import {
-  AdBreak, AdConfig, LinearAd, PlayerAdvertisingAPI,
-} from 'bitmovin-player/modules/bitmovinplayer-advertising-core';
+import { AdConfig, LinearAd, PlayerAdvertisingAPI } from 'bitmovin-player/modules/bitmovinplayer-advertising-core';
 
 interface StreamPart {
   start: number;
@@ -158,11 +154,19 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
         };
 
         if (result === YSSessionResult.INITIALISED) {
+          this.calculateAdParts();
           // clone source to not modify passed object
           let clonedSource = {
             ...source,
             hls: this.manager.masterPlaylist(), // use received url from yospace
           };
+
+          // convert start time (relative) to an absolute time
+          if (this.yospaceSourceConfig.assetType === YospaceAssetType.VOD && clonedSource.options && clonedSource.options.startOffset) {
+            clonedSource.options.startOffset = this.toAbsoluteTime(clonedSource.options.startOffset);
+            console.log('startOffset adjusted to: ' + clonedSource.options.startOffset);
+          }
+
           this.yospaceListenerAdapter = new YospaceAdListenerAdapter();
           this.bindYospaceEvent();
           this.manager.registerPlayer(this.yospaceListenerAdapter);
@@ -648,6 +652,17 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     return playbackTime - previousBreaksDuration;
   }
 
+  private toAbsoluteTime(relativeTime: number): number {
+    // magical content seeking
+    const originalStreamPart = this.contentMapping.find((mapping: StreamPartMapping) => {
+      return mapping.magic.start <= relativeTime && relativeTime <= mapping.magic.end;
+    });
+
+    const elapsedTimeInStreamPart = relativeTime - originalStreamPart.magic.start;
+    const absoluteTime = originalStreamPart.original.start + elapsedTimeInStreamPart;
+    return absoluteTime;
+  }
+
   private magicBufferLevel(bufferLevel: BufferLevel): number {
     if (this.isAdActive()) {
       return Math.min(bufferLevel.level, this.getCurrentAd().duration);
@@ -904,6 +919,16 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   };
 
   private onSourceLoaded = () => {
+
+    this.fireEvent({
+      timestamp: Date.now(),
+      type: this.player.exports.PlayerEvent.SourceLoaded,
+    });
+  };
+
+
+
+  private calculateAdParts () {
     if (this.yospaceSourceConfig.assetType === YospaceAssetType.VOD) {
       const session = this.manager.session;
       const timeline = session.timeline;
@@ -937,12 +962,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
         }
       });
     }
-
-    this.fireEvent({
-      timestamp: Date.now(),
-      type: this.player.exports.PlayerEvent.SourceLoaded,
-    });
-  };
+  }
 
   private onSeek = (event: SeekEvent) => {
     if (this.isVpaidActive) {
