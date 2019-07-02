@@ -235,7 +235,6 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     if (!EnumHelper.isYospaceEvent(eventType)) {
       // we need to suppress some events because they need to be modified first. so don't add it to the actual player
       const suppressedEventTypes = [
-        this.player.exports.PlayerEvent.SourceLoaded,
         this.player.exports.PlayerEvent.TimeChanged,
         this.player.exports.PlayerEvent.Paused,
 
@@ -843,7 +842,6 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     this.player.on(this.player.exports.PlayerEvent.Seek, this.onSeek);
     this.player.on(this.player.exports.PlayerEvent.Seeked, this.onSeeked);
 
-    this.player.on(this.player.exports.PlayerEvent.SourceLoaded, this.onSourceLoaded);
     // To support ads in live streams we need to track metadata events
     this.player.on(this.player.exports.PlayerEvent.Metadata, this.onMetaData);
 
@@ -863,7 +861,6 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     this.player.off(this.player.exports.PlayerEvent.Seek, this.onSeek);
     this.player.off(this.player.exports.PlayerEvent.Seeked, this.onSeeked);
 
-    this.player.off(this.player.exports.PlayerEvent.SourceLoaded, this.onSourceLoaded);
     // To support ads in live streams we need to track metadata events
     this.player.off(this.player.exports.PlayerEvent.Metadata, this.onMetaData);
 
@@ -908,50 +905,6 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       this.fireEvent(event);
     } else {
       this.suppressedEventsController.remove(this.player.exports.PlayerEvent.Paused);
-    }
-  };
-
-  private onSourceLoaded = () => {
-
-    this.fireEvent({
-      timestamp: Date.now(),
-      type: this.player.exports.PlayerEvent.SourceLoaded,
-    });
-  };
-
-  private calculateAdParts () {
-    if (this.yospaceSourceConfig.assetType === YospaceAssetType.VOD) {
-      const session = this.manager.session;
-      const timeline = session.timeline;
-      // calculate duration magic
-      timeline.getAllElements().forEach((element) => {
-        const originalChunk: StreamPart = {
-          start: element.offset,
-          end: element.offset + element.duration,
-        };
-
-        switch (element.type) {
-          case YSTimelineElement.ADVERT:
-            originalChunk.adBreak = element.adBreak;
-
-            this.adParts.push(originalChunk);
-            break;
-          case YSTimelineElement.VOD:
-
-            const magicalContentChunk = {
-              start: this.contentDuration,
-              end: this.contentDuration + element.duration,
-            };
-
-            this.contentMapping.push({
-              magic: magicalContentChunk,
-              original: originalChunk,
-            });
-
-            this.contentDuration += element.duration;
-            break;
-        }
-      });
     }
   };
 
@@ -1071,6 +1024,42 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       '', // We don't know the asset url as the VPAID is loading this
       currentBreak.getDuration() + '', // Yospace want it as string
     );
+  }
+
+  private calculateAdParts () {
+    if (this.yospaceSourceConfig.assetType === YospaceAssetType.VOD) {
+      const session = this.manager.session;
+      const timeline = session.timeline;
+      // calculate duration magic
+      timeline.getAllElements().forEach((element) => {
+        const originalChunk: StreamPart = {
+          start: element.offset,
+          end: element.offset + element.duration,
+        };
+
+        switch (element.type) {
+          case YSTimelineElement.ADVERT:
+            originalChunk.adBreak = element.adBreak;
+
+            this.adParts.push(originalChunk);
+            break;
+          case YSTimelineElement.VOD:
+
+            const magicalContentChunk = {
+              start: this.contentDuration,
+              end: this.contentDuration + element.duration,
+            };
+
+            this.contentMapping.push({
+              magic: magicalContentChunk,
+              original: originalChunk,
+            });
+
+            this.contentDuration += element.duration;
+            break;
+        }
+      });
+    }
   }
 
   private bufferApi: PlayerBufferAPI = {
