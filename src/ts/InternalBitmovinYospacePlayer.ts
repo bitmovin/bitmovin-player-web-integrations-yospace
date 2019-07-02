@@ -953,7 +953,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
         }
       });
     }
-  }
+  };
 
   private onSeek = (event: SeekEvent) => {
     if (this.isVpaidActive) {
