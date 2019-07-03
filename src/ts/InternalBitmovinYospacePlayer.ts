@@ -1,9 +1,8 @@
 ///<reference path='Yospace.d.ts'/>
 import {
-  AdBreakEvent, AdEvent, AdQuartile, AdQuartileEvent, BufferLevel, BufferType, MediaType,
-  PlayerAPI, PlayerBufferAPI, PlayerEvent, PlayerEventBase,
-  PlayerEventCallback, SeekEvent, TimeChangedEvent, TimeRange, PlaybackEvent, MetadataEvent,
-  PlayerError, ErrorEvent,
+  AdBreakEvent, AdEvent, AdQuartile, AdQuartileEvent, BufferLevel, BufferType, ErrorEvent, MediaType, MetadataEvent,
+  PlaybackEvent, PlayerAPI, PlayerBufferAPI, PlayerError, PlayerEvent, PlayerEventBase, PlayerEventCallback, SeekEvent,
+  TimeChangedEvent, TimeRange,
 } from 'bitmovin-player/modules/bitmovinplayer-core';
 
 import {
@@ -14,14 +13,11 @@ import { ArrayUtils } from 'bitmovin-player-ui/dist/js/framework/arrayutils';
 import { VastHelper } from './VastHelper';
 import {
   BitmovinYospacePlayerAPI, BitmovinYospacePlayerPolicy, UNDEFINED_VAST_ERROR_CODE, YospaceAdBreak, YospaceAdBreakEvent,
-  YospaceAssetType,
-  YospaceConfiguration, YospaceErrorCode, YospaceErrorEvent, YospaceEventBase, YospacePlayerEvent,
+  YospaceAssetType, YospaceConfiguration, YospaceErrorCode, YospaceErrorEvent, YospaceEventBase, YospacePlayerEvent,
   YospacePlayerEventCallback, YospacePolicyErrorCode, YospacePolicyErrorEvent, YospaceSourceConfig,
 } from './BitmovinYospacePlayerAPI';
 import { YospacePlayerError } from './YospaceError';
-import {
-  AdBreak, AdConfig, LinearAd, PlayerAdvertisingAPI,
-} from 'bitmovin-player/modules/bitmovinplayer-advertising-core';
+import { AdConfig, LinearAd, PlayerAdvertisingAPI } from 'bitmovin-player/modules/bitmovinplayer-advertising-core';
 
 interface StreamPart {
   start: number;
@@ -158,11 +154,19 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
         };
 
         if (result === YSSessionResult.INITIALISED) {
+          this.calculateAdParts();
           // clone source to not modify passed object
           let clonedSource = {
             ...source,
             hls: this.manager.masterPlaylist(), // use received url from yospace
           };
+
+          // convert start time (relative) to an absolute time
+          if (this.yospaceSourceConfig.assetType === YospaceAssetType.VOD && clonedSource.options && clonedSource.options.startOffset) {
+            clonedSource.options.startOffset = this.toAbsoluteTime(clonedSource.options.startOffset);
+            console.log('startOffset adjusted to: ' + clonedSource.options.startOffset);
+          }
+
           this.yospaceListenerAdapter = new YospaceAdListenerAdapter();
           this.bindYospaceEvent();
           this.manager.registerPlayer(this.yospaceListenerAdapter);
@@ -231,7 +235,6 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     if (!EnumHelper.isYospaceEvent(eventType)) {
       // we need to suppress some events because they need to be modified first. so don't add it to the actual player
       const suppressedEventTypes = [
-        this.player.exports.PlayerEvent.SourceLoaded,
         this.player.exports.PlayerEvent.TimeChanged,
         this.player.exports.PlayerEvent.Paused,
 
@@ -314,13 +317,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       this.cachedSeekTarget = null;
     }
 
-    // magical content seeking
-    const originalStreamPart = this.contentMapping.find((mapping: StreamPartMapping) => {
-      return mapping.magic.start <= allowedSeekTarget && allowedSeekTarget <= mapping.magic.end;
-    });
-
-    const elapsedTimeInStreamPart = allowedSeekTarget - originalStreamPart.magic.start;
-    const magicSeekTarget = originalStreamPart.original.start + elapsedTimeInStreamPart;
+    const magicSeekTarget = this.toAbsoluteTime(allowedSeekTarget);
 
     return this.player.seek(magicSeekTarget, issuer);
   }
@@ -648,6 +645,16 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     return playbackTime - previousBreaksDuration;
   }
 
+  private toAbsoluteTime(relativeTime: number): number {
+    const originalStreamPart = this.contentMapping.find((mapping: StreamPartMapping) => {
+      return mapping.magic.start <= relativeTime && relativeTime <= mapping.magic.end;
+    });
+
+    const elapsedTimeInStreamPart = relativeTime - originalStreamPart.magic.start;
+    const absoluteTime = originalStreamPart.original.start + elapsedTimeInStreamPart;
+    return absoluteTime;
+  }
+
   private magicBufferLevel(bufferLevel: BufferLevel): number {
     if (this.isAdActive()) {
       return Math.min(bufferLevel.level, this.getCurrentAd().duration);
@@ -835,7 +842,6 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     this.player.on(this.player.exports.PlayerEvent.Seek, this.onSeek);
     this.player.on(this.player.exports.PlayerEvent.Seeked, this.onSeeked);
 
-    this.player.on(this.player.exports.PlayerEvent.SourceLoaded, this.onSourceLoaded);
     // To support ads in live streams we need to track metadata events
     this.player.on(this.player.exports.PlayerEvent.Metadata, this.onMetaData);
 
@@ -855,7 +861,6 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     this.player.off(this.player.exports.PlayerEvent.Seek, this.onSeek);
     this.player.off(this.player.exports.PlayerEvent.Seeked, this.onSeeked);
 
-    this.player.off(this.player.exports.PlayerEvent.SourceLoaded, this.onSourceLoaded);
     // To support ads in live streams we need to track metadata events
     this.player.off(this.player.exports.PlayerEvent.Metadata, this.onMetaData);
 
@@ -901,47 +906,6 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     } else {
       this.suppressedEventsController.remove(this.player.exports.PlayerEvent.Paused);
     }
-  };
-
-  private onSourceLoaded = () => {
-    if (this.yospaceSourceConfig.assetType === YospaceAssetType.VOD) {
-      const session = this.manager.session;
-      const timeline = session.timeline;
-      // calculate duration magic
-      timeline.getAllElements().forEach((element) => {
-        const originalChunk: StreamPart = {
-          start: element.offset,
-          end: element.offset + element.duration,
-        };
-
-        switch (element.type) {
-          case YSTimelineElement.ADVERT:
-            originalChunk.adBreak = element.adBreak;
-
-            this.adParts.push(originalChunk);
-            break;
-          case YSTimelineElement.VOD:
-
-            const magicalContentChunk = {
-              start: this.contentDuration,
-              end: this.contentDuration + element.duration,
-            };
-
-            this.contentMapping.push({
-              magic: magicalContentChunk,
-              original: originalChunk,
-            });
-
-            this.contentDuration += element.duration;
-            break;
-        }
-      });
-    }
-
-    this.fireEvent({
-      timestamp: Date.now(),
-      type: this.player.exports.PlayerEvent.SourceLoaded,
-    });
   };
 
   private onSeek = (event: SeekEvent) => {
@@ -1060,6 +1024,42 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       '', // We don't know the asset url as the VPAID is loading this
       currentBreak.getDuration() + '', // Yospace want it as string
     );
+  }
+
+  private calculateAdParts () {
+    if (this.yospaceSourceConfig.assetType === YospaceAssetType.VOD) {
+      const session = this.manager.session;
+      const timeline = session.timeline;
+      // calculate duration magic
+      timeline.getAllElements().forEach((element) => {
+        const originalChunk: StreamPart = {
+          start: element.offset,
+          end: element.offset + element.duration,
+        };
+
+        switch (element.type) {
+          case YSTimelineElement.ADVERT:
+            originalChunk.adBreak = element.adBreak;
+
+            this.adParts.push(originalChunk);
+            break;
+          case YSTimelineElement.VOD:
+
+            const magicalContentChunk = {
+              start: this.contentDuration,
+              end: this.contentDuration + element.duration,
+            };
+
+            this.contentMapping.push({
+              magic: magicalContentChunk,
+              original: originalChunk,
+            });
+
+            this.contentDuration += element.duration;
+            break;
+        }
+      });
+    }
   }
 
   private bufferApi: PlayerBufferAPI = {
