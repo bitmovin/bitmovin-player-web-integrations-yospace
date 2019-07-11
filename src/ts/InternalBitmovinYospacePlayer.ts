@@ -679,6 +679,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     // reset all local attributes
     this.unregisterPlayerEvents();
     if (this.manager) {
+      this.manager.reportPlayerEvent(YSPlayerEvents.END);
       this.manager.shutdown();
       this.manager = null;
     }
