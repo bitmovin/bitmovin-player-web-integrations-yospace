@@ -472,6 +472,14 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     return this.manager.session.currentAdvert;
   }
 
+  private getCurrentAdBreak(): YSAdBreak | null {
+    if (!this.manager) {
+      return null;
+    }
+    return this.manager.session.currentAdvert.adBreak;
+  }
+
+
   private fireEvent<E extends PlayerEventBase | YospaceEventBase>(event: E): void {
     if (this.eventHandlers[event.type]) {
       this.eventHandlers[event.type].forEach((callback: YospacePlayerEventCallback) => callback(event));
@@ -555,6 +563,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   };
 
   private onAdFinished = (event: BYSAdEvent) => {
+    console.log('YospaceAdFinished Event');
     const playerEvent = AdEventsFactory.createAdEvent(
       this.player,
       this.player.exports.PlayerEvent.AdFinished,
@@ -566,6 +575,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   };
 
   private onAdBreakFinished = (event: BYSAdBreakEvent) => {
+    console.log('YospaceAdBreakFinished Event');
     const adBreak = event.adBreak;
     const playerEvent = AdEventsFactory.createAdBreakEvent(
       this.player,
@@ -574,6 +584,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       this.player.exports.PlayerEvent.AdBreakFinished,
       adBreak.getDuration(),
     );
+
     this.fireEvent<AdBreakEvent>(playerEvent);
 
     if (this.cachedSeekTarget) {
@@ -979,9 +990,33 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       mediaId: currentAd.getMediaID(),
     });
 
+    const currentAdBreak = this.getCurrentAdBreak();
+    if (currentAdBreak && currentAdBreak.adverts && currentAdBreak.adverts.length > 0) {
+      if (currentAdBreak.adverts[currentAdBreak.adverts.length - 1].getMediaID() === currentAd.getMediaID()) {
+
+        const playerEvent = AdEventsFactory.createAdBreakEvent(
+          this.player,
+          currentAdBreak.adBreakIdentifier,
+          this.toMagicTime(currentAdBreak.startPosition),
+          this.player.exports.PlayerEvent.AdBreakFinished,
+          currentAdBreak.getDuration(),
+        );
+
+        console.log('VPAID ad was the last ad in the ad break. Firing ad break end event');
+        this.fireEvent<AdBreakEvent>(playerEvent);
+        this.player.setPlaybackSpeed(this.playbackSpeed);
+        this.player.pause();
+        this.player.play();
+      }
+
+
+    }
+
     const session = this.manager.session;
     session.currentAdvert = null;
     this.manager.session.suppressAnalytics(false);
+
+
   };
 
   private onVpaidAdSkipped = (event: AdEvent) => {
