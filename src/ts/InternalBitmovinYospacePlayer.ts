@@ -17,7 +17,10 @@ import {
   YospacePlayerEventCallback, YospacePolicyErrorCode, YospacePolicyErrorEvent, YospaceSourceConfig,
 } from './BitmovinYospacePlayerAPI';
 import { YospacePlayerError } from './YospaceError';
-import { AdConfig, LinearAd, PlayerAdvertisingAPI } from 'bitmovin-player/modules/bitmovinplayer-advertising-core';
+import {
+  Ad,
+  AdBreak, AdConfig, LinearAd, PlayerAdvertisingAPI,
+} from 'bitmovin-player/modules/bitmovinplayer-advertising-core';
 
 interface StreamPart {
   start: number;
@@ -89,9 +92,12 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   // save vpaid status
   private isVpaidActive = false;
 
+  // save last VPAID ad and flag to fire Ad Break End event
+  private fireVpaidAdBreakEnd = false;
+  private lastVPaidAd: YSAdvert;
+
   constructor(containerElement: HTMLElement, player: PlayerAPI, yospaceConfig: YospaceConfiguration = {}) {
     this.yospaceConfig = yospaceConfig;
-
     this.player = player;
     this.wrapPlayer();
   }
@@ -473,10 +479,11 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   }
 
   private getCurrentAdBreak(): YSAdBreak | null {
-    if (!this.manager) {
+    let currentAd = this.getCurrentAd();
+    if (!currentAd) {
       return null;
     }
-    return this.manager.session.currentAdvert.adBreak;
+    return currentAd.adBreak;
   }
 
   private fireEvent<E extends PlayerEventBase | YospaceEventBase>(event: E): void {
@@ -562,7 +569,6 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   };
 
   private onAdFinished = (event: BYSAdEvent) => {
-    console.log('YospaceAdFinished Event');
     const playerEvent = AdEventsFactory.createAdEvent(
       this.player,
       this.player.exports.PlayerEvent.AdFinished,
@@ -574,7 +580,6 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   };
 
   private onAdBreakFinished = (event: BYSAdBreakEvent) => {
-    console.log('YospaceAdBreakFinished Event');
     const adBreak = event.adBreak;
     const playerEvent = AdEventsFactory.createAdBreakEvent(
       this.player,
@@ -694,6 +699,8 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       this.manager = null;
     }
 
+    this.fireVpaidAdBreakEnd = false;
+    this.lastVPaidAd = null;
     this.contentDuration = 0;
     this.contentMapping = [];
     this.adParts = [];
@@ -858,6 +865,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 
     // Subscribe to some ad events. In Case of VPAID we rely on the player events to track it.
     this.player.on(this.player.exports.PlayerEvent.AdBreakStarted, this.onVpaidAdBreakStarted);
+    this.player.on(this.player.exports.PlayerEvent.AdBreakFinished, this.onVpaidAdBreakFinished);
     this.player.on(this.player.exports.PlayerEvent.AdStarted, this.onVpaidAdStarted);
     this.player.on(this.player.exports.PlayerEvent.AdFinished, this.onVpaidAdFinished);
     this.player.on(this.player.exports.PlayerEvent.AdSkipped, this.onVpaidAdSkipped);
@@ -877,6 +885,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 
     // Subscribe to some ad events. In Case of VPAID we rely on the player events to track it.
     this.player.off(this.player.exports.PlayerEvent.AdBreakStarted, this.onVpaidAdBreakStarted);
+    this.player.off(this.player.exports.PlayerEvent.AdBreakFinished, this.onVpaidAdBreakFinished);
     this.player.off(this.player.exports.PlayerEvent.AdStarted, this.onVpaidAdStarted);
     this.player.off(this.player.exports.PlayerEvent.AdFinished, this.onVpaidAdFinished);
     this.player.off(this.player.exports.PlayerEvent.AdSkipped, this.onVpaidAdSkipped);
@@ -974,6 +983,16 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   };
 
   private onVpaidAdStarted = (event: AdEvent) => {
+    const currentAdBreak = this.getCurrentAdBreak();
+    const currentAd = this.getCurrentAd();
+    this.lastVPaidAd = currentAd;
+    this.fireVpaidAdBreakEnd = false;
+
+    if (currentAdBreak && currentAdBreak.adverts && currentAdBreak.adverts.length > 0) {
+      if (currentAdBreak.adverts[currentAdBreak.adverts.length - 1].getMediaID() === currentAd.getMediaID()) {
+        this.fireVpaidAdBreakEnd = true;
+      }
+    }
     this.trackVpaidEvent(VpaidTrackingEvent.AdVideoStart);
   };
 
@@ -989,20 +1008,20 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       mediaId: currentAd.getMediaID(),
     });
 
-    const currentAdBreak = this.getCurrentAdBreak();
-    if (currentAdBreak && currentAdBreak.adverts && currentAdBreak.adverts.length > 0) {
-      if (currentAdBreak.adverts[currentAdBreak.adverts.length - 1].getMediaID() === currentAd.getMediaID()) {
-        console.log('VPAID ad was the last ad in the ad break. Firing ad break end event');
-        this.onAdBreakFinished({
-          type: BYSListenerEvent.AD_BREAK_END,
-          adBreak: currentAdBreak,
-        });
-      }
-    }
-
     const session = this.manager.session;
     session.currentAdvert = null;
     this.manager.session.suppressAnalytics(false);
+  };
+
+  private onVpaidAdBreakFinished = (event: AdBreakEvent) => {
+    if (this.fireVpaidAdBreakEnd) {
+        this.onAdBreakFinished({
+          type: BYSListenerEvent.AD_BREAK_END,
+          adBreak: this.lastVPaidAd.adBreak,
+        });
+    }
+    this.fireVpaidAdBreakEnd = false;
+    this.lastVPaidAd = null;
   };
 
   private onVpaidAdSkipped = (event: AdEvent) => {
@@ -1013,6 +1032,13 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       timestamp: Date.now(),
       type: this.player.exports.PlayerEvent.AdSkipped,
       ad: AdTranslator.mapYsAdvert(this.getCurrentAd()),
+    });
+
+    // it is okay for adBreak to be null, it is not used
+    this.onVpaidAdBreakFinished({
+      timestamp: Date.now(),
+      type: this.player.exports.PlayerEvent.AdBreakFinished,
+      adBreak: null,
     });
   };
 
