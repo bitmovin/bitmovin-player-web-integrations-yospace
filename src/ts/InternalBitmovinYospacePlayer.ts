@@ -993,23 +993,12 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     const currentAdBreak = this.getCurrentAdBreak();
     if (currentAdBreak && currentAdBreak.adverts && currentAdBreak.adverts.length > 0) {
       if (currentAdBreak.adverts[currentAdBreak.adverts.length - 1].getMediaID() === currentAd.getMediaID()) {
-
-        const playerEvent = AdEventsFactory.createAdBreakEvent(
-          this.player,
-          currentAdBreak.adBreakIdentifier,
-          this.toMagicTime(currentAdBreak.startPosition),
-          this.player.exports.PlayerEvent.AdBreakFinished,
-          currentAdBreak.getDuration(),
-        );
-
         console.log('VPAID ad was the last ad in the ad break. Firing ad break end event');
-        this.fireEvent<AdBreakEvent>(playerEvent);
-        this.player.setPlaybackSpeed(this.playbackSpeed);
-        this.player.pause();
-        this.player.play();
+        this.onAdBreakFinished({
+          type: BYSListenerEvent.AD_BREAK_END,
+          adBreak: currentAdBreak,
+        });
       }
-
-
     }
 
     const session = this.manager.session;
