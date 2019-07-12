@@ -479,7 +479,6 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     return this.manager.session.currentAdvert.adBreak;
   }
 
-
   private fireEvent<E extends PlayerEventBase | YospaceEventBase>(event: E): void {
     if (this.eventHandlers[event.type]) {
       this.eventHandlers[event.type].forEach((callback: YospacePlayerEventCallback) => callback(event));
@@ -1004,8 +1003,6 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     const session = this.manager.session;
     session.currentAdvert = null;
     this.manager.session.suppressAnalytics(false);
-
-
   };
 
   private onVpaidAdSkipped = (event: AdEvent) => {
