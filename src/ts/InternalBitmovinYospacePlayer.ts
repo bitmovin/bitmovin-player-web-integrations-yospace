@@ -17,10 +17,7 @@ import {
   YospacePlayerEventCallback, YospacePolicyErrorCode, YospacePolicyErrorEvent, YospaceSourceConfig,
 } from './BitmovinYospacePlayerAPI';
 import { YospacePlayerError } from './YospaceError';
-import {
-  Ad,
-  AdBreak, AdConfig, LinearAd, PlayerAdvertisingAPI,
-} from 'bitmovin-player/modules/bitmovinplayer-advertising-core';
+import { AdConfig, LinearAd, PlayerAdvertisingAPI } from 'bitmovin-player/modules/bitmovinplayer-advertising-core';
 
 interface StreamPart {
   start: number;
@@ -1032,13 +1029,6 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       timestamp: Date.now(),
       type: this.player.exports.PlayerEvent.AdSkipped,
       ad: AdTranslator.mapYsAdvert(this.getCurrentAd()),
-    });
-
-    // it is okay for adBreak to be null, it is not used
-    this.onVpaidAdBreakFinished({
-      timestamp: Date.now(),
-      type: this.player.exports.PlayerEvent.AdBreakFinished,
-      adBreak: null,
     });
   };
 
