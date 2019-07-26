@@ -240,6 +240,8 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       const suppressedEventTypes = [
         this.player.exports.PlayerEvent.TimeChanged,
         this.player.exports.PlayerEvent.Paused,
+        this.player.exports.PlayerEvent.Seeked,
+        this.player.exports.PlayerEvent.Seek,
 
         // Suppress all ad events
         this.player.exports.PlayerEvent.AdBreakFinished,
