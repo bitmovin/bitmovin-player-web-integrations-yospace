@@ -705,6 +705,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     this.adParts = [];
     this.adStartedTimestamp = null;
     this.cachedSeekTarget = null;
+    this.isVpaidActive = false;
   }
 
   private handleQuartileEvent(adQuartileEventName: string): void {
