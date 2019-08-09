@@ -11,9 +11,27 @@ export class VastHelper {
 
   static buildDataUri(ad: VASTAd): string {
     // build a valid VAST xml data uri to schedule only the current vpaid ad
-    const vastXML = ad.vastXML;
+    let vastXML = ad.vastXML;
+
+    this.removeXmlNodes('TrackingEvents', vastXML);
+    this.removeXmlNodes('Tracking', vastXML);
+    this.removeXmlNodes('Impression', vastXML);
+    this.removeXmlNodes('ClickTracking', vastXML);
+    this.removeXmlNodes('IconClickTracking', vastXML);
+    this.removeXmlNodes('NonLinearClickTracking', vastXML);
+
+    console.log('Scheduling VPAID ad: ' + vastXML.outerHTML);
+
     const vastVersion = vastXML.parentElement.getAttribute('version');
     const vastXMLString = '<VAST version="' + vastVersion + '">' + vastXML.outerHTML + '</VAST>';
     return 'data:text/xml,' + encodeURIComponent(vastXMLString);
   }
+
+  static removeXmlNodes(name: string, xml: Element) {
+    var elements = xml.getElementsByTagName(name);
+    for (var index = elements.length - 1; index >= 0; index--) {
+      elements[index].parentNode.removeChild(elements[index]);
+    }
+  }
+
 }
