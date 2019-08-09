@@ -12,24 +12,20 @@ export class VastHelper {
   static buildDataUri(ad: VASTAd): string {
     // build a valid VAST xml data uri to schedule only the current vpaid ad
     let vastXML = ad.vastXML;
-
-    this.removeXmlNodes('TrackingEvents', vastXML);
-    this.removeXmlNodes('Tracking', vastXML);
-    this.removeXmlNodes('Impression', vastXML);
-    this.removeXmlNodes('ClickTracking', vastXML);
-    this.removeXmlNodes('IconClickTracking', vastXML);
-    this.removeXmlNodes('NonLinearClickTracking', vastXML);
-
+    const trackingEvents = ['TrackingEvents', 'Tracking', 'Impression', 'Impression', 'ClickTracking',
+      'IconClickTracking', 'NonLinearClickTracking'];
+    this.removeXmlNodes(trackingEvents, vastXML);
     const vastVersion = vastXML.parentElement.getAttribute('version');
     const vastXMLString = '<VAST version="' + vastVersion + '">' + vastXML.outerHTML + '</VAST>';
     return 'data:text/xml,' + encodeURIComponent(vastXMLString);
   }
 
-  static removeXmlNodes(name: string, xml: Element) {
-    var elements = xml.getElementsByTagName(name);
-    for (var index = elements.length - 1; index >= 0; index--) {
-      elements[index].parentNode.removeChild(elements[index]);
-    }
+  static removeXmlNodes(names: string[], xml: Element) {
+    names.forEach( (name) => {
+      let elements = xml.getElementsByTagName(name);
+      for (let index = elements.length - 1; index >= 0; index--) {
+        elements[index].parentNode.removeChild(elements[index]);
+      }
+    });
   }
-
 }
