@@ -20,8 +20,6 @@ export class VastHelper {
     this.removeXmlNodes('IconClickTracking', vastXML);
     this.removeXmlNodes('NonLinearClickTracking', vastXML);
 
-    console.log('Scheduling VPAID ad: ' + vastXML.outerHTML);
-
     const vastVersion = vastXML.parentElement.getAttribute('version');
     const vastXMLString = '<VAST version="' + vastVersion + '">' + vastXML.outerHTML + '</VAST>';
     return 'data:text/xml,' + encodeURIComponent(vastXMLString);
