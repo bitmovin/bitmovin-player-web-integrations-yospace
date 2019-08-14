@@ -170,4 +170,5 @@ declare class YSTimeline {
 
 declare class VASTInteractive {
   track(ev: string, position: number, asset: string, brktime: string): void;
+  src: string;
 }
