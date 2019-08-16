@@ -313,18 +313,24 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       return false;
     }
 
-    const allowedSeekTarget = this.playerPolicy.canSeekTo(time);
-    if (allowedSeekTarget !== time) {
-      // cache original seek target
-      this.cachedSeekTarget = time;
-      this.handleYospacePolicyEvent(YospacePolicyErrorCode.SEEK_TO_NOT_ALLOWED);
+    if (this.isLive()) {
+      return this.player.seek(time, issuer);
     } else {
-      this.cachedSeekTarget = null;
+      const allowedSeekTarget = this.playerPolicy.canSeekTo(time);
+      if (allowedSeekTarget !== time) {
+        // cache original seek target
+        this.cachedSeekTarget = time;
+        this.handleYospacePolicyEvent(YospacePolicyErrorCode.SEEK_TO_NOT_ALLOWED);
+      } else {
+        this.cachedSeekTarget = null;
+      }
+  
+      const magicSeekTarget = this.toAbsoluteTime(allowedSeekTarget);
+  
+      return this.player.seek(magicSeekTarget, issuer);
     }
 
-    const magicSeekTarget = this.toAbsoluteTime(allowedSeekTarget);
 
-    return this.player.seek(magicSeekTarget, issuer);
   }
 
   getCurrentTime(): number {
@@ -798,6 +804,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     },
 
     isLinearAdActive: () => {
+      console.warn('Linear Ad Active');
       return this.isAdActive();
     },
 
