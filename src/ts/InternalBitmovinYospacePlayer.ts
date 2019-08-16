@@ -165,7 +165,8 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
           };
 
           // convert start time (relative) to an absolute time
-          if (this.yospaceSourceConfig.assetType === YospaceAssetType.VOD && clonedSource.options && clonedSource.options.startOffset) {
+          if (this.yospaceSourceConfig.assetType === YospaceAssetType.VOD && clonedSource.options
+            && clonedSource.options.startOffset) {
             clonedSource.options.startOffset = this.toAbsoluteTime(clonedSource.options.startOffset);
             console.log('startOffset adjusted to: ' + clonedSource.options.startOffset);
           }
@@ -321,9 +322,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     } else {
       this.cachedSeekTarget = null;
     }
-
     const magicSeekTarget = this.toAbsoluteTime(allowedSeekTarget);
-
     return this.player.seek(magicSeekTarget, issuer);
   }
 
@@ -364,14 +363,16 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
    * @deprecated Use {@link PlayerBufferAPI.getLevel} instead.
    */
   getVideoBufferLength(): number | null {
-    return this.buffer.getLevel(this.player.exports.BufferType.ForwardDuration, this.player.exports.MediaType.Video).level;
+    return this.buffer.getLevel(this.player.exports.BufferType.ForwardDuration,
+      this.player.exports.MediaType.Video).level;
   }
 
   /**
    * @deprecated Use {@link PlayerBufferAPI.getLevel} instead.
    */
   getAudioBufferLength(): number | null {
-    return this.buffer.getLevel(this.player.exports.BufferType.ForwardDuration, this.player.exports.MediaType.Audio).level;
+    return this.buffer.getLevel(this.player.exports.BufferType.ForwardDuration,
+      this.player.exports.MediaType.Audio).level;
   }
 
   getBufferedRanges(): TimeRange[] {
@@ -664,9 +665,13 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       return mapping.magic.start <= relativeTime && relativeTime <= mapping.magic.end;
     });
 
-    const elapsedTimeInStreamPart = relativeTime - originalStreamPart.magic.start;
-    const absoluteTime = originalStreamPart.original.start + elapsedTimeInStreamPart;
-    return absoluteTime;
+    if (originalStreamPart) {
+      const elapsedTimeInStreamPart = relativeTime - originalStreamPart.magic.start;
+      const absoluteTime = originalStreamPart.original.start + elapsedTimeInStreamPart;
+      return absoluteTime;
+    } else {
+      return relativeTime;
+    }
   }
 
   private magicBufferLevel(bufferLevel: BufferLevel): number {
@@ -823,7 +828,8 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 
           if (seekTarget >= this.player.getDuration()) {
             this.isPlaybackFinished = true;
-            this.suppressedEventsController.add(this.player.exports.PlayerEvent.Paused, this.player.exports.PlayerEvent.Seek, this.player.exports.PlayerEvent.Seeked);
+            this.suppressedEventsController.add(this.player.exports.PlayerEvent.Paused,
+              this.player.exports.PlayerEvent.Seek, this.player.exports.PlayerEvent.Seeked);
             this.player.pause();
             this.player.seek(ad.adBreak.startPosition - 1); // -1 to be sure to don't have a frame of the ad visible
             this.fireEvent({
