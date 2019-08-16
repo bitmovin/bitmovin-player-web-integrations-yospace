@@ -802,7 +802,6 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     },
 
     isLinearAdActive: () => {
-      console.warn('Linear Ad Active');
       return this.isAdActive();
     },
 
