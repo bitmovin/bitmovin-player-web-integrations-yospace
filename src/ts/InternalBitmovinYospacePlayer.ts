@@ -324,9 +324,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       } else {
         this.cachedSeekTarget = null;
       }
-  
       const magicSeekTarget = this.toAbsoluteTime(allowedSeekTarget);
-  
       return this.player.seek(magicSeekTarget, issuer);
     }
 
