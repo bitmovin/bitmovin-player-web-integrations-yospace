@@ -324,7 +324,6 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     }
     const magicSeekTarget = this.toAbsoluteTime(allowedSeekTarget);
     return this.player.seek(magicSeekTarget, issuer);
-
   }
 
   getCurrentTime(): number {
@@ -1022,10 +1021,10 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 
   private onVpaidAdBreakFinished = (event: AdBreakEvent) => {
     if (this.fireVpaidAdBreakEnd) {
-      this.onAdBreakFinished({
-        type: BYSListenerEvent.AD_BREAK_END,
-        adBreak: this.lastVPaidAd.adBreak,
-      });
+        this.onAdBreakFinished({
+          type: BYSListenerEvent.AD_BREAK_END,
+          adBreak: this.lastVPaidAd.adBreak,
+        });
     }
     this.fireVpaidAdBreakEnd = false;
     this.lastVPaidAd = null;
@@ -1074,7 +1073,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     );
   }
 
-  private calculateAdParts() {
+  private calculateAdParts () {
     if (this.yospaceSourceConfig.assetType === YospaceAssetType.VOD) {
       const session = this.manager.session;
       const timeline = session.timeline;
@@ -1159,7 +1158,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     for (const method of methods) {
       // Only add methods that are not already present
       if (typeof (this as any)[method] !== 'function') {
-        (this as any)[method] = function() {
+        (this as any)[method] = function () {
           return (player as any)[method].apply(player, arguments);
         };
       }
