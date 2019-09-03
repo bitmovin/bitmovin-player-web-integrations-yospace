@@ -1,7 +1,9 @@
 import {
   AudioQuality, AudioTrack, DownloadedAudioData, DownloadedVideoData, LogLevel, LowLatencyAPI, MetadataType, Player,
-  PlayerAPI, PlayerBufferAPI, PlayerConfig, PlayerEvent, PlayerEventCallback, QueryParameters, SegmentMap, Snapshot,
-  SourceConfig, SupportedTechnologyMode, Technology, Thumbnail, TimeRange, VideoQuality, ViewMode, ViewModeOptions,
+  PlayerAPI, PlayerBufferAPI, PlayerConfig, PlayerEvent, PlayerEventCallback, PlayerType, QueryParameters, SegmentMap,
+  Snapshot,
+  SourceConfig, StreamType, SupportedTechnologyMode, Technology, Thumbnail, TimeRange, VideoQuality, ViewMode,
+  ViewModeOptions,
 } from 'bitmovin-player/modules/bitmovinplayer-core';
 import { InternalBitmovinYospacePlayer } from './InternalBitmovinYospacePlayer';
 
@@ -315,7 +317,7 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     return this.player.getPlaybackVideoData();
   }
 
-  getPlayerType(): 'html5' | 'flash' | 'native' | 'native-flash' | 'unknown' {
+  getPlayerType(): PlayerType {
     return this.player.getPlayerType();
   }
 
@@ -331,7 +333,7 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     return this.player.getSource();
   }
 
-  getStreamType(): 'progressive' | 'dash' | 'hls' | 'smooth' | 'unknown' {
+  getStreamType(): StreamType {
     return this.player.getStreamType();
   }
 
