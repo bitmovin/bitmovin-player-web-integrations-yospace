@@ -1,6 +1,6 @@
 {
   "name": "@bitmovin/player-integration-yospace",
-  "version": "1.0.0-rc31",
+  "version": "1.0.0-rc32",
   "description": "Yospace integration for the Bitmovin Player",
   "main": "./dist/js/bitmovin-player-yospace.js",
   "types": "./dist/js/bitmovin-player-yospace.d.ts",
@@ -14,7 +14,7 @@
   "author": "Bitmovin",
   "license": "MIT",
   "devDependencies": {
-    "bitmovin-player": "^8.16.1",
+    "bitmovin-player": "^8.17.0",
     "bitmovin-player-ui": "^3.6.0",
     "browser-sync": "^2.18.8",
     "browserify": "^14.1.0",
