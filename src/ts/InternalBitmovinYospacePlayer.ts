@@ -13,7 +13,8 @@ import { ArrayUtils } from 'bitmovin-player-ui/dist/js/framework/arrayutils';
 import { VastHelper } from './VastHelper';
 import {
   BitmovinYospacePlayerAPI, BitmovinYospacePlayerPolicy, UNDEFINED_VAST_ERROR_CODE, YospaceAdBreak, YospaceAdBreakEvent,
-  YospaceAssetType, YospaceConfiguration, YospaceErrorCode, YospaceErrorEvent, YospaceEventBase, YospacePlayerEvent,
+  YospaceAssetType, YospaceConfiguration, YospaceErrorCode, YospaceErrorEvent, YospaceEventBase,
+  YospacePlayerEvent,
   YospacePlayerEventCallback, YospacePolicyErrorCode, YospacePolicyErrorEvent, YospaceSourceConfig,
 } from './BitmovinYospacePlayerAPI';
 import { YospacePlayerError } from './YospaceError';
@@ -33,6 +34,7 @@ interface StreamPartMapping {
 // TODO: remove this when it's available in the Player
 interface LocalLinearAd extends LinearAd {
   extensions: any[];
+  hasInteractiveAd: boolean;
 }
 
 // Enums for yospace related vpaid ad tracking strings
@@ -1207,6 +1209,7 @@ class AdTranslator {
         requestsUi: !ysAd.hasInteractiveUnit(),
       },
       extensions: VastHelper.getExtensions(ysAd.advert),
+      hasInteractiveAd: ysAd.hasInteractiveUnit(),
     } as LocalLinearAd;
   }
 }
