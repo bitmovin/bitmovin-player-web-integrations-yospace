@@ -41,10 +41,12 @@ interface LocalLinearAd extends LinearAd {
 
 interface YospaceCompanionAd extends CompanionAd {
   id: string;
-  staticResource: string;
-  htmlResource: string;
-  iframeResource: string;
-  creativeTrackingEvents: string [];
+  staticResource: string | null;
+  htmlResource: string | null;
+  iframeResource: string | null;
+  creativeTrackingEvents: string [] | null;
+  companionClickThroughURLTemplate: string | null;
+  companionClickTrackingURLTemplates: string [] | null;
 }
 
 
@@ -557,6 +559,8 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
           htmlResource: companion.htmlResource,
           iframeResource: companion.iframeResource,
           creativeTrackingEvents: creativeView,
+          companionClickThroughURLTemplate: companion.companionClickThroughURLTemplate,
+          companionClickTrackingURLTemplates: companion.companionClickTrackingURLTemplates,
         } as YospaceCompanionAd;
         this.handleAdStart(currentAd, yospaceCompanionAd);
       }).catch(err => {
