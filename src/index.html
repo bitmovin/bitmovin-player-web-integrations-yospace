@@ -71,6 +71,8 @@
       <div id="player"></div>
     </div>
   </div>
+  <div id="companionDiv" style="width:728px; height:90px;">
+  </div>
 </div>
 <script type="text/javascript">
   var yospacePlayer;
@@ -164,7 +166,7 @@
 
   var vodVpaidSource = {
     title: 'VOD Stream',
-    hls: 'https://csm-e-turnerstg-5p30c9t6lfad.tls1.yospace.com/csm/access/525951113/cWEvY21hZl9hZHZhbmNlZF9mbXA0X2Zyb21faW50ZXIvcHJvZ19zZWcvbXdjX0NBUkUxMDA5MjYxNzAwMDE4ODUyL2NsZWFyLzNjM2MzYzNjM2MzYzNjM2MzYzNjM2MzYzNjM2MzYzNjL21hc3Rlcl9jbF9ub19pZnJhbWUubTN1OA==?yo.av=2&yo.ad=true&yo.ac=true',
+    hls: 'https://turnercmaf.warnermediacdn.com/csm/qa/cmaf_advanced_fmp4_from_inter/prog_seg/bones_RADS1008071800025944_v12/clear/3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c/master_cl_ifp.m3u8?context=525951113',
 
     // Yospace configuration
     assetType: bitmovin.player.ads.yospace.YospaceAssetType.VOD
@@ -233,10 +235,20 @@
 
   yospacePlayer.on('adstarted', function(event) {
     console.debug('Ad Started' + JSON.stringify(event));
+
+    if (event.ad && event.ad.companionAds && event.ad.companionAds.length > 0) {
+      var img = new Image(event.ad.companionAds[0].width,event.ad.companionAds[0].height)
+      img.src = event.ad.companionAds[0].staticResource
+      document.getElementById("companionDiv").appendChild(img)
+    }
   })
 
   yospacePlayer.on('adfinished', function(event) {
     console.debug('Ad Finished: ' + JSON.stringify(event));
+    var companion = document.getElementById("companionDiv")
+    while (companion.firstChild) {
+      companion.removeChild(companion.firstChild);
+    }
   })
 
 </script>
