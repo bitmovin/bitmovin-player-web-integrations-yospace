@@ -13,7 +13,8 @@ import { ArrayUtils } from 'bitmovin-player-ui/dist/js/framework/arrayutils';
 import { VastHelper } from './VastHelper';
 import {
   BitmovinYospacePlayerAPI, BitmovinYospacePlayerPolicy, UNDEFINED_VAST_ERROR_CODE, YospaceAdBreak, YospaceAdBreakEvent,
-  YospaceAssetType, YospaceConfiguration, YospaceErrorCode, YospaceErrorEvent, YospaceEventBase, YospacePlayerEvent,
+  YospaceAssetType, YospaceCompanionAd, YospaceConfiguration, YospaceErrorCode, YospaceErrorEvent, YospaceEventBase,
+  YospacePlayerEvent,
   YospacePlayerEventCallback, YospacePolicyErrorCode, YospacePolicyErrorEvent, YospaceSourceConfig,
 } from './BitmovinYospacePlayerAPI';
 import { YospacePlayerError } from './YospaceError';
@@ -55,16 +56,6 @@ enum VpaidTrackingEvent {
   AdUserAcceptInvitation = 'acceptInvitation',
   AdUserMinimize = 'collapse',
   AdUserClose = 'close',
-}
-
-export interface YospaceCompanionAd extends CompanionAd {
-  id: string;
-  staticResource: string | null;
-  htmlResource: string | null;
-  iframeResource: string | null;
-  creativeTrackingEvents: string [] | null;
-  companionClickThroughURLTemplate: string | null;
-  companionClickTrackingURLTemplates: string [] | null;
 }
 
 // It is expected that this does not implement all members of the PlayerAPI cause they will be added dynamically.

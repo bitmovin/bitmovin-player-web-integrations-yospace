@@ -5,7 +5,7 @@ import {
   PlayerEventCallback,
   PlayerExports,
   SourceConfig,
-  AdBreak, AdBreakEvent,
+  AdBreak, AdBreakEvent, CompanionAd,
 } from 'bitmovin-player';
 
 // Enums
@@ -49,6 +49,16 @@ export interface YospaceAdBreak extends AdBreak {
 
 export interface YospaceAdBreakEvent extends PlayerEventBase {
   adBreak: YospaceAdBreak;
+}
+
+export interface YospaceCompanionAd extends CompanionAd {
+  id: string;
+  staticResource: string | null;
+  htmlResource: string | null;
+  iframeResource: string | null;
+  creativeTrackingEvents: string [] | null;
+  companionClickThroughURLTemplate: string | null;
+  companionClickTrackingURLTemplates: string [] | null;
 }
 
 export interface YospaceConfiguration {
