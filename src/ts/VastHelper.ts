@@ -1,7 +1,7 @@
 ///<reference path="Yospace.d.ts"/>
 import X2JS = require('x2js');
 import { VastAd, VastCompanionAd, VastCreative, VastCreativeCompanion, VastResponse } from 'vast-client';
-
+import { YospaceCompanionAd } from './InternalBitmovinYospacePlayer';
 export class VastHelper {
 
   static getExtensions(ad: VASTAd): any[] {
@@ -31,20 +31,49 @@ export class VastHelper {
     return xmlDoc;
   }
 
-  static companionAdFromVastResponse(response: VastResponse): VastCompanionAd | null {
-    let vastCompanionAd: VastCompanionAd;
+  static companionAdFromVastResponse(response: VastResponse): VastCompanionAd [] {
+    let vastCompanionAds: VastCompanionAd [] = [];
     let ad: VastAd = response.ads[0];
     if (ad) {
       let companionAds = ad.creatives.filter(value => value.type === 'companion');
-      if (companionAds && companionAds.length > 0) {
-        let companionAd = companionAds[0] as VastCreativeCompanion;
-        console.log('Found Companion Ad: ' + JSON.stringify(companionAd));
-        if (companionAd) {
-          vastCompanionAd = companionAd.variations[0];
-        }
+      if (companionAds) {
+        companionAds.forEach((vastCompanionAd: VastCreativeCompanion) => {
+          if (vastCompanionAd.variations && vastCompanionAd.variations.length > 0) {
+            console.log('Found Companion Ad: ' + JSON.stringify(vastCompanionAd));
+            vastCompanionAds.push(vastCompanionAd.variations[0]);
+          }
+        });
       }
     }
-    return vastCompanionAd;
+    return vastCompanionAds;
+  }
+
+  static parseVastResponse(vastResponse: VastResponse): YospaceCompanionAd [] {
+    let yospaceCompanionAds: YospaceCompanionAd [] = [];
+    let creativeView: string [];
+    // Do something with the parsed VAST response
+    let companions: VastCompanionAd [] = VastHelper.companionAdFromVastResponse(vastResponse);
+    if (companions != null) {
+      companions.forEach((companion) => {
+        console.info('Companion ad found: id=' + companion.id + ' height=' + companion.height + ' width=' + companion.width);
+        if (companion.trackingEvents) {
+          creativeView = companion.trackingEvents.creativeView;
+        }
+
+        yospaceCompanionAds.push({
+          id: companion.id,
+          height: +companion.height,
+          width: +companion.width,
+          staticResource: companion.staticResource,
+          htmlResource: companion.htmlResource,
+          iframeResource: companion.iframeResource,
+          creativeTrackingEvents: creativeView,
+          companionClickThroughURLTemplate: companion.companionClickThroughURLTemplate,
+          companionClickTrackingURLTemplates: companion.companionClickTrackingURLTemplates,
+        } as YospaceCompanionAd);
+      });
+    }
+    return yospaceCompanionAds;
   }
 
   static removeXmlNodes(names: string[], xml: Element) {

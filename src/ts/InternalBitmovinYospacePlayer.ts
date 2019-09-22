@@ -39,17 +39,6 @@ interface LocalLinearAd extends LinearAd {
   extensions: any[];
 }
 
-interface YospaceCompanionAd extends CompanionAd {
-  id: string;
-  staticResource: string | null;
-  htmlResource: string | null;
-  iframeResource: string | null;
-  creativeTrackingEvents: string [] | null;
-  companionClickThroughURLTemplate: string | null;
-  companionClickTrackingURLTemplates: string [] | null;
-}
-
-
 // Enums for yospace related vpaid ad tracking strings
 enum VpaidTrackingEvent {
   AdSkipped = 'skip',
@@ -66,6 +55,16 @@ enum VpaidTrackingEvent {
   AdUserAcceptInvitation = 'acceptInvitation',
   AdUserMinimize = 'collapse',
   AdUserClose = 'close',
+}
+
+export interface YospaceCompanionAd extends CompanionAd {
+  id: string;
+  staticResource: string | null;
+  htmlResource: string | null;
+  iframeResource: string | null;
+  creativeTrackingEvents: string [] | null;
+  companionClickThroughURLTemplate: string | null;
+  companionClickTrackingURLTemplates: string [] | null;
 }
 
 // It is expected that this does not implement all members of the PlayerAPI cause they will be added dynamically.
@@ -537,42 +536,21 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 
   private onAdStarted = (event: BYSAdEvent) => {
     const currentAd = this.getCurrentAd();
-    let yospaceCompanionAd;
-    let creativeView: string [];
 
     if (currentAd && currentAd.advert && currentAd.advert.vastXML && currentAd.advert.vastXML.outerHTML) {
       this.vastParser.parseVAST(VastHelper.buildVastDocument(currentAd.advert)).then(vastResponse => {
-        // Do something with the parsed VAST response
-        let companion: VastCompanionAd = VastHelper.companionAdFromVastResponse(vastResponse);
-        console.info('Companion ad found: id=' + companion.id + ' height=' + companion.height + ' width=' + companion.width);
-
-
-        if (companion.trackingEvents) {
-          creativeView = companion.trackingEvents.creativeView;
-        }
-
-        yospaceCompanionAd = {
-          id: companion.id,
-          height: +companion.height,
-          width: +companion.width,
-          staticResource: companion.staticResource,
-          htmlResource: companion.htmlResource,
-          iframeResource: companion.iframeResource,
-          creativeTrackingEvents: creativeView,
-          companionClickThroughURLTemplate: companion.companionClickThroughURLTemplate,
-          companionClickTrackingURLTemplates: companion.companionClickTrackingURLTemplates,
-        } as YospaceCompanionAd;
-        this.handleAdStart(currentAd, yospaceCompanionAd);
+        this.handleAdStart(currentAd, VastHelper.parseVastResponse(vastResponse));
       }).catch(err => {
         console.info('Unable to parse vastXML. No companion ad found - ' + err);
         this.handleAdStart(currentAd);
       });
     } else {
+      console.info('Unable to parse vastXML. No VAST XML present');
       this.handleAdStart(currentAd);
     }
   };
 
-  private handleAdStart = (currentAd: YSAdvert, yospaceCompanionAd: YospaceCompanionAd = null) => {
+  private handleAdStart = (currentAd: YSAdvert, yospaceCompanionAds: YospaceCompanionAd [] = null) => {
     if (currentAd.hasInteractiveUnit()) {
       // Handle VPAID ad
       this.isVpaidActive = true;
@@ -601,17 +579,12 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       });
     }
 
-    let companionAds = [];
-    if (yospaceCompanionAd) {
-      companionAds.push(yospaceCompanionAd);
-    }
-
     const playerEvent = AdEventsFactory.createAdEvent(
       this.player,
       this.player.exports.PlayerEvent.AdStarted,
       this.manager,
       this.getCurrentAd(),
-      companionAds,
+      yospaceCompanionAds,
     );
 
     // Need to be set before fireEvent is fired as the UI will call getCurrentTime in the callback of the

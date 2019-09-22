@@ -237,9 +237,12 @@
     console.debug('Ad Started' + JSON.stringify(event));
 
     if (event.ad && event.ad.companionAds && event.ad.companionAds.length > 0) {
+      var linkElement = document.createElement('a');
+      linkElement.href = event.ad.companionAds[0].companionClickThroughURLTemplate
       var img = new Image(event.ad.companionAds[0].width,event.ad.companionAds[0].height)
       img.src = event.ad.companionAds[0].staticResource
-      document.getElementById("companionDiv").appendChild(img)
+      linkElement.appendChild(img)
+      document.getElementById("companionDiv").appendChild(linkElement)
     }
   })
 
