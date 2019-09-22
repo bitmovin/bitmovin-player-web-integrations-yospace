@@ -1,7 +1,7 @@
 ///<reference path="Yospace.d.ts"/>
 import X2JS = require('x2js');
 import { VastAd, VastCompanionAd, VastCreative, VastCreativeCompanion, VastResponse } from 'vast-client';
-import { YospaceCompanionAd } from './InternalBitmovinYospacePlayer';
+import { YospaceCompanionAd } from './BitmovinYospacePlayerAPI';
 export class VastHelper {
 
   static getExtensions(ad: VASTAd): any[] {
