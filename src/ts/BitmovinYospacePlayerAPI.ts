@@ -53,12 +53,12 @@ export interface YospaceAdBreakEvent extends PlayerEventBase {
 
 export interface YospaceCompanionAd extends CompanionAd {
   id: string;
-  staticResource: string | null;
-  htmlResource: string | null;
-  iframeResource: string | null;
-  creativeTrackingEvents: string [] | null;
-  companionClickThroughURLTemplate: string | null;
-  companionClickTrackingURLTemplates: string [] | null;
+  staticResource?: string;
+  htmlResource?: string;
+  iframeResource?: string;
+  creativeTrackingEvents?: string [];
+  companionClickThroughURLTemplate?: string;
+  companionClickTrackingURLTemplates?: string [];
 }
 
 export interface YospaceConfiguration {

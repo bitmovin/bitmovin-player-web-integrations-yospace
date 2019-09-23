@@ -14,15 +14,13 @@ import { VastHelper } from './VastHelper';
 import {
   BitmovinYospacePlayerAPI, BitmovinYospacePlayerPolicy, UNDEFINED_VAST_ERROR_CODE, YospaceAdBreak, YospaceAdBreakEvent,
   YospaceAssetType, YospaceCompanionAd, YospaceConfiguration, YospaceErrorCode, YospaceErrorEvent, YospaceEventBase,
-  YospacePlayerEvent,
-  YospacePlayerEventCallback, YospacePolicyErrorCode, YospacePolicyErrorEvent, YospaceSourceConfig,
+  YospacePlayerEvent, YospacePlayerEventCallback, YospacePolicyErrorCode, YospacePolicyErrorEvent, YospaceSourceConfig,
 } from './BitmovinYospacePlayerAPI';
 import { YospacePlayerError } from './YospaceError';
 import {
   AdConfig, CompanionAd, LinearAd, PlayerAdvertisingAPI,
 } from 'bitmovin-player/modules/bitmovinplayer-advertising-core';
-import { VastAd, VastCompanionAd, VastCreativeCompanion, VASTParser } from 'vast-client';
-
+import { VASTParser, VastResponse } from 'vast-client';
 
 interface StreamPart {
   start: number;
@@ -529,9 +527,9 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     const currentAd = this.getCurrentAd();
 
     if (currentAd && currentAd.advert && currentAd.advert.vastXML && currentAd.advert.vastXML.outerHTML) {
-      this.vastParser.parseVAST(VastHelper.buildVastDocument(currentAd.advert)).then(vastResponse => {
+      this.vastParser.parseVAST(VastHelper.buildVastDocument(currentAd.advert)).then((vastResponse: VastResponse) => {
         this.handleAdStart(currentAd, VastHelper.parseVastResponse(vastResponse));
-      }).catch(err => {
+      }).catch((err: any) => {
         console.info('Unable to parse vastXML. No companion ad found - ' + err);
         this.handleAdStart(currentAd);
       });
@@ -541,7 +539,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     }
   };
 
-  private handleAdStart = (currentAd: YSAdvert, yospaceCompanionAds: YospaceCompanionAd [] = null) => {
+  private handleAdStart = (currentAd: YSAdvert, yospaceCompanionAds?: YospaceCompanionAd[]) => {
     if (currentAd.hasInteractiveUnit()) {
       // Handle VPAID ad
       this.isVpaidActive = true;
@@ -586,7 +584,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     }
 
     this.fireEvent<AdEvent>(playerEvent);
-  }
+  };
 
   private onAdFinished = (event: BYSAdEvent) => {
     const playerEvent = AdEventsFactory.createAdEvent(
@@ -1041,10 +1039,10 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 
   private onVpaidAdBreakFinished = (event: AdBreakEvent) => {
     if (this.fireVpaidAdBreakEnd) {
-        this.onAdBreakFinished({
-          type: BYSListenerEvent.AD_BREAK_END,
-          adBreak: this.lastVPaidAd.adBreak,
-        });
+      this.onAdBreakFinished({
+        type: BYSListenerEvent.AD_BREAK_END,
+        adBreak: this.lastVPaidAd.adBreak,
+      });
     }
     this.fireVpaidAdBreakEnd = false;
     this.lastVPaidAd = null;
@@ -1093,7 +1091,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     );
   }
 
-  private calculateAdParts () {
+  private calculateAdParts() {
     if (this.yospaceSourceConfig.assetType === YospaceAssetType.VOD) {
       const session = this.manager.session;
       const timeline = session.timeline;
@@ -1178,7 +1176,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     for (const method of methods) {
       // Only add methods that are not already present
       if (typeof (this as any)[method] !== 'function') {
-        (this as any)[method] = function () {
+        (this as any)[method] = function() {
           return (player as any)[method].apply(player, arguments);
         };
       }
@@ -1250,7 +1248,8 @@ class AdEventsFactory {
     };
   }
 
-  static createAdEvent(player: PlayerAPI, type: PlayerEvent, manager: YSSessionManager, ad: YSAdvert, companionAds: CompanionAd[] = null): AdEvent {
+  static createAdEvent(player: PlayerAPI, type: PlayerEvent, manager: YSSessionManager, ad: YSAdvert,
+                       companionAds?: CompanionAd[]): AdEvent {
     return {
       timestamp: Date.now(),
       type: type,

@@ -1,6 +1,6 @@
 {
   "name": "@bitmovin/player-integration-yospace",
-  "version": "1.0.0-rc32",
+  "version": "1.0.0-b33",
   "description": "Yospace integration for the Bitmovin Player",
   "main": "./dist/js/bitmovin-player-yospace.js",
   "types": "./dist/js/bitmovin-player-yospace.d.ts",
@@ -35,9 +35,7 @@
     "vinyl-buffer": "^1.0.0",
     "vinyl-source-stream": "^1.1.0",
     "watchify": "^3.9.0",
-    "x2js": "^3.2.3"
-  },
-  "dependencies": {
+    "x2js": "^3.2.3",
     "@types/vast-client": "2.1.0"
   }
 }
