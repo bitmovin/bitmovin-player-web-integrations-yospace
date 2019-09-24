@@ -1248,8 +1248,13 @@ class AdEventsFactory {
     };
   }
 
-  static createAdEvent(player: PlayerAPI, type: PlayerEvent, manager: YSSessionManager, ad: YSAdvert,
-                       companionAds?: CompanionAd[]): AdEvent {
+  static createAdEvent(
+    player: PlayerAPI,
+    type: PlayerEvent,
+    manager: YSSessionManager,
+    ad: YSAdvert,
+    companionAds?: CompanionAd[],
+  ): AdEvent {
     return {
       timestamp: Date.now(),
       type: type,

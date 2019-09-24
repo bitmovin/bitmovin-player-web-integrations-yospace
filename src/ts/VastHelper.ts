@@ -1,7 +1,7 @@
 ///<reference path="Yospace.d.ts"/>
 import X2JS = require('x2js');
 import { VastAd, VastCompanionAd, VastCreativeCompanion, VastResponse } from 'vast-client';
-import { YospaceCompanionAd } from './BitmovinYospacePlayerAPI';
+import { CompanionAdResource, CompanionAdType, YospaceCompanionAd } from './BitmovinYospacePlayerAPI';
 
 export class VastHelper {
 
@@ -63,14 +63,29 @@ export class VastHelper {
       if (companion.trackingEvents) {
         creativeView = companion.trackingEvents.creativeView;
       }
+      let companionAdResource: CompanionAdResource;
+      if (companion.staticResource) {
+        companionAdResource = {
+          url: companion.staticResource,
+          type: CompanionAdType.StaticResource,
+        };
+      } else if (companion.htmlResource) {
+        companionAdResource = {
+          url: companion.htmlResource,
+          type: CompanionAdType.HtmlResource,
+        };
+      } else if (companion.iframeResource) {
+        companionAdResource = {
+          url: companion.iframeResource,
+          type: CompanionAdType.IFrameResource,
+        };
+      }
 
       yospaceCompanionAds.push({
         id: companion.id,
         height: +companion.height,
         width: +companion.width,
-        staticResource: companion.staticResource,
-        htmlResource: companion.htmlResource,
-        iframeResource: companion.iframeResource,
+        resource: companionAdResource,
         creativeTrackingEvents: creativeView,
         companionClickThroughURLTemplate: companion.companionClickThroughURLTemplate,
         companionClickTrackingURLTemplates: companion.companionClickTrackingURLTemplates,

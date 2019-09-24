@@ -189,7 +189,7 @@
   };
 
   var conf = {
-    key: '18ca6ad5-9768-4129-bdf6-17685e0d14d2',
+    key: 'YOUR_PLAYER_KEY',
     playback: {
       muted: true,
       autoplay: true,
@@ -249,7 +249,7 @@
       var linkElement = document.createElement('a');
       linkElement.href = event.ad.companionAds[0].companionClickThroughURLTemplate;
       var img = new Image(event.ad.companionAds[0].width, event.ad.companionAds[0].height);
-      img.src = event.ad.companionAds[0].staticResource;
+      img.src = event.ad.companionAds[0].resource.url;
       linkElement.appendChild(img);
       document.getElementById("companionDiv").appendChild(linkElement);
     }
