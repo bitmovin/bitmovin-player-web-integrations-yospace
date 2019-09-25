@@ -51,7 +51,7 @@ export class VastHelper {
   }
 
   static parseVastResponse(vastResponse: VastResponse): YospaceCompanionAd [] {
-    let yospaceCompanionAds: YospaceCompanionAd [] = [];
+    let yospaceCompanionAds: YospaceCompanionAd[] = [];
     let creativeView: string[];
     let companions: VastCompanionAd [] = VastHelper.companionAdFromVastResponse(vastResponse);
     if (companions == null) {
