@@ -27,13 +27,9 @@ export interface BitmovinYospacePlayerAPI extends PlayerAPI {
   readonly exports: BitmovinYospacePlayerExports;
 
   load(source: SourceConfig | YospaceSourceConfig, forceTechnology?: string, disableSeeking?: boolean): Promise<void>;
-
   on(eventType: PlayerEvent | YospacePlayerEvent, callback: YospacePlayerEventCallback | PlayerEventCallback): void;
-
   off(eventType: PlayerEvent | YospacePlayerEvent, callback: YospacePlayerEventCallback | PlayerEventCallback): void;
-
   setPolicy(policy: BitmovinYospacePlayerPolicy): void;
-
   getCurrentPlayerType(): YospacePlayerType;
 }
 
