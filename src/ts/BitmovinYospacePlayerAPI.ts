@@ -1,11 +1,5 @@
 import {
-  PlayerAPI,
-  PlayerEvent,
-  PlayerEventBase,
-  PlayerEventCallback,
-  PlayerExports,
-  SourceConfig,
-  AdBreak, AdBreakEvent,
+  AdBreak, CompanionAd, PlayerAPI, PlayerEvent, PlayerEventBase, PlayerEventCallback, PlayerExports, SourceConfig,
 } from 'bitmovin-player';
 
 // Enums
@@ -51,6 +45,25 @@ export interface YospaceAdBreakEvent extends PlayerEventBase {
   adBreak: YospaceAdBreak;
 }
 
+export interface YospaceCompanionAd extends CompanionAd {
+  id: string;
+  resource: CompanionAdResource;
+  creativeTrackingEvents?: string [];
+  companionClickThroughURLTemplate?: string;
+  companionClickTrackingURLTemplates?: string [];
+}
+
+export interface CompanionAdResource {
+  url: string;
+  type: CompanionAdType;
+}
+
+export enum CompanionAdType {
+  StaticResource = 'staticresource',
+  HtmlResource = 'htmlresource',
+  IFrameResource = 'iframeresource',
+}
+
 export interface YospaceConfiguration {
   debug?: boolean;
 }
@@ -67,7 +80,9 @@ export interface BitmovinYospacePlayerExports extends PlayerExports {
 
 export interface BitmovinYospacePlayerPolicy {
   canMute(): boolean;
+
   canSeek(): boolean;
+
   /**
    * Determine whether the player is permitted to seek to a point in the stream.
    * Based on the provided location, the nearest permissible location is returned which should be
@@ -77,12 +92,15 @@ export interface BitmovinYospacePlayerPolicy {
    * @return The closest available seek target. Default start time of last ad which would be skipped.
    */
   canSeekTo(seekTarget: number): number;
+
   /**
    * @return 0+ if skip is permitted
    * the value is the delay in seconds before skip is permitted, otherwise -1 which means the advert is not skippable
    */
   canSkip(): number;
+
   canPause(): boolean;
+
   canChangePlaybackSpeed(): boolean;
 }
 
