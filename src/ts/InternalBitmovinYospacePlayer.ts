@@ -1055,7 +1055,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     this.fireEvent<AdEvent>({
       timestamp: Date.now(),
       type: this.player.exports.PlayerEvent.AdSkipped,
-      ad: AdTranslator.mapYsAdvert(this.getCurrentAd()),
+      ad: AdTranslator.mapYsAdvert(this.lastVPaidAd),
     });
   };
 
