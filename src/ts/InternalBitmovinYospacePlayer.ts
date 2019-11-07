@@ -34,8 +34,10 @@ interface StreamPartMapping {
 }
 
 // TODO: remove this when it's available in the Player
-interface LocalLinearAd extends LinearAd {
+export interface YospaceLinearAd extends LinearAd {
   extensions: any[];
+  adSystem?: string;
+  companionAds?: CompanionAd[];
 }
 
 // Enums for yospace related vpaid ad tracking strings
@@ -544,7 +546,8 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       // Handle VPAID ad
       this.isVpaidActive = true;
       this.manager.session.suppressAnalytics(true);
-
+      console.log('Schedule VPAID');
+      console.log(VastHelper.buildDataUriWithoutTracking(currentAd.advert));
       this.player.ads.schedule({
         tag: {
           url: VastHelper.buildDataUriWithoutTracking(currentAd.advert),
@@ -1050,7 +1053,6 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 
   private onVpaidAdSkipped = (event: AdEvent) => {
     this.trackVpaidEvent(VpaidTrackingEvent.AdSkipped);
-
     this.onVpaidAdFinished(event);
     this.fireEvent<AdEvent>({
       timestamp: Date.now(),
@@ -1140,8 +1142,10 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   };
 
   unload(): Promise<void> {
+    if (this.isAdActive() || this.lastVPaidAd) {
+      this.ads.skip();
+    }
     this.resetState();
-
     return this.player.unload();
   }
 
@@ -1225,7 +1229,8 @@ class AdTranslator {
         requestsUi: !ysAd.hasInteractiveUnit(),
       },
       extensions: VastHelper.getExtensions(ysAd.advert),
-    } as LocalLinearAd;
+      adSystem: ysAd.advert.AdSystem,
+    } as YospaceLinearAd;
   }
 }
 
@@ -1264,7 +1269,7 @@ class AdEventsFactory {
         },
         ...AdTranslator.mapYsAdvert(ad),
         companionAds: companionAds,
-      } as LocalLinearAd,
+      } as YospaceLinearAd,
     };
   }
 }
