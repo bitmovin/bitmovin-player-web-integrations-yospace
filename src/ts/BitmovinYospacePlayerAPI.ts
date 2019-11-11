@@ -109,6 +109,7 @@ export interface BitmovinYospacePlayerPolicy {
 export enum YospacePlayerEvent {
   YospaceError = 'yospaceerror',
   PolicyError = 'policyerror',
+  TruexAdFree = 'truexadfree',
 }
 
 export enum YospaceErrorCode {

@@ -97,6 +97,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   // save last VPAID ad and flag to fire Ad Break End event
   private fireVpaidAdBreakEnd = false;
   private lastVPaidAd: YSAdvert;
+  private truexAdFree: boolean;
 
   private vastParser: VASTParser = new VASTParser();
 
@@ -546,8 +547,10 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       // Handle VPAID ad
       this.isVpaidActive = true;
       this.manager.session.suppressAnalytics(true);
-      console.log('Schedule VPAID');
+
+      console.log('Schedule VPAID: ' + currentAd.advert.id + ' truex: ' + currentAd.advert.AdSystem === 'trueX');
       console.log(VastHelper.buildDataUriWithoutTracking(currentAd.advert));
+
       this.player.ads.schedule({
         tag: {
           url: VastHelper.buildDataUriWithoutTracking(currentAd.advert),
@@ -732,6 +735,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     this.adStartedTimestamp = null;
     this.cachedSeekTarget = null;
     this.isVpaidActive = false;
+    this.truexAdFree = undefined;
   }
 
   private handleQuartileEvent(adQuartileEventName: string): void {
@@ -1028,8 +1032,23 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     // isVpaidActive flag to false.
     this.trackVpaidEvent(VpaidTrackingEvent.AdVideoComplete);
     this.isVpaidActive = false;
-
     const currentAd = this.getCurrentAd();
+
+    // we have a timeout here to prevent a race condition where adfinished is sent before adskipped
+    // if truexAdFree has not been set to false by the adskipped listener, fire the truexadfree event
+    if (this.lastVPaidAd.advert.AdSystem === 'trueX' && typeof this.truexAdFree === 'undefined') {
+      this.truexAdFree = true;
+      setTimeout(() => {
+        console.info('TrueXAdFree callback: ' + this.truexAdFree);
+        if (this.truexAdFree) {
+          this.fireEvent({
+            timestamp: Date.now(),
+            type: YospacePlayerEvent.TruexAdFree,
+          });
+        }
+      }, 200);
+    }
+
     this.onAdFinished({
       type: BYSListenerEvent.ADVERT_END,
       mediaId: currentAd.getMediaID(),
@@ -1049,9 +1068,15 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     }
     this.fireVpaidAdBreakEnd = false;
     this.lastVPaidAd = null;
+    this.truexAdFree = undefined;
   };
 
   private onVpaidAdSkipped = (event: AdEvent) => {
+    if (this.lastVPaidAd && this.lastVPaidAd.advert.AdSystem === 'trueX') {
+      this.truexAdFree = false;
+      console.info('Truex ad skipped: ' + this.lastVPaidAd.advert.id);
+    }
+
     this.trackVpaidEvent(VpaidTrackingEvent.AdSkipped);
     this.onVpaidAdFinished(event);
     this.fireEvent<AdEvent>({
