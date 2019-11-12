@@ -35,6 +35,12 @@ export interface BitmovinYospacePlayerAPI extends PlayerAPI {
 
 export interface YospaceSourceConfig extends SourceConfig {
   assetType: YospaceAssetType;
+  truexConfiguration?: TruexConfiguration;
+}
+
+export interface TruexConfiguration {
+  userId: string;
+  vastConfigUrl: string;
 }
 
 export interface YospaceAdBreak extends AdBreak {

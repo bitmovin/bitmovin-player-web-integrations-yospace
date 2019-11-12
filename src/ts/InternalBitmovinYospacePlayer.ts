@@ -543,12 +543,14 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   };
 
   private handleAdStart = (currentAd: YSAdvert, yospaceCompanionAds?: YospaceCompanionAd[]) => {
-    if (currentAd.hasInteractiveUnit()) {
-      // Handle VPAID ad
+    let isTruexAd = currentAd.advert.AdSystem === 'trueX';
+
+    // Display all VPAID ads & Truex ads if a TruexConfiguration is present
+    if (currentAd.hasInteractiveUnit() && (!isTruexAd || this.yospaceSourceConfig.truexConfiguration)) {
       this.isVpaidActive = true;
       this.manager.session.suppressAnalytics(true);
 
-      console.log('Schedule VPAID: ' + currentAd.advert.id + ' truex: ' + currentAd.advert.AdSystem === 'trueX');
+      console.log('Schedule VPAID: ' + currentAd.advert.id + ' truex: ' + isTruexAd);
       console.log(VastHelper.buildDataUriWithoutTracking(currentAd.advert));
 
       this.player.ads.schedule({
