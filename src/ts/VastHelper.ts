@@ -2,6 +2,7 @@
 import X2JS = require('x2js');
 import { VastAd, VastCompanionAd, VastCreativeCompanion, VastResponse } from 'vast-client';
 import { CompanionAdResource, CompanionAdType, YospaceCompanionAd } from './BitmovinYospacePlayerAPI';
+import { Logger } from './Logger';
 
 export class VastHelper {
 
@@ -41,7 +42,7 @@ export class VastHelper {
     if (companionAds) {
       companionAds.forEach((vastCompanionAd: VastCreativeCompanion) => {
         if (vastCompanionAd.variations && vastCompanionAd.variations.length > 0) {
-          console.log('Found Companion Ad: ' + JSON.stringify(vastCompanionAd));
+          Logger.log('Found Companion Ad: ' + JSON.stringify(vastCompanionAd));
           vastCompanionAds.push(vastCompanionAd.variations[0]);
         }
       });
@@ -58,7 +59,7 @@ export class VastHelper {
       return yospaceCompanionAds;
     }
     companions.forEach((companion) => {
-      console.info(
+      Logger.log(
         'Companion ad found: id=' + companion.id + ' height=' + companion.height + ' width=' + companion.width);
       if (companion.trackingEvents) {
         creativeView = companion.trackingEvents.creativeView;
