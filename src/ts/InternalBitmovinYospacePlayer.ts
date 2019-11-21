@@ -575,6 +575,8 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
           data: error.data,
         });
       });
+    } else if (isTruexAd && !this.yospaceSourceConfig.truexConfiguration) {
+      Logger.warn('TrueX ad not rendered because a truexConfiguration was not specified');
     }
 
     const playerEvent = AdEventsFactory.createAdEvent(
