@@ -21,6 +21,7 @@ import {
   AdConfig, CompanionAd, LinearAd, PlayerAdvertisingAPI,
 } from 'bitmovin-player/modules/bitmovinplayer-advertising-core';
 import { VASTParser, VastResponse } from 'vast-client';
+import { Logger } from './Logger';
 
 interface StreamPart {
   start: number;
@@ -176,7 +177,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
           if (this.yospaceSourceConfig.assetType === YospaceAssetType.VOD && clonedSource.options
             && clonedSource.options.startOffset) {
             clonedSource.options.startOffset = this.toAbsoluteTime(clonedSource.options.startOffset);
-            console.log('startOffset adjusted to: ' + clonedSource.options.startOffset);
+            Logger.log('startOffset adjusted to: ' + clonedSource.options.startOffset);
           }
 
           this.yospaceListenerAdapter = new YospaceAdListenerAdapter();
@@ -215,7 +216,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
           this.manager = YSSessionManager.createForNonLinear(url, properties, onInitComplete);
           break;
         default:
-          console.error('Undefined YospaceSourceConfig.assetType; Could not obtain session;');
+          Logger.error('Undefined YospaceSourceConfig.assetType; Could not obtain session;');
       }
     });
   }
@@ -533,11 +534,11 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       this.vastParser.parseVAST(VastHelper.buildVastDocument(currentAd.advert)).then((vastResponse: VastResponse) => {
         this.handleAdStart(currentAd, VastHelper.parseVastResponse(vastResponse));
       }).catch((err: any) => {
-        console.info('Unable to parse vastXML. No companion ad found - ' + err);
+        Logger.log('Unable to parse vastXML. No companion ad found - ' + err);
         this.handleAdStart(currentAd);
       });
     } else {
-      console.info('Unable to parse vastXML. No VAST XML present');
+      Logger.log('Unable to parse vastXML. No VAST XML present');
       this.handleAdStart(currentAd);
     }
   };
@@ -550,8 +551,8 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       this.isVpaidActive = true;
       this.manager.session.suppressAnalytics(true);
 
-      console.log('Schedule VPAID: ' + currentAd.advert.id + ' truex: ' + isTruexAd);
-      console.log(VastHelper.buildDataUriWithoutTracking(currentAd.advert));
+      Logger.log('Schedule VPAID: ' + currentAd.advert.id + ' truex: ' + isTruexAd);
+      Logger.log(VastHelper.buildDataUriWithoutTracking(currentAd.advert));
 
       this.player.ads.schedule({
         tag: {
@@ -574,6 +575,8 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
           data: error.data,
         });
       });
+    } else if (isTruexAd && !this.yospaceSourceConfig.truexConfiguration) {
+      Logger.warn('TrueX ad not rendered because a truexConfiguration was not specified');
     }
 
     const playerEvent = AdEventsFactory.createAdEvent(
@@ -809,7 +812,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   // Custom advertising module with overwritten methods
   private advertisingApi: PlayerAdvertisingAPI = {
     discardAdBreak: (adBreakId: string) => {
-      console.warn('CSAI is not supported for yospace stream');
+      Logger.warn('CSAI is not supported for yospace stream');
       return;
     },
 

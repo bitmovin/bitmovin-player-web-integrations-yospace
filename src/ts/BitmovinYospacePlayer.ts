@@ -37,6 +37,7 @@ import {
   YospaceConfiguration, YospaceErrorCode, YospacePlayerEvent, YospacePlayerEventCallback, YospacePlayerType,
   YospacePolicyErrorCode, YospaceSourceConfig,
 } from './BitmovinYospacePlayerAPI';
+import { Logger } from './Logger';
 
 export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   private player: BitmovinYospacePlayerAPI;
@@ -56,16 +57,20 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     this.config = config;
     this.yospaceConfig = yospaceConfig;
 
+    if (yospaceConfig.debug) {
+      Logger.enable();
+    }
+
     // Clear advertising config
     if (config.advertising) {
-      console.warn('Client side advertising config is not supported. If you are using the BitmovinPlayer as' +
+      Logger.warn('Client side advertising config is not supported. If you are using the BitmovinPlayer as' +
         'fallback please use player.ads.schedule');
     }
     // add advertising again to load ads module
     config.advertising = {};
 
     if (config.ui === undefined || config.ui) {
-      console.warn('Please setup the UI after initializing the yospace player');
+      Logger.warn('Please setup the UI after initializing the yospace player');
       config.ui = false;
     }
 
@@ -166,7 +171,7 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   // here to ensure the feature during the live time of the BitmovinYospacePlayer
   setPolicy(policy: BitmovinYospacePlayerPolicy): void {
     if (this.getCurrentPlayerType() === YospacePlayerType.Bitmovin) {
-      console.log('[BitmovinYospacePlayer] Policy does not apply for Bitmovin Player but is saved for further ' +
+      Logger.log('[BitmovinYospacePlayer] Policy does not apply for Bitmovin Player but is saved for further ' +
         'BitmovinYospace Player usage');
     }
 
