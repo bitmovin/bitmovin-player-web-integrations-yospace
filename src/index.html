@@ -19,8 +19,8 @@
     <script type="text/javascript" src="../yospace/yo-ad-management.min.js"></script>
     <script type="text/javascript" src="js/bitmovin-player-yospace.js"></script>
 
-    <script type="text/javascript" src="//cdn.bitmovin.com/player/web/8.5.0/bitmovinplayer-ui.js"></script>
-    <link rel="stylesheet" href="//cdn.bitmovin.com/player/web/8.5.0/bitmovinplayer-ui.css">
+    <script type="text/javascript" src="//cdn.bitmovin.com/player/web/8/bitmovinplayer-ui.js"></script>
+    <link rel="stylesheet" href="//cdn.bitmovin.com/player/web/8/bitmovinplayer-ui.css">
     <style>
         .player-wrapper {
             margin: 20px auto;
@@ -158,20 +158,20 @@
 
   var liveSource = {
     title: 'Live Stream',
-    hls: 'https://cmaf-live.warnermediacdn.com/csmp/cmaf/live/2000073/tbse-clear-novpaid/master.m3u8?yo.ac=true&yo.aas=true&yo.ch=true&yo.ad=true',
+    hls: 'https://live-manifests-aka-qa.warnermediacdn.com/csmp/cmaf/live/2000073/cnn-clear/master.m3u8?yo.av=2&yo.dr=true',
 
     // Yospace configuration
-    assetType: bitmovin.player.ads.yospace.YospaceAssetType.LINEAR,
+    // assetType: bitmovin.player.ads.yospace.YospaceAssetType.LINEAR,
   };
 
   var vodSource = {
     title: 'VOD Stream',
-    hls: 'https://turnercmaf.warnermediacdn.com/csm/qa/cmaf_advanced_fmp4_from_inter/prog_seg/bones_RADS1008071800025944_v12/clear/3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c/master_cl_ifp.m3u8?context=525943851',
+    hls: 'https://vod-manifests-aka-qa.warnermediacdn.com/csm/tcm/clear/3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c/master_cl.m3u8?afid=222591187&caid=2100555&conf_csid=tbs.com_videopage_test&context=182883174&nw=42448&prof=48804%3Amp4_plus_vast_truex&vdur=1800&yo.vp=true',
     // hls: 'http://csm-e.cds1.yospace.com/access/d/400/u/0/1/130782300?f=0000130753172&format=vmap',
 
     // Yospace configuration
     assetType: bitmovin.player.ads.yospace.YospaceAssetType.VOD,
-    truexConfiguration: {}
+    truexConfiguration: {},
     // options: {
     //   startOffset: 600
     // }
@@ -186,17 +186,26 @@
   };
 
   var artOfMotionSource = {
-    title: 'Art Of Motion',
-    hls: '//bitdash-a.akamaihd.net/content/MI201109210084_1/m3u8s/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.m3u8',
-
-    // No Yospace config
+    dash: 'https://bitmovin-a.akamaihd.net/content/MI201109210084_1/mpds/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.mpd',
+    hls: 'https://bitmovin-a.akamaihd.net/content/MI201109210084_1/m3u8s/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.m3u8',
+    progressive: 'https://bitmovin-a.akamaihd.net/content/MI201109210084_1/MI201109210084_mpeg-4_hd_high_1080p25_10mbits.mp4',
+    poster: 'https://bitmovin-a.akamaihd.net/content/MI201109210084_1/poster.jpg',
   };
 
   var conf = {
-    key: 'YOUR_PLAYER_KEY',
+    key: '18ca6ad5-9768-4129-bdf6-17685e0d14d2',
     playback: {
       muted: true,
-      autoplay: true,
+      autoplay: false,
+    },
+    location: {
+      serviceworker: './sw.js?t=' + Date.now(),
+    },
+    tweaks: {
+      native_hls_parsing: true,
+    },
+    logs: {
+      level: 'debug',
     },
     ui: false,
   };
@@ -230,53 +239,55 @@
   var playerContainer = document.getElementById('player');
   yospacePlayer = new bitmovin.player.ads.yospace.BitmovinYospacePlayer(playerContainer, conf, yospaceConfig);
 
-  bitmovin.playerui.UIFactory.buildDefaultUI(yospacePlayer);
+  yospacePlayer.setup().then(() => {
+    console.warn('Player setup completed');
+    bitmovin.playerui.UIFactory.buildDefaultUI(yospacePlayer);
 
-  yospacePlayer.load(vodSource).then(function() {
-    console.log('Source successfully loaded');
-  }).catch(function() {
-    console.log('Error while loading the source');
-  });
+    // yospacePlayer.load(liveSource).then(function() {
+    //   console.log('Source successfully loaded');
+    // }).catch(function() {
+    //   console.log('Error while loading the source');
+    // });
 
-  yospacePlayer.on('yospaceerror', function(event) {
-    console.error(event);
-  })
+    yospacePlayer.on('yospaceerror', function(event) {
+      console.error(event);
+    })
 
-  yospacePlayer.on('adbreakstarted', function(event) {
-    console.debug(event);
-  })
+    yospacePlayer.on('adbreakstarted', function(event) {
+      console.debug(event);
+    })
 
-  yospacePlayer.on('adskipped', function(event) {
-    console.debug(event);
-  })
+    yospacePlayer.on('adskipped', function(event) {
+      console.debug(event);
+    })
 
-  yospacePlayer.on('truexadfree', function(event) {
-    console.debug(event);
-  })
+    yospacePlayer.on('truexadfree', function(event) {
+      console.debug(event);
+    })
 
-  yospacePlayer.on('adstarted', function(event) {
-    console.debug('Ad Started' + JSON.stringify(event));
+    yospacePlayer.on('adstarted', function(event) {
+      console.debug('Ad Started' + JSON.stringify(event));
+      if (event.ad && event.ad.companionAds && event.ad.companionAds.length > 0) {
+        var linkElement = document.createElement('a');
+        linkElement.href = event.ad.companionAds[0].companionClickThroughURLTemplate;
+        var img = new Image(event.ad.companionAds[0].width, event.ad.companionAds[0].height);
+        img.src = event.ad.companionAds[0].resource.url;
+        linkElement.appendChild(img);
+        document.getElementById("companionDiv").appendChild(linkElement);
+      }
+    })
 
-    if (event.ad && event.ad.companionAds && event.ad.companionAds.length > 0) {
-      var linkElement = document.createElement('a');
-      linkElement.href = event.ad.companionAds[0].companionClickThroughURLTemplate;
-      var img = new Image(event.ad.companionAds[0].width, event.ad.companionAds[0].height);
-      img.src = event.ad.companionAds[0].resource.url;
-      linkElement.appendChild(img);
-      document.getElementById("companionDiv").appendChild(linkElement);
-    }
-  })
+    yospacePlayer.on('adfinished', function(event) {
+      console.info('Ad Finished: ' + JSON.stringify(event));
+      var companion = document.getElementById("companionDiv");
+      while (companion.firstChild) {
+        companion.removeChild(companion.firstChild);
+      }
+    })
 
-  yospacePlayer.on('adfinished', function(event) {
-    console.info('Ad Finished: ' + JSON.stringify(event));
-    var companion = document.getElementById("companionDiv");
-    while (companion.firstChild) {
-      companion.removeChild(companion.firstChild);
-    }
-  })
-
-  yospacePlayer.on('adbreakFinished', function(event) {
-    console.debug('Ad Break Finished: ' + JSON.stringify(event));
+    yospacePlayer.on('adbreakFinished', function(event) {
+      console.debug('Ad Break Finished: ' + JSON.stringify(event));
+    })
   })
 
 </script>
