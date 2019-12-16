@@ -16,6 +16,7 @@ import AdvertisingBitmovinModule from 'bitmovin-player/modules/bitmovinplayer-ad
 import MSERendererModule from 'bitmovin-player/modules/bitmovinplayer-mserenderer';
 import EngineBitmovinModule from 'bitmovin-player/modules/bitmovinplayer-engine-bitmovin';
 import HLSModule from 'bitmovin-player/modules/bitmovinplayer-hls';
+import DASHModule from 'bitmovin-player/modules/bitmovinplayer-dash';
 import ABRModule from 'bitmovin-player/modules/bitmovinplayer-abr';
 import ContainerMP4Module from 'bitmovin-player/modules/bitmovinplayer-container-mp4';
 import ContainerTSModule from 'bitmovin-player/modules/bitmovinplayer-container-ts';
@@ -84,6 +85,7 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     Player.addModule(MSERendererModule);
     Player.addModule(EngineBitmovinModule);
     Player.addModule(HLSModule);
+    Player.addModule(DASHModule)
     Player.addModule(ABRModule);
     Player.addModule(ContainerMP4Module);
     Player.addModule(ContainerTSModule);
@@ -99,6 +101,7 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     Player.addModule(EngineNativeModule);
     Player.addModule(DRMModule);
     Player.addModule(RemoteControlModule);
+
     this.bitmovinPlayer = new Player(containerElement, config);
 
     this.bitmovinYospacePlayer = new InternalBitmovinYospacePlayer(
