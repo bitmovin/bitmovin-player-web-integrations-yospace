@@ -253,6 +253,18 @@
       console.error(event);
     })
 
+    yospacePlayer.on('metadata', function(event) {
+      console.log(event);
+    })
+
+    yospacePlayer.on('metadataparsed', function(event) {
+      console.log(event);
+    })
+
+    yospacePlayer.on('segmentplayback', function(event) {
+      console.log(event);
+    })
+
     yospacePlayer.on('adbreakstarted', function(event) {
       console.debug(event);
     })
