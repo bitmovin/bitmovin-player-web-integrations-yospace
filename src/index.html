@@ -9,7 +9,10 @@
     <!-- Bitmovin Player -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
           crossorigin="anonymous">
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha256-3edrmyuQ0w65f8gfBsqowzjJe2iM6n0nKciPUp8y+7E=" crossorigin="anonymous"></script>
+    <script
+            src="https://code.jquery.com/jquery-3.4.1.min.js"
+            integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
+            crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
             crossorigin="anonymous"></script>
 
@@ -163,11 +166,12 @@
 
   var vodSource = {
     title: 'VOD Stream',
-    hls: 'https://csm-e-stg.tls1.yospace.com/csm/access/525947592/cWEvY21hZl9hZHZhbmNlZF9mbXA0X2Zyb21faW50ZXIvcHJvZ19zZWcvbXdjX0NBUkUxMDA5MjYxNzAwMDE4ODUyL2NsZWFyLzNjM2MzYzNjM2MzYzNjM2MzYzNjM2MzYzNjM2MzYzNjL21hc3Rlcl9jbF9ub19pZnJhbWUubTN1OA==?yo.av=2&yo.ad=true',
+    hls: 'https://turnercmaf.warnermediacdn.com/csm/qa/cmaf_advanced_fmp4_from_inter/prog_seg/bones_RADS1008071800025944_v12/clear/3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c/master_cl_ifp.m3u8?context=525943851',
     // hls: 'http://csm-e.cds1.yospace.com/access/d/400/u/0/1/130782300?f=0000130753172&format=vmap',
 
     // Yospace configuration
     assetType: bitmovin.player.ads.yospace.YospaceAssetType.VOD,
+    truexConfiguration: {}
     // options: {
     //   startOffset: 600
     // }
@@ -242,6 +246,14 @@
     console.debug(event);
   })
 
+  yospacePlayer.on('adskipped', function(event) {
+    console.debug(event);
+  })
+
+  yospacePlayer.on('truexadfree', function(event) {
+    console.debug(event);
+  })
+
   yospacePlayer.on('adstarted', function(event) {
     console.debug('Ad Started' + JSON.stringify(event));
 
@@ -256,11 +268,15 @@
   })
 
   yospacePlayer.on('adfinished', function(event) {
-    console.debug('Ad Finished: ' + JSON.stringify(event));
+    console.info('Ad Finished: ' + JSON.stringify(event));
     var companion = document.getElementById("companionDiv");
     while (companion.firstChild) {
       companion.removeChild(companion.firstChild);
     }
+  })
+
+  yospacePlayer.on('adbreakFinished', function(event) {
+    console.debug('Ad Break Finished: ' + JSON.stringify(event));
   })
 
 </script>

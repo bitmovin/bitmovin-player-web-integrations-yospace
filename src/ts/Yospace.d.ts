@@ -81,6 +81,7 @@ declare class VASTAd {
   id: string;
   vastXML: Element;
   Extensions: XMLDocument[];
+  AdSystem: string;
 }
 
 declare class YSAdvert {

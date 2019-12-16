@@ -21,6 +21,7 @@ import {
   AdConfig, CompanionAd, LinearAd, PlayerAdvertisingAPI,
 } from 'bitmovin-player/modules/bitmovinplayer-advertising-core';
 import { VASTParser, VastResponse } from 'vast-client';
+import { Logger } from './Logger';
 
 interface StreamPart {
   start: number;
@@ -34,8 +35,10 @@ interface StreamPartMapping {
 }
 
 // TODO: remove this when it's available in the Player
-interface LocalLinearAd extends LinearAd {
+export interface YospaceLinearAd extends LinearAd {
   extensions: any[];
+  adSystem?: string;
+  companionAds?: CompanionAd[];
 }
 
 // Enums for yospace related vpaid ad tracking strings
@@ -95,6 +98,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   // save last VPAID ad and flag to fire Ad Break End event
   private fireVpaidAdBreakEnd = false;
   private lastVPaidAd: YSAdvert;
+  private truexAdFree: boolean;
 
   private vastParser: VASTParser = new VASTParser();
 
@@ -173,7 +177,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
           if (this.yospaceSourceConfig.assetType === YospaceAssetType.VOD && clonedSource.options
             && clonedSource.options.startOffset) {
             clonedSource.options.startOffset = this.toAbsoluteTime(clonedSource.options.startOffset);
-            console.log('startOffset adjusted to: ' + clonedSource.options.startOffset);
+            Logger.log('startOffset adjusted to: ' + clonedSource.options.startOffset);
           }
 
           this.yospaceListenerAdapter = new YospaceAdListenerAdapter();
@@ -212,7 +216,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
           this.manager = YSSessionManager.createForNonLinear(url, properties, onInitComplete);
           break;
         default:
-          console.error('Undefined YospaceSourceConfig.assetType; Could not obtain session;');
+          Logger.error('Undefined YospaceSourceConfig.assetType; Could not obtain session;');
       }
     });
   }
@@ -530,20 +534,25 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       this.vastParser.parseVAST(VastHelper.buildVastDocument(currentAd.advert)).then((vastResponse: VastResponse) => {
         this.handleAdStart(currentAd, VastHelper.parseVastResponse(vastResponse));
       }).catch((err: any) => {
-        console.info('Unable to parse vastXML. No companion ad found - ' + err);
+        Logger.log('Unable to parse vastXML. No companion ad found - ' + err);
         this.handleAdStart(currentAd);
       });
     } else {
-      console.info('Unable to parse vastXML. No VAST XML present');
+      Logger.log('Unable to parse vastXML. No VAST XML present');
       this.handleAdStart(currentAd);
     }
   };
 
   private handleAdStart = (currentAd: YSAdvert, yospaceCompanionAds?: YospaceCompanionAd[]) => {
-    if (currentAd.hasInteractiveUnit()) {
-      // Handle VPAID ad
+    let isTruexAd = currentAd.advert.AdSystem === 'trueX';
+
+    // Display all VPAID ads & Truex ads if a TruexConfiguration is present
+    if (currentAd.hasInteractiveUnit() && (!isTruexAd || this.yospaceSourceConfig.truexConfiguration)) {
       this.isVpaidActive = true;
       this.manager.session.suppressAnalytics(true);
+
+      Logger.log('Schedule VPAID: ' + currentAd.advert.id + ' truex: ' + isTruexAd);
+      Logger.log(VastHelper.buildDataUriWithoutTracking(currentAd.advert));
 
       this.player.ads.schedule({
         tag: {
@@ -566,6 +575,8 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
           data: error.data,
         });
       });
+    } else if (isTruexAd && !this.yospaceSourceConfig.truexConfiguration) {
+      Logger.warn('TrueX ad not rendered because a truexConfiguration was not specified');
     }
 
     const playerEvent = AdEventsFactory.createAdEvent(
@@ -729,6 +740,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     this.adStartedTimestamp = null;
     this.cachedSeekTarget = null;
     this.isVpaidActive = false;
+    this.truexAdFree = undefined;
   }
 
   private handleQuartileEvent(adQuartileEventName: string): void {
@@ -800,7 +812,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   // Custom advertising module with overwritten methods
   private advertisingApi: PlayerAdvertisingAPI = {
     discardAdBreak: (adBreakId: string) => {
-      console.warn('CSAI is not supported for yospace stream');
+      Logger.warn('CSAI is not supported for yospace stream');
       return;
     },
 
@@ -1025,8 +1037,27 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     // isVpaidActive flag to false.
     this.trackVpaidEvent(VpaidTrackingEvent.AdVideoComplete);
     this.isVpaidActive = false;
-
     const currentAd = this.getCurrentAd();
+
+    // we have a timeout here to prevent a race condition where adfinished is sent before adskipped
+    // if truexAdFree has not been set to false by the adskipped listener, fire the truexadfree event
+    if (this.lastVPaidAd.advert.AdSystem === 'trueX' && typeof this.truexAdFree === 'undefined') {
+      this.truexAdFree = true;
+      setTimeout(() => {
+        console.info('TrueXAdFree callback: ' + this.truexAdFree);
+        if (this.truexAdFree) {
+          this.fireEvent({
+            timestamp: Date.now(),
+            type: YospacePlayerEvent.TruexAdFree,
+          });
+        }
+      }, 200);
+      let currentAdBreak = this.getCurrentAdBreak();
+      if (currentAdBreak) {
+        this.player.seek(currentAdBreak.adBreakStart + currentAdBreak.getDuration());
+      }
+    }
+
     this.onAdFinished({
       type: BYSListenerEvent.ADVERT_END,
       mediaId: currentAd.getMediaID(),
@@ -1046,11 +1077,16 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     }
     this.fireVpaidAdBreakEnd = false;
     this.lastVPaidAd = null;
+    this.truexAdFree = undefined;
   };
 
   private onVpaidAdSkipped = (event: AdEvent) => {
-    this.trackVpaidEvent(VpaidTrackingEvent.AdSkipped);
+    if (this.lastVPaidAd && this.lastVPaidAd.advert.AdSystem === 'trueX') {
+      this.truexAdFree = false;
+      console.info('Truex ad skipped: ' + this.lastVPaidAd.advert.id);
+    }
 
+    this.trackVpaidEvent(VpaidTrackingEvent.AdSkipped);
     this.onVpaidAdFinished(event);
     this.fireEvent<AdEvent>({
       timestamp: Date.now(),
@@ -1140,8 +1176,10 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   };
 
   unload(): Promise<void> {
+    if (this.isAdActive() || this.lastVPaidAd) {
+      this.ads.skip();
+    }
     this.resetState();
-
     return this.player.unload();
   }
 
@@ -1225,7 +1263,8 @@ class AdTranslator {
         requestsUi: !ysAd.hasInteractiveUnit(),
       },
       extensions: VastHelper.getExtensions(ysAd.advert),
-    } as LocalLinearAd;
+      adSystem: ysAd.advert.AdSystem,
+    } as YospaceLinearAd;
   }
 }
 
@@ -1264,7 +1303,7 @@ class AdEventsFactory {
         },
         ...AdTranslator.mapYsAdvert(ad),
         companionAds: companionAds,
-      } as LocalLinearAd,
+      } as YospaceLinearAd,
     };
   }
 }

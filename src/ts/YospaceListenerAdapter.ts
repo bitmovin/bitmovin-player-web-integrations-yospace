@@ -1,4 +1,5 @@
 import { ArrayUtils } from 'bitmovin-player-ui/dist/js/framework/arrayutils';
+import { Logger } from './Logger';
 
 /** BYS -> BitmovinYospace */
 export enum BYSListenerEvent {
@@ -84,7 +85,7 @@ export class YospaceAdListenerAdapter {
   }
 
   UpdateTimeline(timeline: YSTimeline): void {
-    console.log('[listener] UpdateTimeline', timeline);
+    Logger.log('[listener] UpdateTimeline', timeline);
     this.emitEvent({
       type: BYSListenerEvent.UPDATE_TIMELINE,
       timeline: timeline,
@@ -92,7 +93,7 @@ export class YospaceAdListenerAdapter {
   }
 
   AnalyticsFired(call_id: any, call_data: any): void {
-    console.log('[listener] AnalyticsFired', call_id, call_data);
+    Logger.log('[listener] AnalyticsFired', call_id, call_data);
     this.emitEvent({
       type: BYSListenerEvent.ANALYTICS_FIRED,
       call_id: call_id,
