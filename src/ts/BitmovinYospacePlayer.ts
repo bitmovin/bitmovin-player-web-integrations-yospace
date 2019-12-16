@@ -85,7 +85,7 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     Player.addModule(MSERendererModule);
     Player.addModule(EngineBitmovinModule);
     Player.addModule(HLSModule);
-    Player.addModule(DASHModule)
+    Player.addModule(DASHModule);
     Player.addModule(ABRModule);
     Player.addModule(ContainerMP4Module);
     Player.addModule(ContainerTSModule);
