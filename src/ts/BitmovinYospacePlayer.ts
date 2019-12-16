@@ -18,7 +18,6 @@ import EngineBitmovinModule from 'bitmovin-player/modules/bitmovinplayer-engine-
 import HLSModule from 'bitmovin-player/modules/bitmovinplayer-hls';
 import DASHModule from 'bitmovin-player/modules/bitmovinplayer-dash';
 import ABRModule from 'bitmovin-player/modules/bitmovinplayer-abr';
-import DASHModule from 'bitmovin-player/modules/bitmovinplayer-dash';
 import ContainerMP4Module from 'bitmovin-player/modules/bitmovinplayer-container-mp4';
 import ContainerTSModule from 'bitmovin-player/modules/bitmovinplayer-container-ts';
 import SubtitlesModule, { PlayerSubtitlesAPI } from 'bitmovin-player/modules/bitmovinplayer-subtitles';
