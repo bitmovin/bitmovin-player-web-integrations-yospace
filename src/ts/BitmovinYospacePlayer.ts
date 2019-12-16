@@ -1,6 +1,7 @@
 import {
   AudioQuality, AudioTrack, DownloadedAudioData, DownloadedVideoData, LogLevel, LowLatencyAPI, MetadataType, Player,
-  PlayerAPI, PlayerBufferAPI, PlayerConfig, PlayerEvent, PlayerEventCallback, PlayerType, QueryParameters, SegmentMap,
+  PlayerAPI, PlayerBufferAPI, PlayerConfig, PlayerEvent, PlayerEventCallback, PlayerManifestAPI, PlayerType,
+  QueryParameters, SegmentMap,
   Snapshot,
   SourceConfig, StreamType, SupportedTechnologyMode, Technology, Thumbnail, TimeRange, VideoQuality, ViewMode,
   ViewModeOptions,
@@ -304,6 +305,10 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 
   getManifest(): string {
     return this.player.getManifest();
+  }
+
+  get manifest(): PlayerManifestAPI {
+    return this.player.manifest;
   }
 
   getMaxTimeShift(): number {
