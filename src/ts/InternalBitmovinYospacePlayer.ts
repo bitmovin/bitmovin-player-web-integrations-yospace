@@ -997,7 +997,8 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       return;
     }
 
-    const validTypes = ['ID3', 'EMSG'];
+    console.warn(event)
+    const validTypes = ['ID3', 'EMSG', 'DATERANGE'];
     const type = event.metadataType;
 
     if (!validTypes.includes(type)) {
