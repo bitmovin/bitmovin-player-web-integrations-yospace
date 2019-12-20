@@ -22,6 +22,7 @@ import {
 } from 'bitmovin-player/modules/bitmovinplayer-advertising-core';
 import { VASTParser, VastResponse } from 'vast-client';
 import { Logger } from './Logger';
+import { DateRangeEmitter } from './DateRangeEmitter';
 
 interface StreamPart {
   start: number;
@@ -69,7 +70,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   // Yospace fields
   private yospaceConfig: YospaceConfiguration;
   private yospaceSourceConfig: YospaceSourceConfig;
-  private manager: YSSessionManager;
+  private _manager: YSSessionManager;
   private yospaceListenerAdapter: YospaceAdListenerAdapter;
   private playerPolicy: BitmovinYospacePlayerPolicy;
 
@@ -95,6 +96,9 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   // save vpaid status
   private isVpaidActive = false;
 
+  // convert EXT-X-DATERANGE tags to EMSG events
+  private dateRangeEmitter: DateRangeEmitter;
+
   // save last VPAID ad and flag to fire Ad Break End event
   private fireVpaidAdBreakEnd = false;
   private lastVPaidAd: YSAdvert;
@@ -105,7 +109,17 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   constructor(containerElement: HTMLElement, player: PlayerAPI, yospaceConfig: YospaceConfiguration = {}) {
     this.yospaceConfig = yospaceConfig;
     this.player = player;
+    this.dateRangeEmitter = new DateRangeEmitter(this.player);
     this.wrapPlayer();
+  }
+
+  get manager(): YSSessionManager {
+    return this._manager;
+  }
+
+  set manager(value: YSSessionManager) {
+    this._manager = value;
+    this.dateRangeEmitter.manager = this._manager;
   }
 
   load(source: YospaceSourceConfig, forceTechnology?: string, disableSeeking?: boolean): Promise<void> {
@@ -495,6 +509,10 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     return currentAd.adBreak;
   }
 
+  getYospaceManager(): YSSessionManager | null {
+    return this.manager;
+  }
+
   private fireEvent<E extends PlayerEventBase | YospaceEventBase>(event: E): void {
     if (this.eventHandlers[event.type]) {
       this.eventHandlers[event.type].forEach((callback: YospacePlayerEventCallback) => callback(event));
@@ -730,6 +748,10 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       this.manager.reportPlayerEvent(YSPlayerEvents.END);
       this.manager.shutdown();
       this.manager = null;
+    }
+
+    if (this.dateRangeEmitter) {
+      this.dateRangeEmitter.reset();
     }
 
     this.fireVpaidAdBreakEnd = false;
@@ -997,7 +1019,6 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       return;
     }
 
-    console.warn(event)
     const validTypes = ['ID3', 'EMSG', 'DATERANGE'];
     const type = event.metadataType;
 
@@ -1008,11 +1029,12 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     let yospaceMetadataObject: { [key: string]: any; };
     if (type === 'ID3') {
       yospaceMetadataObject = this.parseId3Tags(event);
-    } else {
+      this.manager.reportPlayerEvent(YSPlayerEvents.METADATA, yospaceMetadataObject);
+    } else if (type === 'EMSG') {
       yospaceMetadataObject = this.mapEmsgToId3Tags(event);
+      this.manager.reportPlayerEvent(YSPlayerEvents.METADATA, yospaceMetadataObject);
     }
 
-    this.manager.reportPlayerEvent(YSPlayerEvents.METADATA, yospaceMetadataObject);
   };
 
   private onVpaidAdBreakStarted = (event: AdBreakEvent) => {
