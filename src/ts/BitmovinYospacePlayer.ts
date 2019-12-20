@@ -126,6 +126,26 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 
   setup(): Promise <void>  {
     return this.unregisterAllServiceWorker().then( () => {
+
+    if (BitmovinYospaceHelper.isSafari() || BitmovinYospaceHelper.isSafariIOS()) {
+      if (!this.config.location) {
+        this.config.location = {};
+      }
+
+      if (!this.config.location.serviceworker) {
+        this.config.location.serviceworker = './sw.js';
+      }
+
+      if (!this.config.tweaks) {
+        this.config.tweaks = {};
+      }
+
+      if (!this.config.tweaks.native_hls_parsing) {
+        this.config.tweaks.native_hls_parsing = true;
+      }
+
+      Logger.log('Loading the ServiceWorkerModule');
+      }
       this.bitmovinPlayer = new Player(this.containerElement, this.config);
 
       this.bitmovinYospacePlayer = new InternalBitmovinYospacePlayer(

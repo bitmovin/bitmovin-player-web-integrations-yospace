@@ -198,12 +198,6 @@
       muted: true,
       autoplay: true,
     },
-    location: {
-      serviceworker: './sw.js?t=' + Date.now(),
-    },
-    tweaks: {
-      native_hls_parsing: true,
-    },
     logs: {
       level: 'debug',
     },
@@ -240,14 +234,7 @@
   yospacePlayer = new bitmovin.player.ads.yospace.BitmovinYospacePlayer(playerContainer, conf, yospaceConfig);
 
   yospacePlayer.setup().then(() => {
-    console.warn('Player setup completed');
     bitmovin.playerui.UIFactory.buildDefaultUI(yospacePlayer);
-
-    // yospacePlayer.load(liveSource).then(function() {
-    //   console.log('Source successfully loaded');
-    // }).catch(function() {
-    //   console.log('Error while loading the source');
-    // });
 
     yospacePlayer.on('yospaceerror', function(event) {
       console.error(event);
