@@ -105,23 +105,6 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     Player.addModule(DRMModule);
     Player.addModule(RemoteControlModule);
     Player.addModule(ServiceWorkerClientModule);
-
-/*
-    if (BitmovinYospaceHelper.isSafari() || BitmovinYospaceHelper.isSafariIOS()) {
-*/
-
-      // if (!config.location) {
-      //   config.location = {};
-      //   // config.location.serviceworker = './sw.js';
-      // }
-      //
-      // if (!config.tweaks) {
-      //   config.tweaks = {};
-      //   // config.tweaks.native_hls_parsing = true;
-      // }
-
-      // Logger.log('Loading the ServiceWorkerModule');
-    // }
   }
 
   setup(): Promise <void>  {
