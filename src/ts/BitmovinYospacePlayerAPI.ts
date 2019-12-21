@@ -25,7 +25,7 @@ export const UNDEFINED_VAST_ERROR_CODE = 900;
 
 export interface BitmovinYospacePlayerAPI extends PlayerAPI {
   readonly exports: BitmovinYospacePlayerExports;
-
+  setup(): Promise <void>;
   load(source: SourceConfig | YospaceSourceConfig, forceTechnology?: string, disableSeeking?: boolean): Promise<void>;
   on(eventType: PlayerEvent | YospacePlayerEvent, callback: YospacePlayerEventCallback | PlayerEventCallback): void;
   off(eventType: PlayerEvent | YospacePlayerEvent, callback: YospacePlayerEventCallback | PlayerEventCallback): void;
