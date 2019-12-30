@@ -108,8 +108,13 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   }
 
   setup(): Promise <void>  {
-    return this.unregisterAllServiceWorker().then( () => {
+    return this.unregisterAllServiceWorker().then().catch().then( () => {
+        this.createPlayer();
+      },
+    );
+  }
 
+  private createPlayer(): void {
     if (BitmovinYospaceHelper.isSafari() || BitmovinYospaceHelper.isSafariIOS()) {
       if (!this.config.location) {
         this.config.location = {};
@@ -128,18 +133,16 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       }
 
       Logger.log('Loading the ServiceWorkerModule');
-      }
-      this.bitmovinPlayer = new Player(this.containerElement, this.config);
+    }
+    this.bitmovinPlayer = new Player(this.containerElement, this.config);
 
-      this.bitmovinYospacePlayer = new InternalBitmovinYospacePlayer(
-        this.containerElement,
-        this.bitmovinPlayer,
-        this.yospaceConfig,
-      ) as any as BitmovinYospacePlayerAPI;
+    this.bitmovinYospacePlayer = new InternalBitmovinYospacePlayer(
+      this.containerElement,
+      this.bitmovinPlayer,
+      this.yospaceConfig,
+    ) as any as BitmovinYospacePlayerAPI;
 
-      this.player = this.bitmovinYospacePlayer;
-    });
-
+    this.player = this.bitmovinYospacePlayer;
   }
 
   unregisterAllServiceWorker(): Promise <void> {
