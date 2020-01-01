@@ -179,10 +179,12 @@
 
   var vodVpaidSource = {
     title: 'VOD Stream',
-    hls: 'https://turnercmaf.warnermediacdn.com/csm/qa/cmaf_advanced_fmp4_from_inter/prog_seg/bones_RADS1008071800025944_v12/clear/3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c/master_cl_ifp.m3u8?context=525951113',
-
+    hls: 'https://vod-manifests-aka-qa.warnermediacdn.com/csm/tcm/clear/3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c/master_cl.m3u8?afid=222591187&caid=2100555&conf_csid=tbs.com_videopage_test&context=182883174&nw=42448&prof=48804%3Amp4_plus_vast_truex&vdur=1800&yo.vp=true',
     // Yospace configuration
     assetType: bitmovin.player.ads.yospace.YospaceAssetType.VOD,
+    truexConfiguration: {
+      vastConfigUrl: 'https://qa-get.truex.com/a2a6aa9ae3d7bd9b8b2675781696b28d50ca0736/vast?dimension_1=#e{series.title}&dimension_2=#{slot.position}&dimension_3=#e{asset.title}&dimension_4=#e{asset.id}&dimension_5=truex_sold&stream_id=#{request.videoRandom}&stream_position=preroll&cb=#e{random}'
+    },
   };
 
   var artOfMotionSource = {

@@ -1,11 +1,13 @@
 {
   "name": "@bitmovin/player-integration-yospace",
-  "version": "1.0.0-rc49",
+  "version": "1.0.0-rc50",
   "description": "Yospace integration for the Bitmovin Player",
   "main": "./dist/js/bitmovin-player-yospace.js",
   "types": "./dist/js/bitmovin-player-yospace.d.ts",
   "scripts": {
-    "prepublishOnly": "gulp npm-prepare"
+    "prepublishOnly": "gulp npm-prepare",
+    "build": "gulp build-prod",
+    "start": "gulp build-prod && http-server"
   },
   "repository": {
     "type": "git",

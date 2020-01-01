@@ -1067,8 +1067,10 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     if (this.lastVPaidAd.advert.AdSystem === 'trueX' && typeof this.truexAdFree === 'undefined') {
       this.truexAdFree = true;
       setTimeout(() => {
-        console.info('TrueXAdFree callback: ' + this.truexAdFree);
-        if (this.truexAdFree) {
+        // only fire the TrueX ad free event if the user has finished a preroll ad tag. Midroll ad tags do not earn the
+        // ad free expereience
+        if (this.truexAdFree && currentAd.adBreak && currentAd.adBreak.startPosition === 0) {
+          console.info('TrueXAdFree callback: ' + this.truexAdFree);
           this.fireEvent({
             timestamp: Date.now(),
             type: YospacePlayerEvent.TruexAdFree,
