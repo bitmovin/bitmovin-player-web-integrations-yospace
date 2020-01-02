@@ -74,7 +74,7 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     config.advertising = {};
 
     if (config.ui === undefined || config.ui) {
-      Logger.log('Please setup the UI after initializing the yospace player');
+      Logger.warn('Please setup the UI after initializing the yospace player');
       config.ui = false;
     }
 
