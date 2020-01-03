@@ -7,7 +7,7 @@
   "scripts": {
     "prepublishOnly": "gulp npm-prepare",
     "build": "gulp build-prod",
-    "start": "gulp build-prod && http-server"
+    "start": "gulp serve"
   },
   "repository": {
     "type": "git",
