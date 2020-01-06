@@ -120,17 +120,20 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
         this.config.location = {};
       }
 
-      // if (!this.config.location.serviceworker) {
-      //   this.config.location.serviceworker = './sw.js';
-      // }
-      //
-      // if (!this.config.tweaks) {
-      //   this.config.tweaks = {};
-      // }
-      //
-      // if (!this.config.tweaks.native_hls_parsing) {
-      //   this.config.tweaks.native_hls_parsing = true;
-      // }
+      if (!this.config.tweaks) {
+        this.config.tweaks = {};
+      }
+
+      if (!this.yospaceConfig.disableServiceWorker) {
+        if (!this.config.location.serviceworker) {
+          this.config.location.serviceworker = './sw.js';
+        }
+
+        if (!this.config.tweaks.native_hls_parsing) {
+          this.config.tweaks.native_hls_parsing = true;
+        }
+      }
+
 
       Logger.log('Loading the ServiceWorkerModule');
     }
