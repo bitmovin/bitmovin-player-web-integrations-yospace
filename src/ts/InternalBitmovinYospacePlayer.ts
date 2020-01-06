@@ -203,6 +203,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
             this.playerPolicy = new DefaultBitmovinYospacePlayerPolicy(this as any as BitmovinYospacePlayerAPI);
           }
 
+          Logger.log('Loading Source: ' + JSON.stringify(clonedSource));
           this.player.load(clonedSource, forceTechnology, disableSeeking).then(resolve).catch(reject);
         } else {
           this.manager.shutdown();
@@ -346,6 +347,8 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       this.cachedSeekTarget = null;
     }
     const magicSeekTarget = this.toAbsoluteTime(allowedSeekTarget);
+
+    Logger.log('Seek: ' + time + ' -> ' + magicSeekTarget);
     return this.player.seek(magicSeekTarget, issuer);
   }
 
@@ -1080,7 +1083,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       }, 200);
       let currentAdBreak = this.getCurrentAdBreak();
       if (currentAdBreak) {
-        this.player.seek(currentAdBreak.adBreakStart + currentAdBreak.getDuration());
+        // this.player.seek(currentAdBreak.adBreakStart + currentAdBreak.getDuration());
       }
     }
 

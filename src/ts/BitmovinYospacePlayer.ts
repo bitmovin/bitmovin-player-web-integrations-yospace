@@ -120,17 +120,17 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
         this.config.location = {};
       }
 
-      if (!this.config.location.serviceworker) {
-        this.config.location.serviceworker = './sw.js';
-      }
-
-      if (!this.config.tweaks) {
-        this.config.tweaks = {};
-      }
-
-      if (!this.config.tweaks.native_hls_parsing) {
-        this.config.tweaks.native_hls_parsing = true;
-      }
+      // if (!this.config.location.serviceworker) {
+      //   this.config.location.serviceworker = './sw.js';
+      // }
+      //
+      // if (!this.config.tweaks) {
+      //   this.config.tweaks = {};
+      // }
+      //
+      // if (!this.config.tweaks.native_hls_parsing) {
+      //   this.config.tweaks.native_hls_parsing = true;
+      // }
 
       Logger.log('Loading the ServiceWorkerModule');
     }
@@ -178,6 +178,8 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
             }
           }
 
+          Logger.log('BitmovinYospacePlayer loading source after switching players- ' + JSON.stringify(source));
+
           this.player.load(source, forceTechnology, disableSeeking).then(resolve).catch(reject);
         }).catch(reject);
       };
@@ -188,6 +190,7 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       } else if (isAssetTypePresent() && this.currentPlayerType === YospacePlayerType.Bitmovin) {
         switchPlayer(YospacePlayerType.BitmovinYospace);
       } else {
+        Logger.log('BitmovinYospacePlayer loading source - ' + JSON.stringify(source));
         // Else load the source in the current player
         this.player.load(source, forceTechnology, disableSeeking).then(resolve).catch(reject);
       }
