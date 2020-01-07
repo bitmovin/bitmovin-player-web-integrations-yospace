@@ -27,7 +27,7 @@ export class DateRangeEmitter {
 
   private onMetadata = (event: MetadataEvent): void => {
     if (event.metadataType === 'DATERANGE') {
-      Logger.log('DateRangeEmitter - metadata ' + JSON.stringify(event));
+      Logger.log('DateRangeEmitter - ' + this.player.getCurrentTime() + ' metadata ' + JSON.stringify(event));
       let dateRangeData: any = event.metadata;
 
       // create an S metadata event 0.1 seconds into the start of the EXT-X-DATERANGE
