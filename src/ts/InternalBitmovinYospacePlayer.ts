@@ -1063,27 +1063,23 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     // isVpaidActive flag to false.
     this.trackVpaidEvent(VpaidTrackingEvent.AdVideoComplete);
     this.isVpaidActive = false;
-    const currentAd = this.getCurrentAd();
+    const currentAd = this.lastVPaidAd;
 
     // we have a timeout here to prevent a race condition where adfinished is sent before adskipped
     // if truexAdFree has not been set to false by the adskipped listener, fire the truexadfree event
-    if (this.lastVPaidAd.advert.AdSystem === 'trueX' && typeof this.truexAdFree === 'undefined') {
+    if (currentAd.advert.AdSystem === 'trueX' && this.truexAdFree !== false) {
+      Logger.log('TrueXAd finished');
+
       // only fire the TrueX ad free event if the user has finished a preroll ad tag. Midroll ad tags do not earn the
       // ad free expereience
       this.truexAdFree = (currentAd.adBreak && currentAd.adBreak.startPosition === 0);
-      setTimeout(() => {
 
-        if (this.truexAdFree) {
-          console.info('TrueXAdFree callback: ' + this.truexAdFree);
-          this.fireEvent({
-            timestamp: Date.now(),
-            type: YospacePlayerEvent.TruexAdFree,
-          });
-        }
-      }, 200);
-      let currentAdBreak = this.getCurrentAdBreak();
-      if (currentAdBreak) {
-        this.player.seek(currentAdBreak.adBreakStart + currentAdBreak.getDuration());
+      if (this.truexAdFree) {
+        Logger.log('TrueXAdFree firing: ' + this.truexAdFree);
+        this.fireEvent({
+          timestamp: Date.now(),
+          type: YospacePlayerEvent.TruexAdFree,
+        });
       }
     }
 
