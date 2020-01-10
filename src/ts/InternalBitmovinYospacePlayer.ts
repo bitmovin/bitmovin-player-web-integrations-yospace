@@ -749,6 +749,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     // reset all local attributes
     this.unregisterPlayerEvents();
     if (this.manager) {
+      Logger.log('[BitmovinYospacePlayer] - sending YSPlayerEvent.END');
       this.manager.reportPlayerEvent(YSPlayerEvents.END);
       this.manager.shutdown();
       this.manager = null;
@@ -918,9 +919,12 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     this.player.on(this.player.exports.PlayerEvent.Playing, this.onPlaying);
     this.player.on(this.player.exports.PlayerEvent.TimeChanged, this.onTimeChanged);
     this.player.on(this.player.exports.PlayerEvent.Paused, this.onPause);
-
     this.player.on(this.player.exports.PlayerEvent.Seek, this.onSeek);
     this.player.on(this.player.exports.PlayerEvent.Seeked, this.onSeeked);
+
+    this.player.on(this.player.exports.PlayerEvent.StallStarted, this.onStallStarted);
+    this.player.on(this.player.exports.PlayerEvent.StallEnded, this.onStallEnded);
+
 
     // To support ads in live streams we need to track metadata events
     this.player.on(this.player.exports.PlayerEvent.Metadata, this.onMetaData);
@@ -938,9 +942,10 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     this.player.off(this.player.exports.PlayerEvent.Playing, this.onPlaying);
     this.player.off(this.player.exports.PlayerEvent.TimeChanged, this.onTimeChanged);
     this.player.off(this.player.exports.PlayerEvent.Paused, this.onPause);
-
     this.player.off(this.player.exports.PlayerEvent.Seek, this.onSeek);
     this.player.off(this.player.exports.PlayerEvent.Seeked, this.onSeeked);
+    this.player.off(this.player.exports.PlayerEvent.StallStarted, this.onStallStarted);
+    this.player.off(this.player.exports.PlayerEvent.StallEnded, this.onStallEnded);
 
     // To support ads in live streams we need to track metadata events
     this.player.off(this.player.exports.PlayerEvent.Metadata, this.onMetaData);
@@ -959,7 +964,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       this.trackVpaidEvent(VpaidTrackingEvent.AdPlaying);
       return;
     }
-
+    Logger.log('[BitmovinYospacePlayer] - sending YSPlayerEvent.START');
     this.manager.reportPlayerEvent(YSPlayerEvents.START);
   };
 
@@ -980,6 +985,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     if (this.isVpaidActive) {
       this.trackVpaidEvent(VpaidTrackingEvent.AdPaused);
     } else {
+      Logger.log('[BitmovinYospacePlayer] - sending YSPlayerEvents.PAUSE');
       this.manager.reportPlayerEvent(YSPlayerEvents.PAUSE);
     }
 
@@ -994,7 +1000,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     if (this.isVpaidActive) {
       return;
     }
-
+    Logger.log('[BitmovinYospacePlayer] - sending YSPlayerEvents.SEEK_START');
     this.manager.reportPlayerEvent(YSPlayerEvents.SEEK_START, this.player.getCurrentTime());
 
     if (!this.suppressedEventsController.isSuppressed(this.player.exports.PlayerEvent.Seek)) {
@@ -1009,6 +1015,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       return;
     }
 
+    Logger.log('[BitmovinYospacePlayer] - sending YSPlayerEvents.SEEK_END');
     this.manager.reportPlayerEvent(YSPlayerEvents.SEEK_END, this.player.getCurrentTime());
 
     if (!this.suppressedEventsController.isSuppressed(this.player.exports.PlayerEvent.Seeked)) {
@@ -1016,6 +1023,25 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     } else {
       this.suppressedEventsController.remove(this.player.exports.PlayerEvent.Seeked);
     }
+  };
+
+  private onStallStarted = (event: SeekEvent) => {
+    if (this.isVpaidActive) {
+      return;
+    }
+
+    Logger.log('[BitmovinYospacePlayer] - sending YSPlayerEvents.STALL');
+    this.manager.reportPlayerEvent(YSPlayerEvents.STALL, this.player.getCurrentTime());
+  };
+
+  private onStallEnded = (event: SeekEvent) => {
+    if (this.isVpaidActive) {
+      return;
+    }
+
+    Logger.log('[BitmovinYospacePlayer] - sending YSPlayerEvents.RESUME');
+    this.manager.reportPlayerEvent(YSPlayerEvents.RESUME, this.player.getCurrentTime());
+
   };
 
   private onMetaData = (event: MetadataEvent) => {
@@ -1033,9 +1059,11 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     let yospaceMetadataObject: { [key: string]: any; };
     if (type === 'ID3') {
       yospaceMetadataObject = this.parseId3Tags(event);
+      Logger.log('[BitmovinYospacePlayer] - sending YSPlayerEvents.METADATA ' + JSON.stringify(yospaceMetadataObject));
       this.manager.reportPlayerEvent(YSPlayerEvents.METADATA, yospaceMetadataObject);
     } else if (type === 'EMSG') {
       yospaceMetadataObject = this.mapEmsgToId3Tags(event);
+      Logger.log('[BitmovinYospacePlayer] - sending YSPlayerEvents.METADATA ' + JSON.stringify(yospaceMetadataObject));
       this.manager.reportPlayerEvent(YSPlayerEvents.METADATA, yospaceMetadataObject);
     }
 
@@ -1328,6 +1356,7 @@ class AdEventsFactory {
       type: type,
       ad: {
         clickThroughUrlOpened: () => {
+          Logger.log('[BitmovinYospacePlayer] - sending YSPlayerEvents.Click ');
           manager.reportPlayerEvent(YSPlayerEvents.CLICK);
         },
         ...AdTranslator.mapYsAdvert(ad),
