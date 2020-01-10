@@ -40,6 +40,7 @@ export interface YospaceLinearAd extends LinearAd {
   extensions: any[];
   adSystem?: string;
   companionAds?: CompanionAd[];
+  sequence: number;
 }
 
 // Enums for yospace related vpaid ad tracking strings
@@ -1289,6 +1290,7 @@ class AdTranslator {
       },
       extensions: VastHelper.getExtensions(ysAd.advert),
       adSystem: ysAd.advert.AdSystem,
+      sequence: ysAd.advert.sequence,
     } as YospaceLinearAd;
   }
 }

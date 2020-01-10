@@ -83,7 +83,24 @@
             <div id="player"></div>
         </div>
     </div>
-    <div id="companionDiv">
+    <div class='row'>
+        <div class='col-12'>
+            <p1 id='adBreakLabel'>AdBreak: false</p1>
+        </div>
+    </div>
+    <div class='row'>
+        <div class='col-12'>
+            <p1 id='adLabel'>Ad: false</p1>
+        </div>
+    </div>
+
+    <div class='row'>
+        <table class='table' id="adTable">
+        </table>
+    </div>
+    <div class='row'>
+        <div id="companionDiv">
+        </div>
     </div>
 </div>
 <script type="text/javascript">
@@ -279,6 +296,37 @@
         linkElement.appendChild(img);
         document.getElementById("companionDiv").appendChild(linkElement);
       }
+
+      let activeAdBreak = yospacePlayer.ads.getActiveAdBreak();
+      let activeAd = yospacePlayer.ads.getActiveAd();
+
+      console.debug('getActiveAdBreak: ' + JSON.stringify(activeAdBreak))
+      var table = $('#adTable')
+      var header = $('<thead/>')
+      // var row = $('<tr/>')
+      var row2 = $('<tr/>')
+      row2.append($('<th/>').text('Id'))
+      row2.append($('<th/>').text('Duration'))
+      row2.append($('<th/>').text('VPAID'))
+      row2.append($('<th/>').text('Sequence'))
+      header.append(row2)
+      table.append(header)
+      let body = $('<tbody/>')
+      table.append(body)
+      for(let i=0; i<activeAdBreak.ads.length; i++){
+        let ad = activeAdBreak.ads[i]
+        var row = $('<tr>')
+        row.append($('<td/>').text(ad.id))
+        row.append($('<td/>').text(ad.duration))
+        row.append($('<td/>').text(!ad.uiConfig.requestsUi))
+        row.append($('<td/>').text(ad.sequence))
+        if (ad.id === activeAd.id && ad.sequence === activeAd.sequence) {
+          row.addClass('table-active')
+        }
+
+        body.append(row)
+      }
+
     })
 
     yospacePlayer.on('adfinished', function(event) {
@@ -287,6 +335,9 @@
       while (companion.firstChild) {
         companion.removeChild(companion.firstChild);
       }
+
+      $('#adTable tbody').remove()
+      $('#adTable thead').remove()
     })
 
     yospacePlayer.on('adbreakfinished', function(event) {
@@ -296,6 +347,35 @@
     yospacePlayer.on('adbreakstarted', function(event) {
       console.debug('Ad Break Started: ' + JSON.stringify(event));
     })
+
+    yospacePlayer.on('timechanged', function(event) {
+      let adBreak = yospacePlayer.ads.getActiveAdBreak();
+      let ad = yospacePlayer.ads.getActiveAd();
+
+      if (adBreak && ad) {
+        let duration = adBreak.duration;
+        let adCounter = 0;
+        let adDuration = 0;
+        for (let i = 0; i < adBreak.ads.length; i++ ) {
+          adCounter = i + 1
+          let a = adBreak.ads[i];
+          if (a.id === ad.id && ad.sequence === a.sequence) {
+            adDuration = a.duration - event.time
+            duration = duration - event.time
+            break
+          }else {
+            duration = duration - a.duration
+          }
+        }
+
+        $( '#adBreakLabel' ).text('AdBreak: ' + duration + ' remaining')
+        $( '#adLabel' ).text('Ad: ' + adCounter + ' of ' + adBreak.ads.length + '  ' + adDuration + ' remaining')
+      } else {
+        $( '#adBreakLabel' ).text('AdBreak: false')
+        $( '#adLabel' ).text('Ad: false')
+      }
+    })
+
   })
 
 </script>
