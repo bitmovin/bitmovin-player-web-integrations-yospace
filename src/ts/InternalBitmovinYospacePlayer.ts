@@ -1052,7 +1052,9 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     this.fireVpaidAdBreakEnd = false;
 
     if (currentAdBreak && currentAdBreak.adverts && currentAdBreak.adverts.length > 0) {
-      if (currentAdBreak.adverts[currentAdBreak.adverts.length - 1].getMediaID() === currentAd.getMediaID()) {
+      let lastAd = currentAdBreak.adverts[currentAdBreak.adverts.length - 1];
+
+      if (lastAd.getMediaID() === currentAd.getMediaID() && lastAd.advert.sequence === currentAd.advert.sequence) {
         this.fireVpaidAdBreakEnd = true;
       }
     }
