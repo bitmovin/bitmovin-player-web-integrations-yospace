@@ -572,8 +572,9 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     if (currentAd.hasInteractiveUnit() && (!isTruexAd || this.yospaceSourceConfig.truexConfiguration)) {
       this.isVpaidActive = true;
       this.manager.session.suppressAnalytics(true);
-
-      Logger.log('Schedule VPAID: ' + currentAd.advert.id + ' truex: ' + isTruexAd);
+      let position = String(this.player.getCurrentTime());
+      let replaceContentDuration = currentAd.duration;
+      Logger.log('Schedule VPAID: ' + currentAd.advert.id + ' truex: ' + isTruexAd + 'replaceDuration=' + replaceContentDuration + ' position=' + position );
       Logger.log(VastHelper.buildDataUriWithoutTracking(currentAd.advert));
 
       this.player.ads.schedule({
@@ -581,8 +582,8 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
           url: VastHelper.buildDataUriWithoutTracking(currentAd.advert),
           type: 'vast',
         },
-        position: String(this.player.getCurrentTime()),
-        replaceContentDuration: currentAd.duration,
+        position: position,
+        replaceContentDuration: replaceContentDuration,
       } as AdConfig).catch((reason: string) => {
         const error = new PlayerError(this.player.exports.ErrorCode.MODULE_ADVERTISING_ERROR, {
           code: UNDEFINED_VAST_ERROR_CODE,
@@ -1082,7 +1083,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     if (currentAdBreak && currentAdBreak.adverts && currentAdBreak.adverts.length > 0) {
       let lastAd = currentAdBreak.adverts[currentAdBreak.adverts.length - 1];
 
-      if (lastAd.getMediaID() === currentAd.getMediaID() && lastAd.advert.sequence === currentAd.advert.sequence) {
+      if (lastAd.getMediaID() === currentAd.getMediaID() && (lastAd.advert.sequence) && lastAd.advert.sequence === currentAd.advert.sequence) {
         this.fireVpaidAdBreakEnd = true;
       }
     }
@@ -1126,6 +1127,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 
   private onVpaidAdBreakFinished = (event: AdBreakEvent) => {
     if (this.fireVpaidAdBreakEnd) {
+      Logger.log('[BitmovinYospacePlayer] VPAID ad break id=' + this.lastVPaidAd.getMediaID() + 'seq=' + this.lastVPaidAd.advert.sequence + ' was the last ad in the ad break ')
       this.onAdBreakFinished({
         type: BYSListenerEvent.AD_BREAK_END,
         adBreak: this.lastVPaidAd.adBreak,
@@ -1139,11 +1141,12 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   private onVpaidAdSkipped = (event: AdEvent) => {
     if (this.lastVPaidAd && this.lastVPaidAd.advert.AdSystem === 'trueX') {
       this.truexAdFree = false;
-      console.info('Truex ad skipped: ' + this.lastVPaidAd.advert.id);
+      Logger.log('Truex ad skipped: ' + this.lastVPaidAd.advert.id);
     }
 
     this.trackVpaidEvent(VpaidTrackingEvent.AdSkipped);
     this.onVpaidAdFinished(event);
+    Logger.log('[BitmovinYospacePlayer] firing VPAID adskipped event id=' + this.lastVPaidAd.getMediaID());
     this.fireEvent<AdEvent>({
       timestamp: Date.now(),
       type: this.player.exports.PlayerEvent.AdSkipped,
@@ -1174,7 +1177,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 
     const currentAd = this.getCurrentAd();
     const currentBreak = currentAd.adBreak;
-
+    Logger.log('[BitmovinYospacePlayer] tracking VPAID event ' + event + ' id=' + this.lastVPaidAd.getMediaID());
     currentAd.getInteractiveUnit().track(
       event,
       this.player.getCurrentTime(), // The VPAID ad needs to implement the VPAID API otherwise we will report 0 here
