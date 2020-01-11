@@ -83,6 +83,13 @@
             <div id="player"></div>
         </div>
     </div>
+
+    <div class='row'>
+        <div class='col-12'>
+            <p1 id='segmentPlaybackLabel'>Playing Segment: unknown</p1>
+        </div>
+    </div>
+
     <div class='row'>
         <div class='col-12'>
             <p1 id='adBreakLabel'>AdBreak: false</p1>
@@ -218,7 +225,7 @@
       autoplay: true,
     },
     logs: {
-      level: 'debug',
+      level: 'none',
     },
     ui: false,
     tweaks: {
@@ -272,6 +279,12 @@
 
     yospacePlayer.on('segmentplayback', function(event) {
       console.log(event);
+      let segmentUrl = event.url
+      let fileNameIndex = segmentUrl.lastIndexOf("/") + 1;
+
+      var filename = segmentUrl.substr(fileNameIndex);
+      $('#segmentPlaybackLabel').text('Segment: url=' + filename + ' time=' + event.playbackTime)
+      console.log($('#segmentPlaybackLabel').text());
     })
 
     yospacePlayer.on('adbreakstarted', function(event) {
