@@ -73,6 +73,7 @@ export enum CompanionAdType {
 export interface YospaceConfiguration {
   debug?: boolean;
   disableServiceWorker?: boolean;
+  disableVpaidRenderer?: boolean;
 }
 
 export interface BitmovinYospacePlayerExports extends PlayerExports {

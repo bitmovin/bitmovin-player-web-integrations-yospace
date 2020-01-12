@@ -569,7 +569,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     let isTruexAd = currentAd.advert.AdSystem === 'trueX';
 
     // Display all VPAID ads & Truex ads if a TruexConfiguration is present
-    if (currentAd.hasInteractiveUnit() && (!isTruexAd || this.yospaceSourceConfig.truexConfiguration)) {
+    if (!this.yospaceConfig.disableVpaidRenderer && currentAd.hasInteractiveUnit() && (!isTruexAd || this.yospaceSourceConfig.truexConfiguration)) {
       this.isVpaidActive = true;
       this.manager.session.suppressAnalytics(true);
       let position = String(this.player.getCurrentTime());
