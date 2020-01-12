@@ -74,6 +74,7 @@ export interface YospaceConfiguration {
   debug?: boolean;
   disableServiceWorker?: boolean;
   disableVpaidRenderer?: boolean;
+  liveVpaidDurationAdjustment?: number;
 }
 
 export interface BitmovinYospacePlayerExports extends PlayerExports {

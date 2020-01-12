@@ -109,6 +109,11 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 
   constructor(containerElement: HTMLElement, player: PlayerAPI, yospaceConfig: YospaceConfiguration = {}) {
     this.yospaceConfig = yospaceConfig;
+
+    if (!this.yospaceConfig.liveVpaidDurationAdjustment) {
+      this.yospaceConfig.liveVpaidDurationAdjustment = 4;
+    }
+
     this.player = player;
     this.dateRangeEmitter = new DateRangeEmitter(this.player);
     this.wrapPlayer();
@@ -574,6 +579,12 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       this.manager.session.suppressAnalytics(true);
       let position = String(this.player.getCurrentTime());
       let replaceContentDuration = currentAd.duration;
+
+      // workaround for back to back VPAIDs on live
+      if (this.isLive() && this.yospaceConfig.liveVpaidDurationAdjustment) {
+        Logger.log('Adjusting replace content duration by ' + this.yospaceConfig.liveVpaidDurationAdjustment);
+        replaceContentDuration = replaceContentDuration - this.yospaceConfig.liveVpaidDurationAdjustment;
+      }
       Logger.log('Schedule VPAID: ' + currentAd.advert.id + ' truex: ' + isTruexAd + 'replaceDuration=' + replaceContentDuration + ' position=' + position );
       Logger.log(VastHelper.buildDataUriWithoutTracking(currentAd.advert));
 
