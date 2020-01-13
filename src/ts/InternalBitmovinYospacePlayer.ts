@@ -582,8 +582,9 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 
       // workaround for back to back VPAIDs on live
       if (this.isLive() && this.yospaceConfig.liveVpaidDurationAdjustment) {
-        Logger.log('Adjusting replace content duration by ' + this.yospaceConfig.liveVpaidDurationAdjustment);
         replaceContentDuration = replaceContentDuration - this.yospaceConfig.liveVpaidDurationAdjustment;
+        Logger.log('Adjusting replace content duration by ' + this.yospaceConfig.liveVpaidDurationAdjustment + ' - ' + replaceContentDuration);
+
       }
       Logger.log('Schedule VPAID: ' + currentAd.advert.id + ' truex: ' + isTruexAd + 'replaceDuration=' + replaceContentDuration + ' position=' + position );
       Logger.log(VastHelper.buildDataUriWithoutTracking(currentAd.advert));
