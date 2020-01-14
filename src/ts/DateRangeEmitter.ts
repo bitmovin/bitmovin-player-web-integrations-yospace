@@ -5,6 +5,7 @@ export class DateRangeEmitter {
   private player: PlayerAPI;
   private _manager: YSSessionManager;
   private emsgEvents: any[] = [];
+  private processedDateRangeEvents: {[key: string]: number}
 
   constructor(player: PlayerAPI) {
     this.player = player;
@@ -23,12 +24,20 @@ export class DateRangeEmitter {
   reset(): void {
     this._manager = null;
     this.emsgEvents = [];
+    this.processedDateRangeEvents = {};
   }
 
   private onMetadata = (event: MetadataEvent): void => {
     if (event.metadataType === 'DATERANGE') {
-      Logger.log('DateRangeEmitter - ' + this.player.getCurrentTime() + ' metadata ' + JSON.stringify(event));
       let dateRangeData: any = event.metadata;
+      let previousDateRange: number = this.processedDateRangeEvents[dateRangeData.clientAttributes.comYospaceYmid];
+      if (previousDateRange && (Math.abs(previousDateRange - event.start) < 10)) {
+        Logger.log('DateRangeEmitter - Duplicate DateRange detected ymid=' + dateRangeData.clientAttributes.comYospaceYmid + 'currentTime=' + this.player.getCurrentTime());
+        return;
+      } else {
+        this.processedDateRangeEvents[dateRangeData.clientAttributes.comYospaceYmid] = event.start;
+        Logger.log('DateRangeEmitter - currentTime=' + this.player.getCurrentTime() + ' metadata=' + JSON.stringify(event));
+      }
 
       // create an S metadata event 0.1 seconds into the start of the EXT-X-DATERANGE
       let metadataStart = {
@@ -76,7 +85,7 @@ export class DateRangeEmitter {
     // Logger.log('DateRangeEmitter - TimeChanged ' + JSON.stringify(event));
     while (this.emsgEvents.length > 0 && this.emsgEvents[0].startTime <= event.absoluteTime) {
       let emsg = this.emsgEvents.shift();
-      Logger.log('Sending: ' + event.absoluteTime + ' emsg: ' + JSON.stringify(emsg));
+      Logger.log('[DateRangeEmitter] Sending: ' + event.absoluteTime + ' emsg: ' + JSON.stringify(emsg));
       if (this.manager) {
         this.manager.reportPlayerEvent(YSPlayerEvents.METADATA, emsg);
       }
