@@ -5,7 +5,7 @@ export class DateRangeEmitter {
   private player: PlayerAPI;
   private _manager: YSSessionManager;
   private emsgEvents: any[] = [];
-  private processedDateRangeEvents: {[key: string]: number}
+  private processedDateRangeEvents: {[key: string]: number};
 
   constructor(player: PlayerAPI) {
     this.player = player;
