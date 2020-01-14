@@ -134,7 +134,6 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
         }
       }
 
-
       Logger.log('Loading the ServiceWorkerModule');
     }
     this.bitmovinPlayer = new Player(this.containerElement, this.config);

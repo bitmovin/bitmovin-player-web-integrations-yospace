@@ -52,7 +52,7 @@ export class DateRangeEmitter {
           'YSCP': dateRangeData.clientAttributes.comYospaceYmid,
           'YSEQ': '1:1',
           'YTYP': 'M',
-          'YDUR': '2',
+          'YDUR': String(val),
         };
         val = val + 2;
         this.emsgEvents.push(metadataMid);
