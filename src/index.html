@@ -180,6 +180,14 @@
     yospacePlayer.load(customSource);
   });
 
+  // var liveSource = {
+  //   title: 'Live Stream',
+  //   hls: 'https://live-manifests-aka-qa.warnermediacdn.com/csmp/cmaf/live/2000073/cnn-clear/master.m3u8?yo.dr=true&yo.ad=true',
+  //
+  //   // Yospace configuration
+  //   assetType: bitmovin.player.ads.yospace.YospaceAssetType.LINEAR,
+  // };
+
   var liveSource = {
     title: 'Live Stream',
     hls: 'https://live-manifests-aka-qa.warnermediacdn.com/csmp/cmaf/live/2000073/cnn-clear/master.m3u8?yo.dr=true&yo.ad=true',
@@ -187,6 +195,7 @@
     // Yospace configuration
     assetType: bitmovin.player.ads.yospace.YospaceAssetType.LINEAR,
   };
+
 
   var vodSource = {
     title: 'VOD Stream',
