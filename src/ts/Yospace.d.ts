@@ -23,6 +23,7 @@ interface YSSessionManagerDefault {
                       // (Note that this should never be user-modified)
   AD_DEBUG: boolean;  // Should Ad debugging be found and printed (from yo.ad)
   DEBUGGING: boolean; // Should trace messages be output to the console?
+  STRICT_BREAKS: boolean; // Should previous ad beacons be ignored for missed breaks
 }
 
 declare class YSSessionManager {

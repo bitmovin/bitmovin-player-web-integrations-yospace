@@ -226,6 +226,8 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
         USE_ID3: source.assetType !== YospaceAssetType.VOD, // Use time based tracking only for VOD
       };
 
+      YSSessionManager.DEFAULTS.STRICT_BREAKS = source.assetType !== YospaceAssetType.VOD;
+
       switch (source.assetType) {
         case YospaceAssetType.LINEAR:
           this.manager = YSSessionManager.createForLive(url, properties, onInitComplete);
@@ -1096,7 +1098,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       let lastAd = currentAdBreak.adverts[currentAdBreak.adverts.length - 1];
 
       if (lastAd.getMediaID() === currentAd.getMediaID() && lastAd.advert.sequence === currentAd.advert.sequence) {
-        Logger.log('[BitmovinYospacePlayer] setting fireVpaidAdBreakEnd to true')
+        Logger.log('[BitmovinYospacePlayer] setting fireVpaidAdBreakEnd to true');
         this.fireVpaidAdBreakEnd = true;
       }
     }
