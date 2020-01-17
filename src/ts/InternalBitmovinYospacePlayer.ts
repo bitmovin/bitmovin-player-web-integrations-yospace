@@ -1096,6 +1096,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       let lastAd = currentAdBreak.adverts[currentAdBreak.adverts.length - 1];
 
       if (lastAd.getMediaID() === currentAd.getMediaID() && lastAd.advert.sequence === currentAd.advert.sequence) {
+        Logger.log('[BitmovinYospacePlayer] setting fireVpaidAdBreakEnd to true')
         this.fireVpaidAdBreakEnd = true;
       }
     }

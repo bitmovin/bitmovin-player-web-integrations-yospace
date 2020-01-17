@@ -15,7 +15,7 @@ export class Logger {
     }
 
     if (this.enabled) {
-      console.log(message, ...optionalParams);
+      console.log( this.printDate() + ' ' + message, ...optionalParams);
     }
   }
 
@@ -37,5 +37,18 @@ export class Logger {
     if (this.enabled) {
       console.warn(message);
     }
+  }
+
+  private static printDate(): string {
+    var temp = new Date();
+    var dateStr = '[' +
+      this.padString(temp.getHours()) + ':' +
+      this.padString(temp.getMinutes()) + ':' +
+      this.padString(temp.getSeconds()) + ']';
+    return dateStr;
+  }
+
+  private static padString(i: number): string {
+    return (i < 10) ? '0' + i : '' + i;
   }
 }
