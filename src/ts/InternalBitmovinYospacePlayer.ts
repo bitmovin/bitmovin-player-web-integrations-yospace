@@ -109,7 +109,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 
   constructor(containerElement: HTMLElement, player: PlayerAPI, yospaceConfig: YospaceConfiguration = {}) {
     this.yospaceConfig = yospaceConfig;
-
+    Logger.log('[BitmovinYospacePlayer] loading YospacePlayer with config= ' + JSON.stringify(this.yospaceConfig));
     if (!this.yospaceConfig.liveVpaidDurationAdjustment) {
       this.yospaceConfig.liveVpaidDurationAdjustment = 4;
     }
