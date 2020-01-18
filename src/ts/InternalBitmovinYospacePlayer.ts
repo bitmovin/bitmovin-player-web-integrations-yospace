@@ -220,13 +220,13 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
         }
       };
 
-      const properties = {
+      const properties: YSSessionManagerDefault = {
         ...YSSessionManager.DEFAULTS,
         DEBUGGING: Boolean(this.yospaceConfig.debug),
         USE_ID3: source.assetType !== YospaceAssetType.VOD, // Use time based tracking only for VOD
       };
 
-      YSSessionManager.DEFAULTS.STRICT_BREAKS = source.assetType !== YospaceAssetType.VOD;
+      properties.STRICT_BREAKS = source.assetType === YospaceAssetType.LINEAR;
 
       switch (source.assetType) {
         case YospaceAssetType.LINEAR:
