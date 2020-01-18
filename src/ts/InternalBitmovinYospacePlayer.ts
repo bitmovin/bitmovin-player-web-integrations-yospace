@@ -226,7 +226,10 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
         USE_ID3: source.assetType !== YospaceAssetType.VOD, // Use time based tracking only for VOD
       };
 
-      properties.STRICT_BREAKS = source.assetType === YospaceAssetType.LINEAR;
+      if (!this.yospaceConfig.disableStrictBreaks && source.assetType === YospaceAssetType.LINEAR) {
+        Logger.log('[BitmovinYospacePlayer] enabling strict_breaks through Yospace SDK');
+        properties.STRICT_BREAKS = true;
+      }
 
       switch (source.assetType) {
         case YospaceAssetType.LINEAR:
