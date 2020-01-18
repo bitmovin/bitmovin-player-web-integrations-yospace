@@ -1,4 +1,4 @@
-import { AdBreakEvent, AdEvent, MetadataEvent, PlaybackEvent, PlayerAPI, TimeChangedEvent } from 'bitmovin-player';
+import { AdBreakEvent, AdEvent, MetadataEvent, PlayerAPI, TimeChangedEvent } from 'bitmovin-player';
 import { Logger } from './Logger';
 import { YospaceLinearAd } from './InternalBitmovinYospacePlayer';
 
@@ -6,7 +6,7 @@ export class DateRangeEmitter {
   private player: PlayerAPI;
   private _manager: YSSessionManager;
   private emsgEvents: any[] = [];
-  private processedDateRangeEvents: {[key: string]: number};
+  private processedDateRangeEvents: { [key: string]: number };
   private currentTimeBase: number = 0;
 
   constructor(player: PlayerAPI) {
@@ -39,11 +39,15 @@ export class DateRangeEmitter {
       let previousDateRange: number = this.processedDateRangeEvents[dateRangeData.clientAttributes.comYospaceYmid];
       let currentTime = this.player.getCurrentTime();
       if (previousDateRange && (Math.abs(previousDateRange - currentTime) < 10)) {
-        Logger.log('[BitmovinYospacePlayer] - Duplicate DateRange detected ymid=' + dateRangeData.clientAttributes.comYospaceYmid + 'currentTime=' + this.player.getCurrentTime());
+        Logger.log(
+          '[BitmovinYospacePlayer] - Duplicate DateRange detected ymid=' + dateRangeData.clientAttributes.comYospaceYmid
+          + 'currentTime=' + this.player.getCurrentTime());
         return;
       } else {
         this.processedDateRangeEvents[dateRangeData.clientAttributes.comYospaceYmid] = currentTime;
-        Logger.log('[BitmovinYospacePlayer] - currentTime=' + this.player.getCurrentTime() + ' metadata=' + JSON.stringify(event));
+        Logger.log(
+          '[BitmovinYospacePlayer] - currentTime=' + this.player.getCurrentTime() + ' metadata=' + JSON.stringify(
+          event));
       }
 
       // create an S metadata event 0.1 seconds into the start of the EXT-X-DATERANGE
@@ -81,7 +85,7 @@ export class DateRangeEmitter {
         'YSCP': dateRangeData.clientAttributes.comYospaceYmid,
         'YSEQ': '1:1',
         'YTYP': 'E',
-        'YDUR': String(currentTime + duration - 0.1),
+        'YDUR': String(duration - 0.1),
       };
 
       this.emsgEvents.push(metadataEnd);
@@ -94,7 +98,8 @@ export class DateRangeEmitter {
     while (this.emsgEvents.length > 0 && this.emsgEvents[0].startTime <= event.time) {
       let emsg = this.emsgEvents.shift();
 
-      Logger.log('[BitmovinYospacePlayer] Sending: timestamp=' + event.timestamp + ' currentTime=' + event.time + ' absoluteTime=' + event.absoluteTime + ' emsg: ' + JSON.stringify(emsg));
+      Logger.log('[BitmovinYospacePlayer] Sending: timestamp=' + event.timestamp + ' currentTime=' + event.time
+        + ' absoluteTime=' + event.absoluteTime + ' emsg: ' + JSON.stringify(emsg));
       if (this.manager) {
         emsg.startTime = '';
         this.manager.reportPlayerEvent(YSPlayerEvents.METADATA, emsg);
