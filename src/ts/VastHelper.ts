@@ -15,7 +15,7 @@ export class VastHelper {
   static buildDataUriWithoutTracking(ad: VASTAd): string {
     // build a valid VAST xml data uri to schedule only the current vpaid ad
     const vastXML = ad.vastXML;
-    const trackingEvents = ['TrackingEvents', 'Tracking', 'Impression', 'Impression'];
+    const trackingEvents = ['TrackingEvents', 'Tracking'];
     this.removeXmlNodes(trackingEvents, vastXML);
     const vastVersion = vastXML.parentElement.getAttribute('version');
     const vastXMLString = '<VAST version="' + vastVersion + '">' + vastXML.outerHTML + '</VAST>';
