@@ -17,7 +17,7 @@
   "license": "MIT",
   "devDependencies": {
     "@types/vast-client": "2.1.0",
-    "bitmovin-player": "8.27.0",
+    "bitmovin-player": "8.28.0-b2",
     "bitmovin-player-ui": "^3.6.0",
     "browser-sync": "^2.18.8",
     "browserify": "^14.1.0",
