@@ -1,4 +1,5 @@
 ///<reference path='Yospace.d.ts'/>
+
 import {
   AdBreakEvent, AdEvent, AdQuartile, AdQuartileEvent, BufferLevel, BufferType, ErrorEvent, MediaType, MetadataEvent,
   PlaybackEvent, PlayerAPI, PlayerBufferAPI, PlayerError, PlayerEvent, PlayerEventBase, PlayerEventCallback, SeekEvent,
@@ -20,9 +21,11 @@ import { YospacePlayerError } from './YospaceError';
 import {
   AdConfig, CompanionAd, LinearAd, PlayerAdvertisingAPI,
 } from 'bitmovin-player/modules/bitmovinplayer-advertising-core';
-import { VASTParser, VastResponse } from 'vast-client';
 import { Logger } from './Logger';
 import { DateRangeEmitter } from './DateRangeEmitter';
+import { BitmovinYospaceHelper } from './BitmovinYospaceHelper';
+// @ts-ignore
+import * as VastClient from 'vast-client';
 
 interface StreamPart {
   start: number;
@@ -105,7 +108,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   private lastVPaidAd: YSAdvert;
   private truexAdFree: boolean;
 
-  private vastParser: VASTParser = new VASTParser();
+  private vastParser: VastClient.VASTParser = new VastClient.VASTParser();
 
   constructor(containerElement: HTMLElement, player: PlayerAPI, yospaceConfig: YospaceConfiguration = {}) {
     this.yospaceConfig = yospaceConfig;
@@ -115,7 +118,10 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     }
 
     this.player = player;
-    this.dateRangeEmitter = new DateRangeEmitter(this.player);
+
+    if (BitmovinYospaceHelper.isSafari() || BitmovinYospaceHelper.isSafariIOS()) {
+      this.dateRangeEmitter = new DateRangeEmitter(this.player);
+    }
     this.wrapPlayer();
   }
 
@@ -125,7 +131,9 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 
   set manager(value: YSSessionManager) {
     this._manager = value;
-    this.dateRangeEmitter.manager = this._manager;
+    if (this.dateRangeEmitter) {
+      this.dateRangeEmitter.manager = this._manager;
+    }
   }
 
   load(source: YospaceSourceConfig, forceTechnology?: string, disableSeeking?: boolean): Promise<void> {
@@ -563,7 +571,8 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     const currentAd = this.getCurrentAd();
 
     if (currentAd && currentAd.advert && currentAd.advert.vastXML && currentAd.advert.vastXML.outerHTML) {
-      this.vastParser.parseVAST(VastHelper.buildVastDocument(currentAd.advert)).then((vastResponse: VastResponse) => {
+      Logger.log(this.vastParser);
+      this.vastParser.parseVAST(VastHelper.buildVastDocument(currentAd.advert), {}).then((vastResponse: VastClient.VastResponse) => {
         this.handleAdStart(currentAd, VastHelper.parseVastResponse(vastResponse));
       }).catch((err: any) => {
         Logger.log('Unable to parse vastXML. No companion ad found - ' + err);
@@ -954,6 +963,8 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     this.player.on(this.player.exports.PlayerEvent.AdFinished, this.onVpaidAdFinished);
     this.player.on(this.player.exports.PlayerEvent.AdSkipped, this.onVpaidAdSkipped);
     this.player.on(this.player.exports.PlayerEvent.AdQuartile, this.onVpaidAdQuartile);
+    this.player.on(this.player.exports.PlayerEvent.AdError, this.onVpaidAdError);
+
   }
 
   private unregisterPlayerEvents(): void {
@@ -1111,6 +1122,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   private onVpaidAdFinished = (event: AdEvent) => {
     // We have a guard statement in trackVpaidEvent so we need to track it before setting the
     // isVpaidActive flag to false.
+    Logger.log('[BitmovinYospacePlayer] - VPAID ad finished');
     this.trackVpaidEvent(VpaidTrackingEvent.AdVideoComplete);
     this.isVpaidActive = false;
     const currentAd = this.lastVPaidAd;
@@ -1170,6 +1182,25 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       type: this.player.exports.PlayerEvent.AdSkipped,
       ad: AdTranslator.mapYsAdvert(this.lastVPaidAd),
     });
+  };
+
+  private onVpaidAdError = (event: AdEvent) => {
+    Logger.log('[BitmovinYospacePlayer] VPAID Error occurred');
+
+    if (this.lastVPaidAd && this.lastVPaidAd.advert.AdSystem === 'trueX') {
+      this.truexAdFree = false;
+      Logger.log('[BitmovinYospacePlayer] Truex ad errored: ' + this.lastVPaidAd.advert.id);
+    }
+
+    this.trackVpaidEvent(VpaidTrackingEvent.AdSkipped);
+    this.onVpaidAdFinished(event);
+    Logger.log('[BitmovinYospacePlayer] firing VPAID aderror event');
+    this.fireEvent<AdEvent>({
+      timestamp: Date.now(),
+      type: this.player.exports.PlayerEvent.AdError,
+      ad: AdTranslator.mapYsAdvert(this.lastVPaidAd),
+    });
+
   };
 
   private onVpaidAdQuartile = (event: AdQuartileEvent) => {
