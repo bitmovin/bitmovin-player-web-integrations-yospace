@@ -358,7 +358,7 @@ declare namespace VAST {
   height: string;
   htmlResources: string [];
   id: string | null;
-  adSlotID: string | null;
+  adSlotId: string | null;
   iframeResources: string [];
   staticResources: string [];
   trackingEvents: VastCompanionTrackingEvents;

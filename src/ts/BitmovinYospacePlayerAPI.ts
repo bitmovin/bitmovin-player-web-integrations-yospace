@@ -57,7 +57,7 @@ export interface YospaceCompanionAd extends CompanionAd {
   creativeTrackingEvents?: string [];
   companionClickThroughURLTemplate?: string;
   companionClickTrackingURLTemplates?: string [];
-  adSlotID: string | null;
+  adSlotId: string | null;
 }
 
 export interface CompanionAdResource {

@@ -87,7 +87,7 @@ export class VastHelper {
         id: companion.id,
         height: +companion.height,
         width: +companion.width,
-        adSlotID: companion.adSlotID,
+        adSlotId: companion.adSlotId,
         resource: companionAdResource,
         creativeTrackingEvents: creativeView,
         companionClickThroughURLTemplate: companion.companionClickThroughURLTemplate,
