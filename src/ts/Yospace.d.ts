@@ -111,6 +111,7 @@ declare class YSAdBreak {
 }
 
 declare class YSSession {
+  static BREAK_TOLERANCE: number;
   currentAdvert: YSAdvert;
   timeline: YSTimeline;
 

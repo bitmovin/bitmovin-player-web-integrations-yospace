@@ -77,6 +77,7 @@ export interface YospaceConfiguration {
   disableVpaidRenderer?: boolean;
   liveVpaidDurationAdjustment?: number;
   disableStrictBreaks?: boolean;
+  breakTolerance?: number;
 }
 
 export interface BitmovinYospacePlayerExports extends PlayerExports {

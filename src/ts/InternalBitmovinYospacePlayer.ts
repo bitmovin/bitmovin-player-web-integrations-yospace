@@ -121,6 +121,12 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     if (BitmovinYospaceHelper.isSafari() || BitmovinYospaceHelper.isSafariIOS()) {
       this.dateRangeEmitter = new DateRangeEmitter(this.player);
     }
+
+    if (this.yospaceConfig.breakTolerance) {
+      Logger.log('[BitmovinYospacePlayer] setting YSSession.BREAK_TOLERANCE to ' + this.yospaceConfig.breakTolerance);
+      YSSession.BREAK_TOLERANCE = this.yospaceConfig.breakTolerance;
+    }
+
     this.wrapPlayer();
   }
 
@@ -1123,7 +1129,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     // isVpaidActive flag to false.
     Logger.log('[BitmovinYospacePlayer] - VPAID ad finished');
     this.trackVpaidEvent(VpaidTrackingEvent.AdVideoComplete);
-    this.manager.session.handleAdvertEnd(this.lastVPaidAd);
+    // this.manager.session.handleAdvertEnd(this.lastVPaidAd);
     this.isVpaidActive = false;
     const currentAd = this.lastVPaidAd;
 
