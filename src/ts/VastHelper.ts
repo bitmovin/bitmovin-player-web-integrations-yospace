@@ -1,10 +1,9 @@
 ///<reference path="Yospace.d.ts"/>
+///<reference path="VAST.d.ts"/>
 
 import X2JS = require('x2js');
 import { CompanionAdResource, CompanionAdType, YospaceCompanionAd } from './BitmovinYospacePlayerAPI';
 import { Logger } from './Logger';
-// @ts-ignore
-import * as VastClient from 'vast-client';
 
 export class VastHelper {
 
@@ -32,9 +31,9 @@ export class VastHelper {
     return xmlDoc;
   }
 
-  static companionAdFromVastResponse(response: VastClient.VastResponse): VastClient.VastCompanionAd [] {
-    let vastCompanionAds: VastClient.VastCompanionAd[] = [];
-    let ad: VastClient.VastAd = response.ads[0];
+  static companionAdFromVastResponse(response: VAST.VastResponse): VAST.VastCompanionAd [] {
+    let vastCompanionAds: VAST.VastCompanionAd[] = [];
+    let ad: VAST.VastAd = response.ads[0];
     if (!ad) {
       return vastCompanionAds;
     }
@@ -42,7 +41,7 @@ export class VastHelper {
     // @ts-ignore
     let companionAds = ad.creatives.filter(value => value.type === 'companion');
     if (companionAds) {
-      companionAds.forEach((vastCompanionAd: VastClient.VastCreativeCompanion) => {
+      companionAds.forEach((vastCompanionAd: VAST.VastCreativeCompanion) => {
         if (vastCompanionAd.variations && vastCompanionAd.variations.length > 0) {
           Logger.log('Found Companion Ad: ' + JSON.stringify(vastCompanionAd));
           vastCompanionAds.push(vastCompanionAd.variations[0]);
@@ -53,14 +52,14 @@ export class VastHelper {
     return vastCompanionAds;
   }
 
-  static parseVastResponse(vastResponse: VastClient.VastResponse): YospaceCompanionAd [] {
+  static parseVastResponse(vastResponse: VAST.VastResponse): YospaceCompanionAd [] {
     let yospaceCompanionAds: YospaceCompanionAd[] = [];
     let creativeView: string[];
-    let companions: VastClient.VastCompanionAd[] = VastHelper.companionAdFromVastResponse(vastResponse);
+    let companions: VAST.VastCompanionAd[] = VastHelper.companionAdFromVastResponse(vastResponse);
     if (companions == null) {
       return yospaceCompanionAds;
     }
-    companions.forEach((companion: VastClient.VastCompanionAd) => {
+    companions.forEach((companion: VAST.VastCompanionAd) => {
       Logger.log(
         'Companion ad found: id=' + companion.id + ' height=' + companion.height + ' width=' + companion.width);
       if (companion.trackingEvents) {
@@ -69,7 +68,7 @@ export class VastHelper {
       let companionAdResource: CompanionAdResource;
       if (companion.staticResources && companion.staticResources.length > 0) {
         companionAdResource = {
-          url: companion.staticResource[0],
+          url: companion.staticResources[0],
           type: CompanionAdType.StaticResource,
         };
       } else if (companion.htmlResources && companion.htmlResources.length > 0) {
@@ -83,9 +82,6 @@ export class VastHelper {
           type: CompanionAdType.IFrameResource,
         };
       }
-
-      console.warn('[BitmovinYospacePlayer] - Companion Ad: ' + JSON.stringify(companion));
-
 
       yospaceCompanionAds.push({
         id: companion.id,

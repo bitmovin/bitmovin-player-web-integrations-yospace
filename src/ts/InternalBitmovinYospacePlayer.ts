@@ -1,4 +1,5 @@
 ///<reference path='Yospace.d.ts'/>
+///<reference path="VAST.d.ts"/>
 
 import {
   AdBreakEvent, AdEvent, AdQuartile, AdQuartileEvent, BufferLevel, BufferType, ErrorEvent, MediaType, MetadataEvent,
@@ -24,8 +25,6 @@ import {
 import { Logger } from './Logger';
 import { DateRangeEmitter } from './DateRangeEmitter';
 import { BitmovinYospaceHelper } from './BitmovinYospaceHelper';
-// @ts-ignore
-import * as VastClient from 'vast-client';
 
 interface StreamPart {
   start: number;
@@ -108,7 +107,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   private lastVPaidAd: YSAdvert;
   private truexAdFree: boolean;
 
-  private vastParser: VastClient.VASTParser = new VastClient.VASTParser();
+  private vastParser: VAST.VASTParser = new VAST.VASTParser();
 
   constructor(containerElement: HTMLElement, player: PlayerAPI, yospaceConfig: YospaceConfiguration = {}) {
     this.yospaceConfig = yospaceConfig;
@@ -572,7 +571,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 
     if (currentAd && currentAd.advert && currentAd.advert.vastXML && currentAd.advert.vastXML.outerHTML) {
       Logger.log(this.vastParser);
-      this.vastParser.parseVAST(VastHelper.buildVastDocument(currentAd.advert), {}).then((vastResponse: VastClient.VastResponse) => {
+      this.vastParser.parseVAST(VastHelper.buildVastDocument(currentAd.advert), {}).then((vastResponse: VAST.VastResponse) => {
         this.handleAdStart(currentAd, VastHelper.parseVastResponse(vastResponse));
       }).catch((err: any) => {
         Logger.log('Unable to parse vastXML. No companion ad found - ' + err);
@@ -1124,6 +1123,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     // isVpaidActive flag to false.
     Logger.log('[BitmovinYospacePlayer] - VPAID ad finished');
     this.trackVpaidEvent(VpaidTrackingEvent.AdVideoComplete);
+    this.manager.session.handleAdvertEnd(this.lastVPaidAd);
     this.isVpaidActive = false;
     const currentAd = this.lastVPaidAd;
 

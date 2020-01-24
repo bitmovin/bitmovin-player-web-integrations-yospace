@@ -116,6 +116,7 @@ declare class YSSession {
 
   getLinearClickthrough(): string;
   suppressAnalytics(state: boolean): any[];
+  handleAdvertEnd(advert: YSAdvert): void;
 }
 
 declare class YSPlayerPolicy {
