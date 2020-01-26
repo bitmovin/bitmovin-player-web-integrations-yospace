@@ -1210,17 +1210,16 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       mediaId: currentAd.getMediaID(),
     });
 
-    Logger.log('[BitmovinYospacePlayer] - calling YSSession.handleAdvertEnd() id=' + currentAd.getMediaID());
+    Logger.log('[BitmovinYospacePlayer] - resuming Yospace analytics');
+    this.manager.reportPlayerEvent(YSPlayerEvents.RESUME, this.player.getCurrentTime());
     try {
+      Logger.log('[BitmovinYospacePlayer] - calling YSSession.handleAdvertEnd() id=' + currentAd.getMediaID());
       session.handleAdvertEnd(currentAd);
-      session.currentAdvert = null;
     } catch {
       Logger.warn('[BitmovinYospacePlayer] exception thrown inside handleAdvertEnd');
     }
     Logger.log('[BitmovinYospacePlayer] - re-enabling Yospace analytics');
     session.suppressAnalytics(false);
-    Logger.log('[BitmovinYospacePlayer] - resuming Yospace analytics');
-    this.manager.reportPlayerEvent(YSPlayerEvents.RESUME, this.player.getCurrentTime());
   };
 
   private onVpaidAdQuartile = (event: AdQuartileEvent) => {
