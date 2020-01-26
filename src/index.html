@@ -191,7 +191,7 @@
 
   var liveSource = {
     title: 'Live Stream',
-    hls: 'https://live-manifests-aka-qa.warnermediacdn.com/csmp/cmaf/live/2000073/cnn-clear/master.m3u8?yo.dr=true&yo.ad=true',
+    hls: 'https://live-manifests-aka-qa.warnermediacdn.com/csmp/cmaf/live/2000073/cnn-clear/master.m3u8?yo.ad=true&yo.av=2',
 
     // Yospace configuration
     assetType: bitmovin.player.ads.yospace.YospaceAssetType.LINEAR,
@@ -239,7 +239,9 @@
     },
     ui: false,
     tweaks: {
-      ENABLE_SEEK_ON_LIVE: true
+      enable_seek_on_live: true,
+      resume_live_content_at_previous_position_after_ad_break: true,
+      FAIRPLAY_IGNORE_DUPLICATE_INIT_DATA_KEY_ERRORS: true,
     }
   };
 
