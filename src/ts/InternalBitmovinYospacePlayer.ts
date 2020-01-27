@@ -99,6 +99,9 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   // save vpaid status
   private isVpaidActive = false;
 
+  // state when returning from vpaid
+  private isReturningVpaid = false;
+
   // convert EXT-X-DATERANGE tags to EMSG events
   private dateRangeEmitter: DateRangeEmitter;
 
@@ -595,6 +598,8 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     // Display all VPAID ads & Truex ads if a TruexConfiguration is present
     if (!this.yospaceConfig.disableVpaidRenderer && currentAd.hasInteractiveUnit() && (!isTruexAd || this.yospaceSourceConfig.truexConfiguration)) {
       this.isVpaidActive = true;
+      Logger.log('[BitmovinYospacePlayer] - sending YSPlayerEvents.PAUSE at start of VPAID');
+      this.manager.reportPlayerEvent(YSPlayerEvents.PAUSE, this.player.getCurrentTime());
       Logger.log('[BitmovinYospacePlayer] suppressing Yospace analytics');
       this.manager.session.suppressAnalytics(true);
       let position = String(this.player.getCurrentTime());
@@ -1008,6 +1013,12 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       this.manager.reportPlayerEvent(YSPlayerEvents.POSITION, event.time);
     }
 
+    if (this.isReturningVpaid) {
+      Logger.log('[BitmovinYospacePlayer] sending YSPlayerEvents.CONTINUE to resume from VPAID ad');
+      this.manager.reportPlayerEvent(YSPlayerEvents.CONTINUE, event.time);
+      this.isReturningVpaid = false;
+    }
+
     // fire magic time-changed event
     this.fireEvent<TimeChangedEvent>({
       timestamp: Date.now(),
@@ -1074,8 +1085,8 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       return;
     }
 
-    Logger.log('[BitmovinYospacePlayer] - sending YSPlayerEvents.RESUME');
-    this.manager.reportPlayerEvent(YSPlayerEvents.RESUME, this.player.getCurrentTime());
+    Logger.log('[BitmovinYospacePlayer] - sending YSPlayerEvents.CONTINUE');
+    this.manager.reportPlayerEvent(YSPlayerEvents.CONTINUE, this.player.getCurrentTime());
 
   };
 
@@ -1186,7 +1197,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   private onVpaidAdError = (event: AdEvent) => {
     Logger.log('[BitmovinYospacePlayer] VPAID Error occurred');
 
-    if (this.lastVPaidAd && this.lastVPaidAd.advert.AdSystem === 'trueX') {
+    if (this.lastVPaidAd && this.lastVPaidAd.advert && this.lastVPaidAd.advert.AdSystem === 'trueX') {
       this.truexAdFree = false;
       Logger.log('[BitmovinYospacePlayer] Truex ad errored: ' + this.lastVPaidAd.advert.id);
     }
@@ -1205,10 +1216,6 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     this.isVpaidActive = false;
     const currentAd = this.lastVPaidAd;
     const session = this.manager.session;
-    this.onAdFinished({
-      type: BYSListenerEvent.ADVERT_END,
-      mediaId: currentAd.getMediaID(),
-    });
 
     Logger.log('[BitmovinYospacePlayer] - resuming Yospace analytics');
     this.manager.reportPlayerEvent(YSPlayerEvents.RESUME, this.player.getCurrentTime());
@@ -1220,6 +1227,10 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     }
     Logger.log('[BitmovinYospacePlayer] - re-enabling Yospace analytics');
     session.suppressAnalytics(false);
+
+    this.isReturningVpaid = true;
+    Logger.log('[BitmovinYospacePlayer] - sending stall event while returning from VPAID');
+    this.manager.reportPlayerEvent(YSPlayerEvents.STALL, this.player.getCurrentTime());
   };
 
   private onVpaidAdQuartile = (event: AdQuartileEvent) => {
