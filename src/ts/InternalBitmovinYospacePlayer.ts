@@ -116,7 +116,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     this.yospaceConfig = yospaceConfig;
     Logger.log('[BitmovinYospacePlayer] loading YospacePlayer with config= ' + JSON.stringify(this.yospaceConfig));
     if (!this.yospaceConfig.liveVpaidDurationAdjustment) {
-      this.yospaceConfig.liveVpaidDurationAdjustment = 4;
+      this.yospaceConfig.liveVpaidDurationAdjustment = 2;
     }
 
     this.player = player;
