@@ -78,6 +78,8 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       config.ui = false;
     }
 
+    Logger.log('[BitmovinYospacePlayer] creating BitmovinPlayer with configuration ' + JSON.stringify(this.config));
+
     // initialize bitmovin player
     Player.addModule(PolyfillModule);
     Player.addModule(XMLModule);
@@ -107,8 +109,8 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     Player.addModule(ServiceWorkerClientModule);
   }
 
-  setup(): Promise <void>  {
-    return this.unregisterAllServiceWorker().then().catch().then( () => {
+  setup(): Promise<void> {
+    return this.unregisterAllServiceWorker().then().catch().then(() => {
         this.createPlayer();
       },
     );
@@ -134,7 +136,6 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
         }
       }
 
-
       Logger.log('Loading the ServiceWorkerModule');
     }
     this.bitmovinPlayer = new Player(this.containerElement, this.config);
@@ -148,13 +149,17 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     this.player = this.bitmovinYospacePlayer;
   }
 
-  unregisterAllServiceWorker(): Promise <void> {
-    return navigator.serviceWorker.getRegistrations().then((registrations) => {
-      return Promise
-        .all(registrations.map(registration => registration.unregister()))
-        .then(() => {
-    });
-  });
+  unregisterAllServiceWorker(): Promise<void> {
+    if (navigator.serviceWorker) {
+      return navigator.serviceWorker.getRegistrations().then((registrations) => {
+        return Promise
+          .all(registrations.map(registration => registration.unregister()))
+          .then(() => {
+          });
+      });
+    } else {
+      return Promise.resolve();
+    }
   }
 
   load(source: SourceConfig | YospaceSourceConfig, forceTechnology?: string, disableSeeking?: boolean): Promise<void> {

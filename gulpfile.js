@@ -24,7 +24,7 @@ var file = file = require('gulp-file');
 var paths = {
     source: {
         html: ['./src/*.html'],
-        js: ['./src/*.js'],
+        js: ['./src/*.js','./src/vast-client/*.js'],
         tsmain: ['./src/ts/main.ts'],
         ts: ['./src/ts/**/*.ts'],
     },
@@ -147,6 +147,7 @@ gulp.task('serve', function() {
             server: {
                 baseDir: [paths.target.html],
                 index: 'index.html',
+                https: true,
                 routes: {
                     '/yospace': './yospace',
                     '/js': './dist/js/'

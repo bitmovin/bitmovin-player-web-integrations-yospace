@@ -57,6 +57,7 @@ export interface YospaceCompanionAd extends CompanionAd {
   creativeTrackingEvents?: string [];
   companionClickThroughURLTemplate?: string;
   companionClickTrackingURLTemplates?: string [];
+  adSlotId: string | null;
 }
 
 export interface CompanionAdResource {
@@ -73,6 +74,10 @@ export enum CompanionAdType {
 export interface YospaceConfiguration {
   debug?: boolean;
   disableServiceWorker?: boolean;
+  disableVpaidRenderer?: boolean;
+  liveVpaidDurationAdjustment?: number;
+  disableStrictBreaks?: boolean;
+  breakTolerance?: number;
 }
 
 export interface BitmovinYospacePlayerExports extends PlayerExports {
