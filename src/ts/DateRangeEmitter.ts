@@ -37,14 +37,15 @@ export class DateRangeEmitter {
     if (event.metadataType === 'DATERANGE') {
       let dateRangeData: any = event.metadata;
       let previousDateRange: number = this.processedDateRangeEvents[dateRangeData.clientAttributes.comYospaceYmid];
+      let startTime = event.start;
       let currentTime = this.player.getCurrentTime();
-      if (previousDateRange && (Math.abs(previousDateRange - currentTime) < 10)) {
+      if (previousDateRange && (Math.abs(previousDateRange - startTime) < 10)) {
         Logger.log(
           '[BitmovinYospacePlayer] - Duplicate DateRange detected ymid=' + dateRangeData.clientAttributes.comYospaceYmid
           + 'currentTime=' + this.player.getCurrentTime());
         return;
       } else {
-        this.processedDateRangeEvents[dateRangeData.clientAttributes.comYospaceYmid] = currentTime;
+        this.processedDateRangeEvents[dateRangeData.clientAttributes.comYospaceYmid] = startTime;
         Logger.log(
           '[BitmovinYospacePlayer] - currentTime=' + this.player.getCurrentTime() + ' metadata=' + JSON.stringify(
           event));
