@@ -39,6 +39,8 @@ export class DateRangeEmitter {
       let previousDateRange: number = this.processedDateRangeEvents[dateRangeData.clientAttributes.comYospaceYmid];
       let startTime = event.start;
       let currentTime = this.player.getCurrentTime();
+
+      // check for duplicate due to a bug in the Bitmovin Player that fires duplicate date range tags
       if (previousDateRange && (Math.abs(previousDateRange - startTime) < 10)) {
         Logger.log(
           '[BitmovinYospacePlayer] - Duplicate DateRange detected ymid=' + dateRangeData.clientAttributes.comYospaceYmid
