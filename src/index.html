@@ -58,6 +58,9 @@
                         <input type="radio" name="options" id="option-live" autocomplete="off">Load Live
                     </label>
                     <label class="btn btn-outline-secondary">
+                        <input type="radio" name="options" id="option-live-novpaid" autocomplete="off">Live No VPAID
+                    </label>
+                    <label class="btn btn-outline-secondary">
                         <input type="radio" name="options" id="option-aom" autocomplete="off">Art of motion
                     </label>
                 </div>
@@ -116,6 +119,7 @@
 
   var vodButton = $('#option-vod').parent();
   var vodVpaidButton = $('#option-vod-vpaid').parent();
+  var liveNoVpaidButton = $('#option-live-novpaid').parent();
   var liveButton = $('#option-live').parent();
   var artOfMotionButton = $('#option-aom').parent();
   var customStreamButton = $('#load-custom-steam');
@@ -147,6 +151,14 @@
 
     yospacePlayer.unload();
     yospacePlayer.load(liveSource);
+  });
+
+  liveNoVpaidButton.on('click', function() {
+    liveNoVpaidButton.button('toggle');
+    deselectCustomLoadButton();
+
+    yospacePlayer.unload();
+    yospacePlayer.load(liveNoVpaidSource);
   });
 
   artOfMotionButton.on('click', () => {
@@ -185,6 +197,14 @@
     title: 'Live Stream',
     // hls: 'https://live-manifests-aka-qa.warnermediacdn.com/csmp/cmaf/live/2000073/cnn-clear/master.m3u8?yo.ad=true&yo.av=2&yo.pdt=true&yo.dr=true',
     hls: 'https://live-manifests-aka-qa.warnermediacdn.com/csmp/cmaf/live/2000073/timed-cnn-clear/master.m3u8?yo.av=2&yo.pdt=true&yo.dr=true',
+    // Yospace configuration
+    assetType: bitmovin.player.ads.yospace.YospaceAssetType.LINEAR,
+  };
+
+  var liveNoVpaidSource = {
+    title: 'Live Stream',
+    // hls: 'https://live-manifests-aka-qa.warnermediacdn.com/csmp/cmaf/live/2000073/cnn-clear/master.m3u8?yo.ad=true&yo.av=2&yo.pdt=true&yo.dr=true',
+    hls: 'https://live-manifests-aka-qa.warnermediacdn.com/csmp/cmaf/live/2000073/timed-cnn-clear-novpaid/master.m3u8?yo.av=2&yo.pdt=true&yo.dr=true',
     // Yospace configuration
     assetType: bitmovin.player.ads.yospace.YospaceAssetType.LINEAR,
   };
@@ -370,7 +390,7 @@
     })
 
     yospacePlayer.on('timechanged', function(event) {
-      console.log('Time Changed - ' + event.time)
+      console.log('Time Changed - ' + JSON.stringify(event))
       let adBreak = yospacePlayer.ads.getActiveAdBreak();
       let ad = yospacePlayer.ads.getActiveAd();
 
