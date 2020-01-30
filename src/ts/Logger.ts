@@ -15,7 +15,7 @@ export class Logger {
     }
 
     if (this.enabled) {
-      console.log( this.printDate() + ' ' + message, ...optionalParams);
+      console.log(this.printDate() + ' ' + message, ...optionalParams);
     }
   }
 

@@ -580,9 +580,10 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 
     if (currentAd && currentAd.advert && currentAd.advert.vastXML && currentAd.advert.vastXML.outerHTML) {
       Logger.log(this.vastParser);
-      this.vastParser.parseVAST(VastHelper.buildVastDocument(currentAd.advert), {}).then((vastResponse: VAST.VastResponse) => {
-        this.handleAdStart(currentAd, VastHelper.parseVastResponse(vastResponse));
-      }).catch((err: any) => {
+      this.vastParser.parseVAST(VastHelper.buildVastDocument(currentAd.advert), {})
+        .then((vastResponse: VAST.VastResponse) => {
+          this.handleAdStart(currentAd, VastHelper.parseVastResponse(vastResponse));
+        }).catch((err: any) => {
         Logger.log('[BitmovinYospacePlayer] Unable to parse vastXML. No companion ad found - ' + err);
         this.handleAdStart(currentAd);
       });
@@ -596,7 +597,8 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     let isTruexAd = currentAd.advert.AdSystem === 'trueX';
 
     // Display all VPAID ads & Truex ads if a TruexConfiguration is present
-    if (!this.yospaceConfig.disableVpaidRenderer && currentAd.hasInteractiveUnit() && (!isTruexAd || this.yospaceSourceConfig.truexConfiguration)) {
+    if (!this.yospaceConfig.disableVpaidRenderer && currentAd.hasInteractiveUnit() && (!isTruexAd
+      || this.yospaceSourceConfig.truexConfiguration)) {
       this.isVpaidActive = true;
       Logger.log('[BitmovinYospacePlayer] - sending YSPlayerEvents.PAUSE at start of VPAID');
       this.manager.reportPlayerEvent(YSPlayerEvents.PAUSE, this.player.getCurrentTime());
@@ -608,10 +610,13 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       // workaround for back to back VPAIDs on live
       if (this.isLive() && this.yospaceConfig.liveVpaidDurationAdjustment) {
         replaceContentDuration = replaceContentDuration - this.yospaceConfig.liveVpaidDurationAdjustment;
-        Logger.log('[BitmovinYospacePlayer] Adjusting replace content duration by ' + this.yospaceConfig.liveVpaidDurationAdjustment + ' - ' + replaceContentDuration);
+        Logger.log('[BitmovinYospacePlayer] Adjusting replace content duration by '
+          + this.yospaceConfig.liveVpaidDurationAdjustment + ' - ' + replaceContentDuration);
 
       }
-      Logger.log('[BitmovinYospacePlayer] Schedule VPAID: ' + currentAd.advert.id + ' truex: ' + isTruexAd + 'replaceDuration=' + replaceContentDuration + ' position=' + position );
+      Logger.log(
+        '[BitmovinYospacePlayer] Schedule VPAID: ' + currentAd.advert.id + ' truex: ' + isTruexAd + 'replaceDuration='
+        + replaceContentDuration + ' position=' + position);
       Logger.log(VastHelper.buildDataUriWithoutTracking(currentAd.advert));
 
       this.player.ads.schedule({
@@ -962,7 +967,6 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 
     this.player.on(this.player.exports.PlayerEvent.StallStarted, this.onStallStarted);
     this.player.on(this.player.exports.PlayerEvent.StallEnded, this.onStallEnded);
-
 
     // To support ads in live streams we need to track metadata events
     this.player.on(this.player.exports.PlayerEvent.Metadata, this.onMetaData);
