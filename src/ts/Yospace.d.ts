@@ -35,15 +35,24 @@ declare class YSSessionManager {
   session: YSSession;
 
   static createForLive(url: string, properties: Object, delegate: YSSessionManagerDelegateFunction): YSSessionManager;
-  static createForLivePause(url: string, properties: Object, delegate: YSSessionManagerDelegateFunction): YSSessionManager;
-  static createForNonLinear(url: string, properties: Object, delegate: YSSessionManagerDelegateFunction): YSSessionManager;
+
+  static createForLivePause(url: string, properties: Object,
+                            delegate: YSSessionManagerDelegateFunction): YSSessionManager;
+
+  static createForNonLinear(url: string, properties: Object,
+                            delegate: YSSessionManagerDelegateFunction): YSSessionManager;
+
   static createForVoD(url: string, properties: Object, delegate: YSSessionManagerDelegateFunction): YSSessionManager;
 
   masterPlaylist(): string;
+
   registerPlayer(cb_obj: Object): void;
+
   /** @deprecated */
   isYospaceStream(): boolean;
+
   reportPlayerEvent(evt: YSPlayerEvents, data?: any): void;
+
   shutdown(): void;
 }
 
@@ -93,10 +102,15 @@ declare class YSAdvert {
   isActive: boolean;
 
   adPaused(): void;
+
   adResumed(): void;
+
   setActive(active: boolean): void;
+
   hasInteractiveUnit(): boolean;
+
   getInteractiveUnit(): VASTInteractive;
+
   getMediaID(): string;
 }
 
@@ -116,7 +130,9 @@ declare class YSSession {
   timeline: YSTimeline;
 
   getLinearClickthrough(): string;
+
   suppressAnalytics(state: boolean): any[];
+
   handleAdvertEnd(advert: YSAdvert): void;
 }
 
@@ -128,9 +144,13 @@ declare class YSPlayerPolicy {
    * @param newState
    */
   canChangeFullScreen(newState: boolean): boolean;
+
   canClickThrough(): boolean;
+
   canExpandCreative(): boolean;
+
   canMute(): boolean;
+
   canPause(): boolean;
 
   /**
@@ -152,6 +172,7 @@ declare class YSPlayerPolicy {
    * the value is the delay in seconds before skip is permitted, otherwise -1 which means the advert is not skippable
    */
   canSkip(): number;
+
   canStart(): boolean;
 }
 
@@ -166,6 +187,7 @@ declare class YSTimelineElement {
   adBreak: YSAdBreak;
 
   getType(): string;
+
   getAdverts(): YSAdBreak;
 }
 
@@ -175,5 +197,6 @@ declare class YSTimeline {
 
 declare class VASTInteractive {
   track(ev: string, position: number, asset: string, brktime: string): void;
+
   src: string;
 }
