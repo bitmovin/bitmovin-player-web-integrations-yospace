@@ -4,6 +4,7 @@
 import X2JS = require('x2js');
 import { CompanionAdResource, CompanionAdType, YospaceCompanionAd } from './BitmovinYospacePlayerAPI';
 import { Logger } from './Logger';
+import stringify from 'fast-safe-stringify';
 
 export class VastHelper {
 
@@ -43,7 +44,7 @@ export class VastHelper {
     if (companionAds) {
       companionAds.forEach((vastCompanionAd: VAST.VastCreativeCompanion) => {
         if (vastCompanionAd.variations && vastCompanionAd.variations.length > 0) {
-          Logger.log('Found Companion Ad: ' + JSON.stringify(vastCompanionAd));
+          Logger.log('Found Companion Ad: ' + stringify(vastCompanionAd));
           vastCompanionAds.push(vastCompanionAd.variations[0]);
         }
       });
