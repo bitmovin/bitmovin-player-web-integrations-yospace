@@ -41,6 +41,7 @@ import {
 } from './BitmovinYospacePlayerAPI';
 import { Logger } from './Logger';
 import { BitmovinYospaceHelper } from './BitmovinYospaceHelper';
+import stringify from 'fast-safe-stringify';
 
 export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   private player: BitmovinYospacePlayerAPI;
@@ -76,7 +77,7 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       config.ui = false;
     }
 
-    Logger.log('[BitmovinYospacePlayer] creating BitmovinPlayer with configuration ' + JSON.stringify(this.config));
+    Logger.log('[BitmovinYospacePlayer] creating BitmovinPlayer with configuration ' + stringify(this.config));
 
     // initialize bitmovin player
     Player.addModule(PolyfillModule);
@@ -183,7 +184,7 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
             }
           }
 
-          Logger.log('BitmovinYospacePlayer loading source after switching players- ' + JSON.stringify(source));
+          Logger.log('BitmovinYospacePlayer loading source after switching players- ' + stringify(source));
 
           this.player.load(source, forceTechnology, disableSeeking).then(resolve).catch(reject);
         }).catch(reject);
@@ -195,7 +196,7 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       } else if (isAssetTypePresent() && this.currentPlayerType === YospacePlayerType.Bitmovin) {
         switchPlayer(YospacePlayerType.BitmovinYospace);
       } else {
-        Logger.log('BitmovinYospacePlayer loading source - ' + JSON.stringify(source));
+        Logger.log('BitmovinYospacePlayer loading source - ' + stringify(source));
         // Else load the source in the current player
         this.player.load(source, forceTechnology, disableSeeking).then(resolve).catch(reject);
       }

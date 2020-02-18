@@ -25,6 +25,7 @@ import {
 import { Logger } from './Logger';
 import { DateRangeEmitter } from './DateRangeEmitter';
 import { BitmovinYospaceHelper } from './BitmovinYospaceHelper';
+import stringify from 'fast-safe-stringify';
 
 interface StreamPart {
   start: number;
@@ -114,7 +115,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 
   constructor(containerElement: HTMLElement, player: PlayerAPI, yospaceConfig: YospaceConfiguration = {}) {
     this.yospaceConfig = yospaceConfig;
-    Logger.log('[BitmovinYospacePlayer] loading YospacePlayer with config= ' + JSON.stringify(this.yospaceConfig));
+    Logger.log('[BitmovinYospacePlayer] loading YospacePlayer with config= ' + stringify(this.yospaceConfig));
     if (!this.yospaceConfig.liveVpaidDurationAdjustment) {
       this.yospaceConfig.liveVpaidDurationAdjustment = 2;
     }
@@ -225,7 +226,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
             this.playerPolicy = new DefaultBitmovinYospacePlayerPolicy(this as any as BitmovinYospacePlayerAPI);
           }
 
-          Logger.log('Loading Source: ' + JSON.stringify(clonedSource));
+          Logger.log('Loading Source: ' + stringify(clonedSource));
           this.player.load(clonedSource, forceTechnology, disableSeeking).then(resolve).catch(reject);
         } else {
           this.manager.shutdown();
@@ -1109,11 +1110,11 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     let yospaceMetadataObject: { [key: string]: any; };
     if (type === 'ID3') {
       yospaceMetadataObject = this.parseId3Tags(event);
-      Logger.log('[BitmovinYospacePlayer] - sending YSPlayerEvents.METADATA ' + JSON.stringify(yospaceMetadataObject));
+      Logger.log('[BitmovinYospacePlayer] - sending YSPlayerEvents.METADATA ' + stringify(yospaceMetadataObject));
       this.manager.reportPlayerEvent(YSPlayerEvents.METADATA, yospaceMetadataObject);
     } else if (type === 'EMSG') {
       yospaceMetadataObject = this.mapEmsgToId3Tags(event);
-      Logger.log('[BitmovinYospacePlayer] - sending YSPlayerEvents.METADATA ' + JSON.stringify(yospaceMetadataObject));
+      Logger.log('[BitmovinYospacePlayer] - sending YSPlayerEvents.METADATA ' + stringify(yospaceMetadataObject));
       this.manager.reportPlayerEvent(YSPlayerEvents.METADATA, yospaceMetadataObject);
     }
 

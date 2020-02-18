@@ -1,6 +1,7 @@
 import { AdBreakEvent, AdEvent, MetadataEvent, PlayerAPI, TimeChangedEvent } from 'bitmovin-player';
 import { Logger } from './Logger';
 import { YospaceLinearAd } from './InternalBitmovinYospacePlayer';
+import stringify from 'fast-safe-stringify';
 
 export class DateRangeEmitter {
   private player: PlayerAPI;
@@ -49,7 +50,7 @@ export class DateRangeEmitter {
       } else {
         this.processedDateRangeEvents[dateRangeData.clientAttributes.comYospaceYmid] = startTime;
         Logger.log(
-          '[BitmovinYospacePlayer] - currentTime=' + this.player.getCurrentTime() + ' metadata=' + JSON.stringify(
+          '[BitmovinYospacePlayer] - currentTime=' + this.player.getCurrentTime() + ' metadata=' + stringify(
           event));
       }
 
@@ -96,13 +97,13 @@ export class DateRangeEmitter {
   };
 
   private onTimeChanged = (event: TimeChangedEvent): void => {
-    // Logger.log('[BitmovinYospacePlayer] - TimeChanged ' + JSON.stringify(event));
+    // Logger.log('[BitmovinYospacePlayer] - TimeChanged ' + stringify(event));
 
     while (this.emsgEvents.length > 0 && this.emsgEvents[0].startTime <= event.time) {
       let emsg = this.emsgEvents.shift();
 
       Logger.log('[BitmovinYospacePlayer] Sending: timestamp=' + event.timestamp + ' currentTime=' + event.time
-        + ' absoluteTime=' + event.absoluteTime + ' emsg: ' + JSON.stringify(emsg));
+        + ' absoluteTime=' + event.absoluteTime + ' emsg: ' + stringify(emsg));
       if (this.manager) {
         emsg.startTime = '';
         this.manager.reportPlayerEvent(YSPlayerEvents.METADATA, emsg);
@@ -112,13 +113,13 @@ export class DateRangeEmitter {
 
   private onAdStarted = (event: AdEvent): void => {
     let yospaceAd = event.ad as YospaceLinearAd;
-    Logger.log('[BitmovinYospacePlayer] Ad Started for id=' + JSON.stringify(yospaceAd));
+    Logger.log('[BitmovinYospacePlayer] Ad Started for id=' + stringify(yospaceAd));
 
     // if we are not a VPAID ad
     if (!yospaceAd.uiConfig.requestsUi) {
       while (this.emsgEvents.length > 0 && (this.emsgEvents[0].YTYP === 'M' || this.emsgEvents[0].YTYP === 'E')) {
         let emsg = this.emsgEvents.shift();
-        Logger.log('[BitmovinYospacePlayer] Removing emsg due to VPAID starting: ' + JSON.stringify(emsg));
+        Logger.log('[BitmovinYospacePlayer] Removing emsg due to VPAID starting: ' + stringify(emsg));
       }
     }
   };
