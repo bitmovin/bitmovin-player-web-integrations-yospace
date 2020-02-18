@@ -18,9 +18,10 @@
 
     <script type="text/javascript" src="../yospace/yo-ad-management.min.js"></script>
     <script type="text/javascript" src="js/bitmovin-player-yospace.js"></script>
+    <script type="text/javascript" src="vast-client.min.js"></script>
 
-    <script type="text/javascript" src="//cdn.bitmovin.com/player/web/8.5.0/bitmovinplayer-ui.js"></script>
-    <link rel="stylesheet" href="//cdn.bitmovin.com/player/web/8.5.0/bitmovinplayer-ui.css">
+    <script type="text/javascript" src="//cdn.bitmovin.com/player/web/8/bitmovinplayer-ui.js"></script>
+    <link rel="stylesheet" href="//cdn.bitmovin.com/player/web/8/bitmovinplayer-ui.css">
     <style>
         .player-wrapper {
             margin: 20px auto;
@@ -57,6 +58,9 @@
                         <input type="radio" name="options" id="option-live" autocomplete="off">Load Live
                     </label>
                     <label class="btn btn-outline-secondary">
+                        <input type="radio" name="options" id="option-live-novpaid" autocomplete="off">Live No VPAID
+                    </label>
+                    <label class="btn btn-outline-secondary">
                         <input type="radio" name="options" id="option-aom" autocomplete="off">Art of motion
                     </label>
                 </div>
@@ -83,7 +87,36 @@
             <div id="player"></div>
         </div>
     </div>
-    <div id="companionDiv">
+
+    <div class='row'>
+        <div class='col-12'>
+            <p1 id='segmentPlaybackLabel'>Playing Segment: unknown</p1>
+        </div>
+    </div>
+
+    <div class='row'>
+        <div class='col-12'>
+            <p1 id='adBreakLabel'>AdBreak: false</p1>
+        </div>
+    </div>
+    <div class='row'>
+        <div class='col-12'>
+            <p1 id='adLabel'>Ad: false</p1>
+        </div>
+    </div>
+
+    <div class='row'>
+        <table class='table' id="adEventTable">
+        </table>
+    </div>
+
+    <div class='row'>
+        <table class='table' id="adTable">
+        </table>
+    </div>
+    <div class='row'>
+        <div id="companionDiv">
+        </div>
     </div>
 </div>
 <script type="text/javascript">
@@ -91,6 +124,7 @@
 
   var vodButton = $('#option-vod').parent();
   var vodVpaidButton = $('#option-vod-vpaid').parent();
+  var liveNoVpaidButton = $('#option-live-novpaid').parent();
   var liveButton = $('#option-live').parent();
   var artOfMotionButton = $('#option-aom').parent();
   var customStreamButton = $('#load-custom-steam');
@@ -122,6 +156,14 @@
 
     yospacePlayer.unload();
     yospacePlayer.load(liveSource);
+  });
+
+  liveNoVpaidButton.on('click', function() {
+    liveNoVpaidButton.button('toggle');
+    deselectCustomLoadButton();
+
+    yospacePlayer.unload();
+    yospacePlayer.load(tbseFpSource);
   });
 
   artOfMotionButton.on('click', () => {
@@ -156,22 +198,81 @@
     yospacePlayer.load(customSource);
   });
 
+  var tbseFpSource = {
+      title: 'TBSE FP',
+      hls: 'https://live-manifests-aka-qa.warnermediacdn.com/csmp/cmaf/live/2011915/tbseast-cbcs-stage/master_fp.m3u8?yo.pdt=true&_fw_ae=53da17a30bd0d3c946a41c86cb5873f1&_fw_ar=1&afid=180483280&conf_csid=tbs.com_desktop_live_east&nw=42448&prof=48804:tbs_ios_live&yo.vp=false&yo.ad=true&yo.dr=true',
+      // Yospace configuration
+      assetType: bitmovin.player.ads.yospace.YospaceAssetType.LINEAR,
+      drm: {
+          fairplay: {
+              LA_URL: 'https://fairplay-stage.license.istreamplanet.com/api/license/de4c1d30-ac22-4669-8824-19ba9a1dc128',
+              certificateURL: 'https://fairplay-stage.license.istreamplanet.com/api/AppCert/de4c1d30-ac22-4669-8824-19ba9a1dc128',
+              prepareContentId: function(skd) {
+                  const parts = skd.split("/");
+                  return parts[parts.length - 1];
+              },
+              prepareCertificate: function(certificate) {
+                  const str = ab2str(certificate).split('\"').join('');
+                  const uint8 = str2uint8(atob(str));
+                  return uint8;
+              },
+              prepareMessage: function(event, session) {
+                  return event.messageBase64Encoded;
+              },
+              prepareLicense: function(license) {
+                  const str = license.split('\"').join('');
+                  return str;
+              },
+              useUint16InitData: true,
+          }
+      }
+  };
+
+  function ab2str(buf) {
+      return String.fromCharCode.apply(null, new Uint8Array(buf));
+  }
+
+  function str2uint8(str) {
+      var buf = new ArrayBuffer(str.length);
+      var bufView = new Uint8Array(buf);
+      for (var i = 0, strLen = str.length; i < strLen; i++) {
+          bufView[i] = str.charCodeAt(i);
+      }
+      return bufView;
+  }
+
+  var adBreakState = {
+    abs: 0,
+    as: 0,
+    af: 0,
+    abf: 0
+  }
+
   var liveSource = {
     title: 'Live Stream',
-    hls: 'https://cmaf-live.warnermediacdn.com/csmp/cmaf/live/2000073/tbse-clear-novpaid/master.m3u8?yo.ac=true&yo.aas=true&yo.ch=true&yo.ad=true',
-
+    hls: 'https://live-manifests-aka-qa.warnermediacdn.com/csmp/cmaf/live/2000073/cnn-clear/master.m3u8?yo.ad=true&yo.av=2&yo.pdt=true&yo.dr=true',
+    // hls: 'https://live-manifests-aka-qa.warnermediacdn.com/csmp/cmaf/live/2000073/timed-cnn-clear/master.m3u8?yo.av=2&yo.pdt=true&yo.dr=true',
     // Yospace configuration
     assetType: bitmovin.player.ads.yospace.YospaceAssetType.LINEAR,
   };
 
+  var liveNoVpaidSource = {
+    title: 'Live Stream',
+    // hls: 'https://live-manifests-aka-qa.warnermediacdn.com/csmp/cmaf/live/2000073/cnn-clear/master.m3u8?yo.ad=true&yo.av=2&yo.pdt=true&yo.dr=true',
+    hls: 'https://live-manifests-aka-qa.warnermediacdn.com/csmp/cmaf/live/2000073/timed-cnn-clear-novpaid/master.m3u8?yo.av=2&yo.pdt=true&yo.dr=true&yo.pst=true',
+    // Yospace configuration
+    assetType: bitmovin.player.ads.yospace.YospaceAssetType.LINEAR,
+  };
+
+
   var vodSource = {
     title: 'VOD Stream',
-    hls: 'https://turnercmaf.warnermediacdn.com/csm/qa/cmaf_advanced_fmp4_from_inter/prog_seg/bones_RADS1008071800025944_v12/clear/3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c/master_cl_ifp.m3u8?context=525943851',
+    hls: 'https://vod-manifests-aka-qa.warnermediacdn.com/csm/tcm/clear/3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c/master_cl.m3u8?afid=222591187&caid=2100555&conf_csid=tbs.com_videopage_test&context=182883174&nw=42448&prof=48804%3Amp4_plus_vast_truex&vdur=1800&yo.vp=true',
     // hls: 'http://csm-e.cds1.yospace.com/access/d/400/u/0/1/130782300?f=0000130753172&format=vmap',
 
     // Yospace configuration
     assetType: bitmovin.player.ads.yospace.YospaceAssetType.VOD,
-    truexConfiguration: {}
+    truexConfiguration: {},
     // options: {
     //   startOffset: 600
     // }
@@ -179,31 +280,45 @@
 
   var vodVpaidSource = {
     title: 'VOD Stream',
-    hls: 'https://turnercmaf.warnermediacdn.com/csm/qa/cmaf_advanced_fmp4_from_inter/prog_seg/bones_RADS1008071800025944_v12/clear/3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c/master_cl_ifp.m3u8?context=525951113',
-
+    hls: 'https://vod-manifests-aka-qa.warnermediacdn.com/csm/tcm/clear/3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c/master_cl.m3u8?afid=222591187&caid=2100555&conf_csid=tbs.com_videopage_test&context=182883174&nw=42448&prof=48804%3Amp4_plus_vast_truex&vdur=1800&yo.vp=true',
     // Yospace configuration
     assetType: bitmovin.player.ads.yospace.YospaceAssetType.VOD,
+    truexConfiguration: {
+      vastConfigUrl: 'https://qa-get.truex.com/a2a6aa9ae3d7bd9b8b2675781696b28d50ca0736/vast?dimension_1=#e{series.title}&dimension_2=#{slot.position}&dimension_3=#e{asset.title}&dimension_4=#e{asset.id}&dimension_5=truex_sold&stream_id=#{request.videoRandom}&stream_position=preroll&cb=#e{random}'
+    },
   };
 
   var artOfMotionSource = {
-    title: 'Art Of Motion',
-    hls: '//bitdash-a.akamaihd.net/content/MI201109210084_1/m3u8s/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.m3u8',
-
-    // No Yospace config
+    dash: 'https://bitmovin-a.akamaihd.net/content/MI201109210084_1/mpds/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.mpd',
+    hls: 'https://bitmovin-a.akamaihd.net/content/MI201109210084_1/m3u8s/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.m3u8',
+    progressive: 'https://bitmovin-a.akamaihd.net/content/MI201109210084_1/MI201109210084_mpeg-4_hd_high_1080p25_10mbits.mp4',
+    poster: 'https://bitmovin-a.akamaihd.net/content/MI201109210084_1/poster.jpg',
   };
 
   var conf = {
-    key: 'YOUR_PLAYER_KEY',
+    key: '18ca6ad5-9768-4129-bdf6-17685e0d14d2',
     playback: {
       muted: true,
       autoplay: true,
     },
+    logs: {
+      level: 'none',
+    },
     ui: false,
+    tweaks: {
+      enable_seek_for_live: true,
+      resume_live_content_at_previous_position_after_ad_break: true,
+      FAIRPLAY_IGNORE_DUPLICATE_INIT_DATA_KEY_ERRORS: true,
+    }
   };
 
   // Yospace configuration
   var yospaceConfig = {
     debug: true,
+    disableVpaidRenderer: false,
+    liveVpaidDurationAdjustment: 2,
+    disableStrictBreaks: false,
+      disableServiceWorker: true,
   };
 
   var sampleYospacePlayerPolicy = {
@@ -227,56 +342,172 @@
     },
   };
 
+  var setupTable = function() {
+    var table = $('#adEventTable')
+    var header = $('<thead/>')
+    // var row = $('<tr/>')
+    var row2 = $('<tr/>')
+    row2.append($('<th/>').text('AdBreakStart'))
+    row2.append($('<th/>').text('AdStart'))
+    row2.append($('<th/>').text('AdFinished'))
+    row2.append($('<th/>').text('AdBreakFinished'))
+    header.append(row2)
+    table.append(header)
+  }
+
+  var updateAdEventTable = function() {
+    if (adBreakState.abs > 0) {
+      var table = $('#adEventTable')
+      let body = $('<tbody/>')
+      $('#adEventTable tbody').remove()
+      table.append(body)
+      var row = $('<tr>')
+      row.append($('<td/>').text(adBreakState.abs))
+      row.append($('<td/>').text(adBreakState.as))
+      row.append($('<td/>').text(adBreakState.af))
+      row.append($('<td/>').text(adBreakState.abf))
+      body.append(row)
+    }
+  }
+
   var playerContainer = document.getElementById('player');
   yospacePlayer = new bitmovin.player.ads.yospace.BitmovinYospacePlayer(playerContainer, conf, yospaceConfig);
 
-  bitmovin.playerui.UIFactory.buildDefaultUI(yospacePlayer);
+  setupTable()
+  yospacePlayer.setup().then(() => {
+    bitmovin.playerui.UIFactory.buildDefaultUI(yospacePlayer);
 
-  yospacePlayer.load(vodSource).then(function() {
-    console.log('Source successfully loaded');
-  }).catch(function() {
-    console.log('Error while loading the source');
-  });
+    yospacePlayer.on('yospaceerror', function(event) {
+      console.error(event);
+    })
 
-  yospacePlayer.on('yospaceerror', function(event) {
-    console.error(event);
-  })
+    yospacePlayer.on('metadata', function(event) {
+      console.log(event);
+    })
 
-  yospacePlayer.on('adbreakstarted', function(event) {
-    console.debug(event);
-  })
+    yospacePlayer.on('metadataparsed', function(event) {
+      console.log(event);
+    })
 
-  yospacePlayer.on('adskipped', function(event) {
-    console.debug(event);
-  })
+    yospacePlayer.on('segmentplayback', function(event) {
+      if (event.mimeType === 'video/mp4') {
+        let segmentUrl = event.url
+        let fileNameIndex = segmentUrl.lastIndexOf("/") + 1;
 
-  yospacePlayer.on('truexadfree', function(event) {
-    console.debug(event);
-  })
+        var filename = segmentUrl.substr(fileNameIndex);
+        $('#segmentPlaybackLabel').text('Segment: url=' + filename + ' currentTime=' + yospacePlayer.getCurrentTime() + ' event.playbackTime=' + event.playbackTime + ' ms=' + event.mediaSequenceNumber + ' ds=' + event.discontinuitySequenceNumber)
+        console.log($('#segmentPlaybackLabel').text());
+      }
+    })
 
-  yospacePlayer.on('adstarted', function(event) {
-    console.debug('Ad Started' + JSON.stringify(event));
+    yospacePlayer.on('adskipped', function(event) {
+      console.debug(event);
+    })
 
-    if (event.ad && event.ad.companionAds && event.ad.companionAds.length > 0) {
-      var linkElement = document.createElement('a');
-      linkElement.href = event.ad.companionAds[0].companionClickThroughURLTemplate;
-      var img = new Image(event.ad.companionAds[0].width, event.ad.companionAds[0].height);
-      img.src = event.ad.companionAds[0].resource.url;
-      linkElement.appendChild(img);
-      document.getElementById("companionDiv").appendChild(linkElement);
-    }
-  })
+    yospacePlayer.on('truexadfree', function(event) {
+      console.debug(event);
+    })
 
-  yospacePlayer.on('adfinished', function(event) {
-    console.info('Ad Finished: ' + JSON.stringify(event));
-    var companion = document.getElementById("companionDiv");
-    while (companion.firstChild) {
-      companion.removeChild(companion.firstChild);
-    }
-  })
+    yospacePlayer.on('adstarted', function(event) {
+      console.debug('Ad Started' + JSON.stringify(event));
+      adBreakState.as++
+      updateAdEventTable()
 
-  yospacePlayer.on('adbreakFinished', function(event) {
-    console.debug('Ad Break Finished: ' + JSON.stringify(event));
+      if (event.ad && event.ad.companionAds && event.ad.companionAds.length > 0) {
+        var linkElement = document.createElement('a');
+        linkElement.href = event.ad.companionAds[0].companionClickThroughURLTemplate;
+        var img = new Image(event.ad.companionAds[0].width, event.ad.companionAds[0].height);
+        img.src = event.ad.companionAds[0].resource.url;
+        linkElement.appendChild(img);
+        document.getElementById("companionDiv").appendChild(linkElement);
+      }
+
+      let activeAdBreak = yospacePlayer.ads.getActiveAdBreak();
+      let activeAd = yospacePlayer.ads.getActiveAd();
+
+      console.debug('getActiveAdBreak: ' + JSON.stringify(activeAdBreak))
+      var table = $('#adTable')
+      var header = $('<thead/>')
+      // var row = $('<tr/>')
+      var row2 = $('<tr/>')
+      row2.append($('<th/>').text('Id'))
+      row2.append($('<th/>').text('Duration'))
+      row2.append($('<th/>').text('VPAID'))
+      row2.append($('<th/>').text('Sequence'))
+      header.append(row2)
+      table.append(header)
+      let body = $('<tbody/>')
+      table.append(body)
+      for(let i=0; i<activeAdBreak.ads.length; i++){
+        let ad = activeAdBreak.ads[i]
+        var row = $('<tr>')
+        row.append($('<td/>').text(ad.id))
+        row.append($('<td/>').text(ad.duration))
+        row.append($('<td/>').text(!ad.uiConfig.requestsUi))
+        row.append($('<td/>').text(ad.sequence))
+        if (ad.id === activeAd.id && ad.sequence === activeAd.sequence) {
+          row.addClass('table-active')
+        }
+
+        body.append(row)
+      }
+
+    })
+
+    yospacePlayer.on('adfinished', function(event) {
+      console.info('Ad Finished: ' + JSON.stringify(event));
+      adBreakState.af++
+      updateAdEventTable()
+      var companion = document.getElementById("companionDiv");
+      while (companion.firstChild) {
+        companion.removeChild(companion.firstChild);
+      }
+
+      $('#adTable tbody').remove()
+      $('#adTable thead').remove()
+    })
+
+    yospacePlayer.on('adbreakfinished', function(event) {
+      console.debug('Ad Break Finished: ' + JSON.stringify(event));
+      adBreakState.abf++
+      updateAdEventTable()
+    })
+
+    yospacePlayer.on('adbreakstarted', function(event) {
+      console.debug('Ad Break Started: ' + JSON.stringify(event));
+      adBreakState.abs++
+      updateAdEventTable()
+    })
+
+    yospacePlayer.on('timechanged', function(event) {
+      console.log('Time Changed - ' + JSON.stringify(event))
+      let adBreak = yospacePlayer.ads.getActiveAdBreak();
+      let ad = yospacePlayer.ads.getActiveAd();
+
+      if (adBreak && ad) {
+        let duration = adBreak.duration;
+        let adCounter = 0;
+        let adDuration = 0;
+        for (let i = 0; i < adBreak.ads.length; i++ ) {
+          adCounter = i + 1
+          let a = adBreak.ads[i];
+          if (a.id === ad.id && ad.sequence === a.sequence) {
+            adDuration = a.duration - event.time
+            duration = duration - event.time
+            break
+          }else {
+            duration = duration - a.duration
+          }
+        }
+
+        $( '#adBreakLabel' ).text('AdBreak: ' + duration + ' remaining')
+        $( '#adLabel' ).text('Ad: ' + adCounter + ' of ' + adBreak.ads.length + '  ' + adDuration + ' remaining')
+      } else {
+        $( '#adBreakLabel' ).text('AdBreak: false')
+        $( '#adLabel' ).text('Ad: false')
+      }
+    })
+
   })
 
 </script>

@@ -26,10 +26,16 @@ export const UNDEFINED_VAST_ERROR_CODE = 900;
 export interface BitmovinYospacePlayerAPI extends PlayerAPI {
   readonly exports: BitmovinYospacePlayerExports;
 
+  setup(): Promise<void>;
+
   load(source: SourceConfig | YospaceSourceConfig, forceTechnology?: string, disableSeeking?: boolean): Promise<void>;
+
   on(eventType: PlayerEvent | YospacePlayerEvent, callback: YospacePlayerEventCallback | PlayerEventCallback): void;
+
   off(eventType: PlayerEvent | YospacePlayerEvent, callback: YospacePlayerEventCallback | PlayerEventCallback): void;
+
   setPolicy(policy: BitmovinYospacePlayerPolicy): void;
+
   getCurrentPlayerType(): YospacePlayerType;
 }
 
@@ -57,6 +63,7 @@ export interface YospaceCompanionAd extends CompanionAd {
   creativeTrackingEvents?: string [];
   companionClickThroughURLTemplate?: string;
   companionClickTrackingURLTemplates?: string [];
+  adSlotId: string | null;
 }
 
 export interface CompanionAdResource {
@@ -72,6 +79,11 @@ export enum CompanionAdType {
 
 export interface YospaceConfiguration {
   debug?: boolean;
+  disableServiceWorker?: boolean;
+  disableVpaidRenderer?: boolean;
+  liveVpaidDurationAdjustment?: number;
+  disableStrictBreaks?: boolean;
+  breakTolerance?: number;
 }
 
 export interface BitmovinYospacePlayerExports extends PlayerExports {

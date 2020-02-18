@@ -24,6 +24,7 @@ var file = file = require('gulp-file');
 var paths = {
     source: {
         html: ['./src/*.html'],
+        js: ['./src/*.js','./src/vast-client/*.js'],
         tsmain: ['./src/ts/main.ts'],
         ts: ['./src/ts/**/*.ts'],
     },
@@ -70,8 +71,11 @@ gulp.task('lint', function(callback) {
 
 // Copies html files to the target directory
 gulp.task('html', function() {
-    return gulp.src(paths.source.html)
-        .pipe(gulp.dest(paths.target.html));
+    gulp.src(paths.source.html)
+    .pipe(gulp.dest(paths.target.html));
+
+    return gulp.src(paths.source.js)
+    .pipe(gulp.dest(paths.target.html));
 });
 
 // Compiles JS and TypeScript to JS in the target directory
@@ -143,9 +147,10 @@ gulp.task('serve', function() {
             server: {
                 baseDir: [paths.target.html],
                 index: 'index.html',
+                https: true,
                 routes: {
                     '/yospace': './yospace',
-                    '/js': './node_modules/bitmovin-player/'
+                    '/js': './dist/js/'
                 }
             }
         });
