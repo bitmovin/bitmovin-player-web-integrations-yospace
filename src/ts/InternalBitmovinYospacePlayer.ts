@@ -108,10 +108,17 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 
   // save last VPAID ad and flag to fire Ad Break End event
   private fireVpaidAdBreakEnd = false;
+
+  // save the last VPAID ad
   private lastVPaidAd: YSAdvert;
+
+  // save the truexAdFree state
   private truexAdFree: boolean;
 
+  // VASTParser used for parsing companion ads
   private vastParser: VAST.VASTParser = new VAST.VASTParser();
+
+  private startSent: boolean;
 
   constructor(containerElement: HTMLElement, player: PlayerAPI, yospaceConfig: YospaceConfiguration = {}) {
     this.yospaceConfig = yospaceConfig;
@@ -563,6 +570,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   }
 
   private onAdBreakStarted = (event: BYSAdBreakEvent) => {
+    Logger.log('[BitmovinYospacePlayer] yospaceListenerAdapter.AD_BREAK_START');
     this.player.setPlaybackSpeed(1);
 
     const adBreak = event.adBreak;
@@ -616,8 +624,8 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 
       }
       Logger.log(
-        '[BitmovinYospacePlayer] Schedule VPAID: ' + currentAd.advert.id + ' truex: ' + isTruexAd + 'replaceDuration='
-        + replaceContentDuration + ' position=' + position);
+        '[BitmovinYospacePlayer] Schedule VPAID: ' + currentAd.advert.id + ' truex: ' + isTruexAd + ' replaceDuration='
+        + replaceContentDuration + ' position=' + position + ' seekable.start=' + this.player.getSeekableRange().start + ' seekable.end=' + this.player.getSeekableRange().end);
       Logger.log(VastHelper.buildDataUriWithoutTracking(currentAd.advert));
 
       this.player.ads.schedule({
@@ -812,6 +820,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     this.cachedSeekTarget = null;
     this.isVpaidActive = false;
     this.truexAdFree = undefined;
+    this.startSent = false;
   }
 
   private handleQuartileEvent(adQuartileEventName: string): void {
@@ -1009,8 +1018,17 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       this.trackVpaidEvent(VpaidTrackingEvent.AdPlaying);
       return;
     }
-    Logger.log('[BitmovinYospacePlayer] - sending YSPlayerEvent.START');
-    this.manager.reportPlayerEvent(YSPlayerEvents.START);
+
+    if (!this.startSent) {
+      Logger.log('[BitmovinYospacePlayer] - sending YSPlayerEvent.START');
+      this.startSent = true;
+      this.manager.reportPlayerEvent(YSPlayerEvents.START);
+    } else {
+      Logger.log('[BitmovinYospacePlayer] - sending YSPlayerEvent.RESUME');
+      this.manager.reportPlayerEvent(YSPlayerEvents.RESUME);
+
+    }
+
   };
 
   private onTimeChanged = (event: TimeChangedEvent) => {
@@ -1103,7 +1121,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     const validTypes = ['ID3', 'EMSG', 'DATERANGE'];
     const type = event.metadataType;
 
-    if (!validTypes.includes(type)) {
+    if (!validTypes.includes(type) || !this.player.isLive()) {
       return;
     }
 
@@ -1117,7 +1135,6 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       Logger.log('[BitmovinYospacePlayer] - sending YSPlayerEvents.METADATA ' + stringify(yospaceMetadataObject));
       this.manager.reportPlayerEvent(YSPlayerEvents.METADATA, yospaceMetadataObject);
     }
-
   };
 
   private onVpaidAdBreakStarted = (event: AdBreakEvent) => {
