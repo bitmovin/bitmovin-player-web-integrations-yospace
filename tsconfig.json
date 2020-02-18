@@ -1,0 +1,12 @@
+{
+  "files": [
+    "src/ts/main.ts"
+  ],
+  "compilerOptions": {
+    "noImplicitAny": true,
+    "target": "es5",
+    "declaration": true,
+    "outDir": "dist/js",
+    "lib": ["es2016", "es2015.promise", "dom"]
+  }
+}
