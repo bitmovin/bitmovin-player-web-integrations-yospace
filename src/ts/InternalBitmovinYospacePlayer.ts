@@ -106,9 +106,6 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   // convert EXT-X-DATERANGE tags to EMSG events
   private dateRangeEmitter: DateRangeEmitter;
 
-  // save last VPAID ad and flag to fire Ad Break End event
-  private fireVpaidAdBreakEnd = false;
-
   // save the last VPAID ad
   private lastVPaidAd: YSAdvert;
 
@@ -150,6 +147,10 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     if (this.dateRangeEmitter) {
       this.dateRangeEmitter.manager = this._manager;
     }
+  }
+
+  forceSeek(time: number, issuer?: string): boolean {
+    return this.player.seek(this.toAbsoluteTime(time), issuer);
   }
 
   load(source: YospaceSourceConfig, forceTechnology?: string, disableSeeking?: boolean): Promise<void> {
@@ -621,8 +622,13 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
         replaceContentDuration = replaceContentDuration - this.yospaceConfig.liveVpaidDurationAdjustment;
         Logger.log('[BitmovinYospacePlayer] Adjusting replace content duration by '
           + this.yospaceConfig.liveVpaidDurationAdjustment + ' - ' + replaceContentDuration);
-
       }
+
+      // if we are playing back VOD content
+      if (!this.isLive() && isTruexAd) {
+        replaceContentDuration = replaceContentDuration - 2;
+      }
+
       Logger.log(
         '[BitmovinYospacePlayer] Schedule VPAID: ' + currentAd.advert.id + ' truex: ' + isTruexAd + ' replaceDuration='
         + replaceContentDuration + ' position=' + position + ' seekable.start=' + this.player.getSeekableRange().start + ' seekable.end=' + this.player.getSeekableRange().end);
@@ -811,7 +817,6 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       this.dateRangeEmitter.reset();
     }
 
-    this.fireVpaidAdBreakEnd = false;
     this.lastVPaidAd = null;
     this.contentDuration = 0;
     this.contentMapping = [];
@@ -1142,19 +1147,8 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   };
 
   private onVpaidAdStarted = (event: AdEvent) => {
-    const currentAdBreak = this.getCurrentAdBreak();
     const currentAd = this.getCurrentAd();
     this.lastVPaidAd = currentAd;
-    this.fireVpaidAdBreakEnd = false;
-
-    if (currentAdBreak && currentAdBreak.adverts && currentAdBreak.adverts.length > 0) {
-      let lastAd = currentAdBreak.adverts[currentAdBreak.adverts.length - 1];
-
-      if (lastAd.getMediaID() === currentAd.getMediaID() && lastAd.advert.sequence === currentAd.advert.sequence) {
-        Logger.log('[BitmovinYospacePlayer] setting fireVpaidAdBreakEnd to true');
-        this.fireVpaidAdBreakEnd = true;
-      }
-    }
     this.trackVpaidEvent(VpaidTrackingEvent.AdVideoStart);
   };
 
@@ -1171,7 +1165,8 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 
       // only fire the TrueX ad free event if the user has finished a preroll ad tag. Midroll ad tags do not earn the
       // ad free expereience
-      this.truexAdFree = (currentAd.adBreak && currentAd.adBreak.startPosition === 0);
+      // this.truexAdFree = (currentAd.adBreak && currentAd.adBreak.startPosition === 0);
+      this.truexAdFree = true;
 
       if (this.truexAdFree) {
         Logger.log('TrueXAdFree firing: ' + this.truexAdFree);
@@ -1186,14 +1181,6 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   };
 
   private onVpaidAdBreakFinished = (event: AdBreakEvent) => {
-    if (this.fireVpaidAdBreakEnd) {
-      Logger.log('[BitmovinYospacePlayer] VPAID firing ad break finished event');
-      this.onAdBreakFinished({
-        type: BYSListenerEvent.AD_BREAK_END,
-        adBreak: this.lastVPaidAd.adBreak,
-      });
-    }
-    this.fireVpaidAdBreakEnd = false;
     this.lastVPaidAd = null;
     this.truexAdFree = undefined;
   };
@@ -1242,8 +1229,10 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     Logger.log('[BitmovinYospacePlayer] - resuming Yospace analytics');
     this.manager.reportPlayerEvent(YSPlayerEvents.RESUME, this.player.getCurrentTime());
     try {
-      Logger.log('[BitmovinYospacePlayer] - calling YSSession.handleAdvertEnd() id=' + currentAd.getMediaID());
-      session.handleAdvertEnd(currentAd);
+      if (this.player.isLive()) {
+        Logger.log('[BitmovinYospacePlayer] - calling YSSession.handleAdvertEnd() id=' + currentAd.getMediaID());
+        session.handleAdvertEnd(currentAd);
+      }
     } catch {
       Logger.warn('[BitmovinYospacePlayer] exception thrown inside handleAdvertEnd');
     }

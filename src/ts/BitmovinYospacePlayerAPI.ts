@@ -37,6 +37,8 @@ export interface BitmovinYospacePlayerAPI extends PlayerAPI {
   setPolicy(policy: BitmovinYospacePlayerPolicy): void;
 
   getCurrentPlayerType(): YospacePlayerType;
+
+  forceSeek(time: number, issuer?: string): boolean;
 }
 
 export interface YospaceSourceConfig extends SourceConfig {

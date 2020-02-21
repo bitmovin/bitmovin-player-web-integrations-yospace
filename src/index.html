@@ -55,6 +55,9 @@
                         <input type="radio" name="options" id="option-vod-vpaid" autocomplete="off" checked>Load VOD + VPAID
                     </label>
                     <label class="btn btn-outline-secondary">
+                        <input type="radio" name="options" id="option-vod-truex" autocomplete="off" checked>Load TrueX
+                    </label>
+                    <label class="btn btn-outline-secondary">
                         <input type="radio" name="options" id="option-live" autocomplete="off">Load Live
                     </label>
                     <label class="btn btn-outline-secondary">
@@ -124,6 +127,7 @@
 
   var vodButton = $('#option-vod').parent();
   var vodVpaidButton = $('#option-vod-vpaid').parent();
+  var trueXButton = $('#option-vod-truex').parent();
   var liveNoVpaidButton = $('#option-live-novpaid').parent();
   var liveButton = $('#option-live').parent();
   var artOfMotionButton = $('#option-aom').parent();
@@ -148,6 +152,14 @@
 
     yospacePlayer.unload();
     yospacePlayer.load(vodVpaidSource);
+  });
+
+  trueXButton.on('click', function() {
+    trueXButton.button('toggle');
+    deselectCustomLoadButton();
+
+    yospacePlayer.unload();
+    yospacePlayer.load(trueXSource);
   });
 
   liveButton.on('click', function() {
@@ -245,7 +257,9 @@
     abs: 0,
     as: 0,
     af: 0,
-    abf: 0
+    abf: 0,
+    ab: null,
+    ad: null,
   }
 
   var liveSource = {
@@ -278,8 +292,8 @@
     // }
   };
 
-  var vodVpaidSource = {
-    title: 'VOD Stream',
+  var trueXSource = {
+    title: 'TrueX Stream',
     hls: 'https://vod-manifests-aka-qa.warnermediacdn.com/csm/tcm/clear/3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c/master_cl.m3u8?afid=222591187&caid=2100555&conf_csid=tbs.com_videopage_test&context=182883174&nw=42448&prof=48804%3Amp4_plus_vast_truex&vdur=1800&yo.vp=true',
     // Yospace configuration
     assetType: bitmovin.player.ads.yospace.YospaceAssetType.VOD,
@@ -288,12 +302,21 @@
     },
   };
 
+  var vodVpaidSource = {
+    title: 'VOD Stream',
+    hls: 'https://vod-manifests-aka-qa.warnermediacdn.com/csm/tcm/clear/3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c/master_cl.m3u8?afid=222591187&caid=2100555&conf_csid=tbs.com_videopage&context=182883174&nw=42448&prof=48804%3Atbs_web_vod&vdur=1800&yo.vp=true',
+    // Yospace configuration
+    assetType: bitmovin.player.ads.yospace.YospaceAssetType.VOD,
+  };
+
   var artOfMotionSource = {
     dash: 'https://bitmovin-a.akamaihd.net/content/MI201109210084_1/mpds/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.mpd',
     hls: 'https://bitmovin-a.akamaihd.net/content/MI201109210084_1/m3u8s/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.m3u8',
     progressive: 'https://bitmovin-a.akamaihd.net/content/MI201109210084_1/MI201109210084_mpeg-4_hd_high_1080p25_10mbits.mp4',
     poster: 'https://bitmovin-a.akamaihd.net/content/MI201109210084_1/poster.jpg',
   };
+
+  var truexAdFree = false
 
   var conf = {
     key: '18ca6ad5-9768-4129-bdf6-17685e0d14d2',
@@ -389,6 +412,8 @@
       console.log(event);
     })
 
+    yospacePlayer.setPolicy(sampleYospacePlayerPolicy)
+
     yospacePlayer.on('segmentplayback', function(event) {
       if (event.mimeType === 'video/mp4') {
         let segmentUrl = event.url
@@ -405,12 +430,21 @@
     })
 
     yospacePlayer.on('truexadfree', function(event) {
+      truexAdFree = true
       console.debug(event);
+
+      setTimeout(()=> {
+        const seekPosition = adBreakState.ab.scheduleTime + 2
+        console.warn('TrueXAdFree Seeking to ' + seekPosition);
+        yospacePlayer.forceSeek(seekPosition)
+      }, 500)
+
     })
 
     yospacePlayer.on('adstarted', function(event) {
       console.debug('Ad Started' + JSON.stringify(event));
       adBreakState.as++
+      adBreakState.ad = event.ad;
       updateAdEventTable()
 
       if (event.ad && event.ad.companionAds && event.ad.companionAds.length > 0) {
@@ -475,7 +509,8 @@
 
     yospacePlayer.on('adbreakstarted', function(event) {
       console.debug('Ad Break Started: ' + JSON.stringify(event));
-      adBreakState.abs++
+      adBreakState.abs++;
+      adBreakState.ab = event.adBreak;
       updateAdEventTable()
     })
 
