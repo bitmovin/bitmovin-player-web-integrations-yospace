@@ -236,6 +236,10 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     return this.currentPlayerType;
   }
 
+  forceSeek(time: number, issuer?: string): boolean {
+    return this.player.forceSeek(time, issuer);
+  }
+
   destroy(): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       this.bitmovinPlayer.destroy().then(() => {
