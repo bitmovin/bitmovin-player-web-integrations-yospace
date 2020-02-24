@@ -631,7 +631,8 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 
       Logger.log(
         '[BitmovinYospacePlayer] Schedule VPAID: ' + currentAd.advert.id + ' truex: ' + isTruexAd + ' replaceDuration='
-        + replaceContentDuration + ' position=' + position + ' seekable.start=' + this.player.getSeekableRange().start + ' seekable.end=' + this.player.getSeekableRange().end);
+        + replaceContentDuration + ' position=' + position + ' seekable.start=' + this.player.getSeekableRange().start
+        + ' seekable.end=' + this.player.getSeekableRange().end);
       Logger.log(VastHelper.buildDataUriWithoutTracking(currentAd.advert));
 
       this.player.ads.schedule({
@@ -1161,23 +1162,13 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     // we have a timeout here to prevent a race condition where adfinished is sent before adskipped
     // if truexAdFree has not been set to false by the adskipped listener, fire the truexadfree event
     if (currentAd.advert.AdSystem === 'trueX' && this.truexAdFree !== false) {
-      Logger.log('TrueXAd finished');
-
-      // only fire the TrueX ad free event if the user has finished a preroll ad tag. Midroll ad tags do not earn the
-      // ad free expereience
-      // this.truexAdFree = (currentAd.adBreak && currentAd.adBreak.startPosition === 0);
-      this.truexAdFree = true;
-
-      if (this.truexAdFree) {
-        Logger.log('TrueXAdFree firing: ' + this.truexAdFree);
-        this.fireEvent({
-          timestamp: Date.now(),
-          type: YospacePlayerEvent.TruexAdFree,
-        });
-      }
+      Logger.log('TrueXAdFree firing: ' + this.truexAdFree);
+      this.fireEvent({
+        timestamp: Date.now(),
+        type: YospacePlayerEvent.TruexAdFree,
+      });
     }
     this.cleanUpVpaidAd();
-
   };
 
   private onVpaidAdBreakFinished = (event: AdBreakEvent) => {
