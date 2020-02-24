@@ -624,7 +624,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
           + this.yospaceConfig.liveVpaidDurationAdjustment + ' - ' + replaceContentDuration);
       }
 
-      // if we are playing back VOD content
+      // if we are playing back VOD content, resume 2 seconds before the filler ad ends
       if (!this.isLive() && isTruexAd) {
         replaceContentDuration = replaceContentDuration - 2;
       }
