@@ -1172,6 +1172,15 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   };
 
   private onVpaidAdBreakFinished = (event: AdBreakEvent) => {
+    const currentAd = this.lastVPaidAd;
+
+    if (currentAd.advert.AdSystem === 'trueX') {
+      this.fireEvent({
+        timestamp: Date.now(),
+        type: YospacePlayerEvent.TruexAdBreakFinished,
+      });
+    }
+
     this.lastVPaidAd = null;
     this.truexAdFree = undefined;
   };

@@ -130,6 +130,7 @@ export enum YospacePlayerEvent {
   YospaceError = 'yospaceerror',
   PolicyError = 'policyerror',
   TruexAdFree = 'truexadfree',
+  TruexAdBreakFinished = 'truexadbreakfinished',
 }
 
 export enum YospaceErrorCode {
