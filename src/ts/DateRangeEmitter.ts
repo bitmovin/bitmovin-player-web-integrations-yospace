@@ -94,9 +94,9 @@ export class DateRangeEmitter {
 
       this.emsgEvents.push(metadataEnd);
 
-      Logger.log('[BitmovinYospacePlayer] DateRange events which will be sent during upcoming break:')
+      Logger.log('[BitmovinYospacePlayer] DateRange events which will be sent during upcoming break:');
       Logger.table(this.emsgEvents.map(({ startTime, YTYP, YDUR }) => {
-        return {"Type": YTYP, "Start Time": startTime, "Duration": YDUR}
+        return {'Type': YTYP, 'Start Time': startTime, 'Duration': YDUR};
       }));
     }
   };

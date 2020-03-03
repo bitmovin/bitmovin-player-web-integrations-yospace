@@ -45,7 +45,12 @@ export class Logger {
     }
 
     if (this.enabled) {
-      console.table(message);
+      // Check for IE 11 which doesn't support console.table()
+      if (window.navigator.userAgent.indexOf('Trident/') > 0) {
+        console.log(message);
+      } else {
+        console.table(message);
+      }
     }
   }
 
