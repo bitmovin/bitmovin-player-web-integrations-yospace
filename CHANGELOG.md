@@ -8,8 +8,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Added
 - Log a table of upcoming DateRange events which will be emitted
-
+- `forceSeek` method that allows you to seek to a location without having that location changed due to the player policy
 ## Changed
+- Always fire the `TrueXAdFree` event
+- Reduce the replaceContentDuration by 2 seconds in order to allow the player to properly skip the VPAID / TrueX ad if needed
 - Updated Bitmovin Web SDK to 8.30.0
 - Fire a new `TruexAdBreakFinished` event
 
