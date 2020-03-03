@@ -432,14 +432,15 @@
     yospacePlayer.on('truexadfree', function(event) {
       truexAdFree = true
       console.debug(event);
-
-      setTimeout(()=> {
-        const seekPosition = adBreakState.ab.scheduleTime + 1
-        console.warn('TrueXAdFree Seeking to ' + seekPosition);
-        yospacePlayer.forceSeek(seekPosition)
-      }, 500)
-
     })
+
+    yospacePlayer.on('truexadbreakfinished', function(event) {
+      if (truexAdFree) {
+        const seekPosition = adBreakState.ab.scheduleTime + 1
+        console.warn('TrueXAdBreakFinished Seeking to ' + seekPosition);
+        yospacePlayer.forceSeek(seekPosition)
+      }
+    });
 
     yospacePlayer.on('adstarted', function(event) {
       console.debug('Ad Started' + JSON.stringify(event));
