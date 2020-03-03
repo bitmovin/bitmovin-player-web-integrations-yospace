@@ -39,6 +39,21 @@ export class Logger {
     }
   }
 
+  public static table(message: any): void {
+    if (typeof console === 'undefined') {
+      return;
+    }
+
+    if (this.enabled) {
+      // Check for IE 11 which doesn't support console.table()
+      if (window.navigator.userAgent.indexOf('Trident/') > 0) {
+        console.log(message);
+      } else {
+        console.table(message);
+      }
+    }
+  }
+
   private static printDate(): string {
     var temp = new Date();
     var dateStr = '[' +
