@@ -1157,27 +1157,18 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     // We have a guard statement in trackVpaidEvent so we need to track it before setting the
     // isVpaidActive flag to false.
     this.trackVpaidEvent(VpaidTrackingEvent.AdVideoComplete);
-    const currentAd = this.lastVPaidAd;
-
-    // we have a timeout here to prevent a race condition where adfinished is sent before adskipped
-    // if truexAdFree has not been set to false by the adskipped listener, fire the truexadfree event
-    if (currentAd.advert.AdSystem === 'trueX' && this.truexAdFree !== false) {
-      Logger.log('TrueXAdFree firing: ' + this.truexAdFree);
-      this.fireEvent({
-        timestamp: Date.now(),
-        type: YospacePlayerEvent.TruexAdFree,
-      });
-    }
     this.cleanUpVpaidAd();
   };
 
   private onVpaidAdBreakFinished = (event: AdBreakEvent) => {
     const currentAd = this.lastVPaidAd;
 
-    if (currentAd.advert.AdSystem === 'trueX') {
+    // if truexAdFree has not been set to false by the adskipped listener, fire the truexadfree event
+    if (currentAd.advert.AdSystem === 'trueX' && this.truexAdFree !== false) {
+      Logger.log('TrueXAdFree firing');
       this.fireEvent({
         timestamp: Date.now(),
-        type: YospacePlayerEvent.TruexAdBreakFinished,
+        type: YospacePlayerEvent.TruexAdFree,
       });
     }
 
