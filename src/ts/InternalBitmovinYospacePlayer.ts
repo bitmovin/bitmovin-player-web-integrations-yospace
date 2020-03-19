@@ -1036,7 +1036,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       this.manager.reportPlayerEvent(YSPlayerEvents.RESUME);
 
     }
-    
+
     this.isLiveStream = this.player.isLive();
   };
 
