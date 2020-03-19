@@ -117,6 +117,8 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 
   private startSent: boolean;
 
+  private isLiveStream: boolean;
+
   constructor(containerElement: HTMLElement, player: PlayerAPI, yospaceConfig: YospaceConfiguration = {}) {
     this.yospaceConfig = yospaceConfig;
     Logger.log('[BitmovinYospacePlayer] loading YospacePlayer with config= ' + stringify(this.yospaceConfig));
@@ -1034,7 +1036,8 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       this.manager.reportPlayerEvent(YSPlayerEvents.RESUME);
 
     }
-
+    
+    this.isLiveStream = this.player.isLive();
   };
 
   private onTimeChanged = (event: TimeChangedEvent) => {
@@ -1220,7 +1223,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     Logger.log('[BitmovinYospacePlayer] - resuming Yospace analytics');
     this.manager.reportPlayerEvent(YSPlayerEvents.RESUME, this.player.getCurrentTime());
     try {
-      if (this.player.isLive()) {
+      if (this.isLive()) {
         Logger.log('[BitmovinYospacePlayer] - calling YSSession.handleAdvertEnd() id=' + currentAd.getMediaID());
         session.handleAdvertEnd(currentAd);
       }
@@ -1325,7 +1328,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 
   // Needed in BitmovinYospacePlayerPolicy.ts so keep it here
   isLive(): boolean {
-    return this.player.isLive();
+    return this.isLiveStream;
   }
 
   // Add default PlayerAPI implementation to the yospacePlayer

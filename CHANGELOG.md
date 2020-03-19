@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## Changed
 - Fire `TruexAdFree` in the `adBreakFinished` listener instead of `adFinished`, as the stream isn't fully reloaded for seeking after `adFinished`
 - Update Bitmovin Web SDK to 08.31.0
+- `player.isLive()` returns false when in a VPAID, so store `isLiveStream` in a variable upon playing the stream.
 
 ## [1.2.0]
 
