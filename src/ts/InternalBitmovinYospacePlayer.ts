@@ -117,6 +117,8 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 
   private startSent: boolean;
 
+  private isLiveStream: boolean;
+
   constructor(containerElement: HTMLElement, player: PlayerAPI, yospaceConfig: YospaceConfiguration = {}) {
     this.yospaceConfig = yospaceConfig;
     Logger.log('[BitmovinYospacePlayer] loading YospacePlayer with config= ' + stringify(this.yospaceConfig));
@@ -1035,6 +1037,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 
     }
 
+    this.isLiveStream = this.player.isLive();
   };
 
   private onTimeChanged = (event: TimeChangedEvent) => {
@@ -1157,27 +1160,18 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     // We have a guard statement in trackVpaidEvent so we need to track it before setting the
     // isVpaidActive flag to false.
     this.trackVpaidEvent(VpaidTrackingEvent.AdVideoComplete);
-    const currentAd = this.lastVPaidAd;
-
-    // we have a timeout here to prevent a race condition where adfinished is sent before adskipped
-    // if truexAdFree has not been set to false by the adskipped listener, fire the truexadfree event
-    if (currentAd.advert.AdSystem === 'trueX' && this.truexAdFree !== false) {
-      Logger.log('TrueXAdFree firing: ' + this.truexAdFree);
-      this.fireEvent({
-        timestamp: Date.now(),
-        type: YospacePlayerEvent.TruexAdFree,
-      });
-    }
     this.cleanUpVpaidAd();
   };
 
   private onVpaidAdBreakFinished = (event: AdBreakEvent) => {
     const currentAd = this.lastVPaidAd;
 
-    if (currentAd.advert.AdSystem === 'trueX') {
+    // if truexAdFree has not been set to false by the adskipped listener, fire the truexadfree event
+    if (currentAd.advert.AdSystem === 'trueX' && this.truexAdFree !== false) {
+      Logger.log('TrueXAdFree firing');
       this.fireEvent({
         timestamp: Date.now(),
-        type: YospacePlayerEvent.TruexAdBreakFinished,
+        type: YospacePlayerEvent.TruexAdFree,
       });
     }
 
@@ -1229,7 +1223,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     Logger.log('[BitmovinYospacePlayer] - resuming Yospace analytics');
     this.manager.reportPlayerEvent(YSPlayerEvents.RESUME, this.player.getCurrentTime());
     try {
-      if (this.player.isLive()) {
+      if (this.isLive()) {
         Logger.log('[BitmovinYospacePlayer] - calling YSSession.handleAdvertEnd() id=' + currentAd.getMediaID());
         session.handleAdvertEnd(currentAd);
       }
@@ -1334,7 +1328,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 
   // Needed in BitmovinYospacePlayerPolicy.ts so keep it here
   isLive(): boolean {
-    return this.player.isLive();
+    return this.isLiveStream;
   }
 
   // Add default PlayerAPI implementation to the yospacePlayer
