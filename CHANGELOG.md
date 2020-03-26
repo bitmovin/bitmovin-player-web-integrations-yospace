@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## develop
+## Changed
+- Downgrade Bitmovin Web SDK to 8.29.1 because of issues found with transitioning out of VPAID Ads.
+
 ## [1.2.2]
 
 ## Changed
