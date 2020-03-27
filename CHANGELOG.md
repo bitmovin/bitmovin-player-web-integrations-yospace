@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.2.3]
+## Changed
+- Downgrade Bitmovin Web SDK to 8.29.1 because of issues found with transitioning out of VPAID Ads.
+
 ## [1.2.2]
 
 ## Changed
@@ -31,7 +35,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added
 - Initial yospace integration
-
+[1.2.3]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/1.2.2...1.2.3
 [1.2.2]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/1.2.1...1.2.2
 [1.2.0]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/1.1.0...1.2.0
 [1.1.0]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/1.0.0...1.1.0
