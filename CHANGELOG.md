@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## develop
+## Changed
+- Revert `isLive()` method to return response from `player.isLive()`. Only use `isLiveStream` when cleaning up VPAID. 
+
 ## [1.2.3]
 ## Changed
 - Downgrade Bitmovin Web SDK to 8.29.1 because of issues found with transitioning out of VPAID Ads.
