@@ -117,6 +117,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 
   private startSent: boolean;
 
+  // When exiting a VPAID, player.isLive() returns false, so we store the value on stream start
   private isLiveStream: boolean;
 
   constructor(containerElement: HTMLElement, player: PlayerAPI, yospaceConfig: YospaceConfiguration = {}) {
@@ -1223,7 +1224,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     Logger.log('[BitmovinYospacePlayer] - resuming Yospace analytics');
     this.manager.reportPlayerEvent(YSPlayerEvents.RESUME, this.player.getCurrentTime());
     try {
-      if (this.isLive()) {
+      if (this.isLiveStream) {
         Logger.log('[BitmovinYospacePlayer] - calling YSSession.handleAdvertEnd() id=' + currentAd.getMediaID());
         session.handleAdvertEnd(currentAd);
       }
@@ -1328,7 +1329,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 
   // Needed in BitmovinYospacePlayerPolicy.ts so keep it here
   isLive(): boolean {
-    return this.isLiveStream;
+    return this.player.isLive();
   }
 
   // Add default PlayerAPI implementation to the yospacePlayer
