@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## develop
+## Changed
+- Bump `bitmovin-player` to version `8.33.0`
+
 ## [1.2.4]
 ## Changed
 - Revert `isLive()` method to return response from `player.isLive()`. Only use `isLiveStream` when cleaning up VPAID. 
