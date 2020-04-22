@@ -148,7 +148,7 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   }
 
   unregisterAllServiceWorker(): Promise<void> {
-    if (navigator.serviceWorker) {
+    if (navigator.serviceWorker && !this.yospaceConfig.disableServiceWorker) {
       return navigator.serviceWorker.getRegistrations().then((registrations) => {
         return Promise
           .all(registrations.map(registration => registration.unregister()))
