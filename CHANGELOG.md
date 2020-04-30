@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## develop
+## Changed
+- Bump `bitmovin-player` to version `8.34.0`
+
 ## [1.2.6]
 ## Fixed
 - When the `disableServiceWorker` flag is set to true, don't make calls to `navigator.serviceWorker.getRegistrations()`. This was causing issues on Tizen devices. 
