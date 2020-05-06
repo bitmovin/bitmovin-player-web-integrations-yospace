@@ -3,4 +3,5 @@ export {
   YospaceErrorEvent, YospaceEventBase, YospacePlayerEvent, YospacePolicyErrorEvent, YospacePolicyErrorCode,
   YospaceErrorCode, BitmovinYospacePlayerAPI, BitmovinYospacePlayerPolicy, YospaceAssetType, YospaceConfiguration,
   YospaceSourceConfig, YospacePlayerType, BitmovinYospacePlayerExports, YospacePlayerEventCallback, YospaceCompanionAd,
+  YospaceAdBreak, YospaceAdBreakEvent,
 } from './BitmovinYospacePlayerAPI';
