@@ -585,7 +585,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       this.player.exports.PlayerEvent.AdBreakStarted,
       adBreak.getDuration(),
     );
-    this.fireEvent<AdBreakEvent>(playerEvent);
+    this.fireEvent<YospaceAdBreakEvent>(playerEvent);
   };
 
   private onAdStarted = (event: BYSAdEvent) => {
@@ -702,7 +702,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       adBreak.getDuration(),
     );
 
-    this.fireEvent<AdBreakEvent>(playerEvent);
+    this.fireEvent<YospaceAdBreakEvent>(playerEvent);
 
     if (this.cachedSeekTarget) {
       this.seek(this.cachedSeekTarget, 'yospace-ad-skipping');

@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.2.8]
+## Added
+- Expose `YospaceAdBreak` and `YospaceAdBreakEvent` interfaces for use by integrators. 
+
 ## [1.2.7]
 ## Changed
 - Bump `bitmovin-player` to version `8.34.0`
@@ -52,6 +56,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 - Initial yospace integration
 
+[1.2.8]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/1.2.7...1.2.8
 [1.2.7]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/1.2.6...1.2.7
 [1.2.6]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/1.2.5...1.2.6
 [1.2.5]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/1.2.4...1.2.5
