@@ -15,6 +15,13 @@ export enum YospacePlayerType {
   BitmovinYospace,
 }
 
+export enum YospaceAdBreakPosition {
+  Unknown = 'unknown',
+  PreRoll = 'preroll',
+  MidRoll = 'midroll',
+  PostRoll = 'postroll',
+}
+
 // Constants
 
 // The ads API of the player does not export the VastErrorCodes. As they are standardised we can hard code the undefined
@@ -53,6 +60,7 @@ export interface TruexConfiguration {
 
 export interface YospaceAdBreak extends AdBreak {
   duration: number;
+  position?: YospaceAdBreakPosition;
 }
 
 export interface YospaceAdBreakEvent extends PlayerEventBase {

@@ -122,6 +122,7 @@ declare class YSAdBreak {
   startPosition: number;
 
   getDuration(): number;
+  getPosition(): string;
 }
 
 declare class YSSession {
