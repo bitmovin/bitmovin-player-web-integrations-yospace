@@ -259,6 +259,8 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
         properties.STRICT_BREAKS = true;
       }
 
+      YSParseUtils.NAMESPACES = true;
+
       switch (source.assetType) {
         case YospaceAssetType.LINEAR:
           this.manager = YSSessionManager.createForLive(url, properties, onInitComplete);
