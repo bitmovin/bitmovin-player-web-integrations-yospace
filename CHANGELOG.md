@@ -6,7 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Develop
 ## Added
-- Exposed new `YSAdBreak.position` property 
+- Exposed new `YSAdBreak.position` property
+
+## Changed
+- Set `YSParseUtils.NAMESPACES = true` to resolve an XML parsing issue on Smart TVs
 
 ## [1.2.8]
 ## Added
