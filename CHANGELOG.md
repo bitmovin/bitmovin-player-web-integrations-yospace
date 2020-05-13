@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## Develop
+## Added
+- Exposed new `YSAdBreak.position` property 
+
 ## [1.2.8]
 ## Added
 - Expose `YospaceAdBreak` and `YospaceAdBreakEvent` interfaces for use by integrators. 
