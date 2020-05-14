@@ -12,6 +12,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Set `YSParseUtils.NAMESPACES = true` to resolve an XML parsing issue on Smart TVs
 - Upgrade `bitmovin-player` to version `8.35.0`
 
+## Fixed
+- Remove code to destroy both players as it was causing an exception and not needed. 
+
 ## [1.2.8]
 ## Added
 - Expose `YospaceAdBreak` and `YospaceAdBreakEvent` interfaces for use by integrators. 
