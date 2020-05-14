@@ -203,5 +203,5 @@ declare class VASTInteractive {
 }
 
 declare class YSParseUtils {
-  static NAMESPACES: boolean
+  static NAMESPACES: boolean;
 }
