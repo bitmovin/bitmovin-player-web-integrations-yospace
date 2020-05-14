@@ -122,6 +122,7 @@ declare class YSAdBreak {
   startPosition: number;
 
   getDuration(): number;
+  getPosition(): string;
 }
 
 declare class YSSession {
@@ -199,4 +200,8 @@ declare class VASTInteractive {
   track(ev: string, position: number, asset: string, brktime: string): void;
 
   src: string;
+}
+
+declare class YSParseUtils {
+  static NAMESPACES: boolean;
 }

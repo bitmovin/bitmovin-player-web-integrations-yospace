@@ -241,11 +241,7 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   }
 
   destroy(): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
-      this.bitmovinPlayer.destroy().then(() => {
-        this.bitmovinYospacePlayer.destroy().then(resolve).catch(reject);
-      });
-    });
+    return this.player.destroy();
   }
 
   // Default methods propagated to this.player

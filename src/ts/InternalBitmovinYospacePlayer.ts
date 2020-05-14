@@ -16,7 +16,7 @@ import { VastHelper } from './VastHelper';
 import {
   BitmovinYospacePlayerAPI, BitmovinYospacePlayerPolicy, UNDEFINED_VAST_ERROR_CODE, YospaceAdBreak, YospaceAdBreakEvent,
   YospaceAssetType, YospaceCompanionAd, YospaceConfiguration, YospaceErrorCode, YospaceErrorEvent, YospaceEventBase,
-  YospacePlayerEvent, YospacePlayerEventCallback, YospacePolicyErrorCode, YospacePolicyErrorEvent, YospaceSourceConfig,
+  YospacePlayerEvent, YospacePlayerEventCallback, YospacePolicyErrorCode, YospacePolicyErrorEvent, YospaceSourceConfig, YospaceAdBreakPosition,
 } from './BitmovinYospacePlayerAPI';
 import { YospacePlayerError } from './YospaceError';
 import {
@@ -258,6 +258,8 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
         Logger.log('[BitmovinYospacePlayer] enabling strict_breaks through Yospace SDK');
         properties.STRICT_BREAKS = true;
       }
+
+      YSParseUtils.NAMESPACES = true;
 
       switch (source.assetType) {
         case YospaceAssetType.LINEAR:
@@ -584,6 +586,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       this.toMagicTime(adBreak.startPosition),
       this.player.exports.PlayerEvent.AdBreakStarted,
       adBreak.getDuration(),
+      adBreak.getPosition(),
     );
     this.fireEvent<YospaceAdBreakEvent>(playerEvent);
   };
@@ -700,6 +703,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       this.toMagicTime(adBreak.startPosition),
       this.player.exports.PlayerEvent.AdBreakFinished,
       adBreak.getDuration(),
+      adBreak.getPosition(),
     );
 
     this.fireEvent<YospaceAdBreakEvent>(playerEvent);
@@ -1420,6 +1424,7 @@ class AdEventsFactory {
     scheduleTime: number,
     type: PlayerEvent,
     duration: number,
+    position: string,
   ): YospaceAdBreakEvent {
     return {
       timestamp: Date.now(),
@@ -1428,6 +1433,7 @@ class AdEventsFactory {
         id: adBreakId, // can be null
         scheduleTime: scheduleTime,
         duration: duration,
+        position: position as YospaceAdBreakPosition,
       },
     };
   }

@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.2.9]
+## Added
+- Exposed new `YSAdBreak.position` property
+
+## Changed
+- Set `YSParseUtils.NAMESPACES = true` to resolve an XML parsing issue on Smart TVs
+- Upgrade `bitmovin-player` to version `8.35.0`
+
+## Fixed
+- Remove code to destroy both players as it was causing an exception and not needed. 
+
 ## [1.2.8]
 ## Added
 - Expose `YospaceAdBreak` and `YospaceAdBreakEvent` interfaces for use by integrators. 
@@ -56,6 +67,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 - Initial yospace integration
 
+[1.2.9]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/1.2.8...1.2.9
 [1.2.8]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/1.2.7...1.2.8
 [1.2.7]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/1.2.6...1.2.7
 [1.2.6]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/1.2.5...1.2.6
