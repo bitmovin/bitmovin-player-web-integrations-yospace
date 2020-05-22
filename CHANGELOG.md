@@ -3,7 +3,8 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
-## Develop
+
+## [1.2.10]
 ## Changed
 - Upgrade `bitmovin-player` to version `8.35.1-b.1` which resolves issues with parsing Closed Captions.
 
@@ -70,6 +71,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 - Initial yospace integration
 
+[1.2.10]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/1.2.9...1.2.10
 [1.2.9]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/1.2.8...1.2.9
 [1.2.8]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/1.2.7...1.2.8
 [1.2.7]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/1.2.6...1.2.7
