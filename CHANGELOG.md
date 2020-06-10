@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## Develop
+## Fixed
+- Suppress Yospace Analytics before sending the Pause event at the start of a VPAID, per Yospace recommendation.
+
 ## [1.2.11]
 ## Changed
 - Upgrade to `bitmovin-player` version `8.35.1`. Same functionality as the beta mentioned below. 

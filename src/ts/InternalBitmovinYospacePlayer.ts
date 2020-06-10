@@ -616,10 +616,10 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     if (!this.yospaceConfig.disableVpaidRenderer && currentAd.hasInteractiveUnit() && (!isTruexAd
       || this.yospaceSourceConfig.truexConfiguration)) {
       this.isVpaidActive = true;
-      Logger.log('[BitmovinYospacePlayer] - sending YSPlayerEvents.PAUSE at start of VPAID');
-      this.manager.reportPlayerEvent(YSPlayerEvents.PAUSE, this.player.getCurrentTime());
       Logger.log('[BitmovinYospacePlayer] suppressing Yospace analytics');
       this.manager.session.suppressAnalytics(true);
+      Logger.log('[BitmovinYospacePlayer] - sending YSPlayerEvents.PAUSE at start of VPAID');
+      this.manager.reportPlayerEvent(YSPlayerEvents.PAUSE, this.player.getCurrentTime());
       let position = String(this.player.getCurrentTime());
       let replaceContentDuration = currentAd.duration;
 
