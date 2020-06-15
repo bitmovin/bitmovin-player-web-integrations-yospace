@@ -630,8 +630,8 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
           + this.yospaceConfig.liveVpaidDurationAdjustment + ' - ' + replaceContentDuration);
       }
 
-      // if we are scheduling a VPAID for Truex, do not add a replaceContentDuration, 
-      // as we seek of the ad break when appropriate in TUB
+      // If we are scheduling a VPAID for Truex, do not add a replaceContentDuration, 
+      // as we seek over the ad break when appropriate in TUB
       if (!this.isLive() && isTruexAd) {
         replaceContentDuration = 0;
       }
