@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## Develop
 ## Fixed
 - Suppress Yospace Analytics before sending the Pause event at the start of a VPAID, per Yospace recommendation.
+- Remove `-2` adjustment to `replaceContentDuration` for Truex VPAID ads, as seeking logic is handled in TUB. 
 
 ## [1.2.11]
 ## Changed
