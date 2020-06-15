@@ -630,9 +630,10 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
           + this.yospaceConfig.liveVpaidDurationAdjustment + ' - ' + replaceContentDuration);
       }
 
-      // if we are playing back VOD content, resume 2 seconds before the filler ad ends
+      // if we are scheduling a VPAID for Truex, do not add a replaceContentDuration, 
+      // as we seek of the ad break when appropriate in TUB
       if (!this.isLive() && isTruexAd) {
-        replaceContentDuration = replaceContentDuration - 2;
+        replaceContentDuration = 0;
       }
 
       Logger.log(
