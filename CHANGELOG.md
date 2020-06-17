@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## Develop
+## [1.2.12]
 ## Changed
 - Update `bitmovin-player` to version `8.37.1`.
 
