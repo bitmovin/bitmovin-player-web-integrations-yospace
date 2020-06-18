@@ -616,10 +616,10 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     if (!this.yospaceConfig.disableVpaidRenderer && currentAd.hasInteractiveUnit() && (!isTruexAd
       || this.yospaceSourceConfig.truexConfiguration)) {
       this.isVpaidActive = true;
-      Logger.log('[BitmovinYospacePlayer] - sending YSPlayerEvents.PAUSE at start of VPAID');
-      this.manager.reportPlayerEvent(YSPlayerEvents.PAUSE, this.player.getCurrentTime());
       Logger.log('[BitmovinYospacePlayer] suppressing Yospace analytics');
       this.manager.session.suppressAnalytics(true);
+      Logger.log('[BitmovinYospacePlayer] - sending YSPlayerEvents.PAUSE at start of VPAID');
+      this.manager.reportPlayerEvent(YSPlayerEvents.PAUSE, this.player.getCurrentTime());
       let position = String(this.player.getCurrentTime());
       let replaceContentDuration = currentAd.duration;
 
@@ -630,9 +630,10 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
           + this.yospaceConfig.liveVpaidDurationAdjustment + ' - ' + replaceContentDuration);
       }
 
-      // if we are playing back VOD content, resume 2 seconds before the filler ad ends
+      // If we are scheduling a VPAID for Truex, do not add a replaceContentDuration,
+      // as we seek over the ad break when appropriate in TUB
       if (!this.isLive() && isTruexAd) {
-        replaceContentDuration = replaceContentDuration - 2;
+        replaceContentDuration = 0;
       }
 
       Logger.log(

@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.2.12]
+## Changed
+- Update `bitmovin-player` to version `8.37.1`.
+
+## Fixed
+- Suppress Yospace Analytics before sending the Pause event at the start of a VPAID, per Yospace recommendation.
+- Remove `-2` adjustment to `replaceContentDuration` for Truex VPAID ads, as seeking logic is handled in TUB. 
+
 ## [1.2.11]
 ## Changed
 - Upgrade to `bitmovin-player` version `8.35.1`. Same functionality as the beta mentioned below. 
