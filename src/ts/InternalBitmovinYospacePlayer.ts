@@ -130,7 +130,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     this.player = player;
 
     if (BitmovinYospaceHelper.isSafari() || BitmovinYospaceHelper.isSafariIOS()) {
-      this.dateRangeEmitter = new DateRangeEmitter(this.player);
+      this.dateRangeEmitter = new DateRangeEmitter(this.player, this.eventHandlers);
     }
 
     if (this.yospaceConfig.breakTolerance) {
