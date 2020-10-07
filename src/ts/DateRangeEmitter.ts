@@ -1,4 +1,4 @@
-import { AdBreakEvent, AdEvent, MetadataEvent, PlayerAPI, TimeChangedEvent, PlayerEventBase, MetadataType, PlayerEvent } from 'bitmovin-player';
+import { AdBreakEvent, AdEvent, MetadataEvent, PlayerAPI, TimeChangedEvent, PlayerEventBase, MetadataType, PlayerEvent, MetadataParsedEvent } from 'bitmovin-player';
 import { Logger } from './Logger';
 import { YospacePlayerEventCallback } from './BitmovinYospacePlayerAPI';
 import { YospaceLinearAd } from './InternalBitmovinYospacePlayer';
@@ -55,7 +55,7 @@ export class DateRangeEmitter {
         this.processedDateRangeEvents[dateRangeData.clientAttributes.comYospaceYmid] = startTime;
         Logger.log(
           '[BitmovinYospacePlayer] - currentTime=' + this.player.getCurrentTime() + ' metadata=' + stringify(
-          event));
+            event));
       }
 
       // create an S metadata event 0.1 seconds into the start of the EXT-X-DATERANGE
@@ -100,8 +100,10 @@ export class DateRangeEmitter {
 
       Logger.log('[BitmovinYospacePlayer] DateRange events which will be sent during upcoming break:');
       Logger.table(this.emsgEvents.map(({ startTime, YTYP, YDUR }) => {
-        return {'Type': YTYP, 'Start Time': startTime, 'Duration': YDUR};
+        return { 'Type': YTYP, 'Start Time': startTime, 'Duration': YDUR };
       }));
+
+      this.emitMetadataParsedEvents(event);
     }
   };
 
@@ -115,22 +117,34 @@ export class DateRangeEmitter {
         emsg.startTime = '';
         this.manager.reportPlayerEvent(YSPlayerEvents.METADATA, emsg);
       }
+    }
+  };
+
+  private emitMetadataParsedEvents(dateRangeEvent: MetadataEvent) {
+    this.emsgEvents.forEach(event => {
+      let emsg = Object.assign({}, event);
+
+      const startTime: number = Number(emsg.startTime);
 
       delete emsg.startTime;
-      let metadataString = Object.keys(emsg).map((key) => `${key}=${emsg[key]}` ).join(',');
+      let metadataString = Object.keys(emsg).map((key) => `${key}=${emsg[key]}`).join(',');
 
-      let bitmovinMetadataEvent: MetadataEvent = {
-        metadataType: MetadataType.EMSG,
-        type: PlayerEvent.Metadata,
+      let bitmovinMetadataParsedEvent: MetadataParsedEvent = {
+        metadataType: MetadataType.ID3,
+        type: PlayerEvent.MetadataParsed,
         metadata: {
           messageData: metadataString
         },
-        timestamp: event.timestamp
+        data: {
+          messageData: metadataString
+        },
+        timestamp: dateRangeEvent.timestamp,
+        start: startTime
       };
 
-      this.fireEvent(bitmovinMetadataEvent);
-    }
-  };
+      this.fireEvent(bitmovinMetadataParsedEvent);
+    });
+  }
 
   private onAdStarted = (event: AdEvent): void => {
     let yospaceAd = event.ad as YospaceLinearAd;
