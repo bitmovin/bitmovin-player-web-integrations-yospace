@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## Develop
+## Added
+- Emit `metadataParsed` events for generated EMSG/ID3 tags in the DateRangeEmitter.
+
 ## [1.2.14]
 ## Changed
 - Update `bitmovin-player` to version `8.45.1`
