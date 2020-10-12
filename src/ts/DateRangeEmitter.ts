@@ -103,7 +103,7 @@ export class DateRangeEmitter {
         return { 'Type': YTYP, 'Start Time': startTime, 'Duration': YDUR };
       }));
 
-      this.emitMetadataParsedEvents(event);
+      this.emitMetadataParsedEvents(event.timestamp);
     }
   };
 
@@ -113,6 +113,9 @@ export class DateRangeEmitter {
 
       Logger.log('[BitmovinYospacePlayer] Sending: timestamp=' + event.timestamp + ' currentTime=' + event.time
         + ' absoluteTime=' + event.absoluteTime + ' emsg: ' + stringify(emsg));
+
+      this.emitMetadataEvent(event.timestamp, emsg);
+
       if (this.manager) {
         emsg.startTime = '';
         this.manager.reportPlayerEvent(YSPlayerEvents.METADATA, emsg);
@@ -120,30 +123,41 @@ export class DateRangeEmitter {
     }
   };
 
-  private emitMetadataParsedEvents(dateRangeEvent: MetadataEvent) {
+  private emitMetadataParsedEvents(timestamp: number) {
     this.emsgEvents.forEach(event => {
       let emsg = Object.assign({}, event);
 
-      const startTime: number = Number(emsg.startTime);
+      let metadataParsedEvent = this.createBitmovinEvent(timestamp, emsg) as MetadataParsedEvent;
+      metadataParsedEvent.data = metadataParsedEvent.metadata;
+      metadataParsedEvent.type = PlayerEvent.MetadataParsed;
 
-      delete emsg.startTime;
-      let metadataString = Object.keys(emsg).map((key) => `${key}=${emsg[key]}`).join(',');
-
-      let bitmovinMetadataParsedEvent: MetadataParsedEvent = {
-        metadataType: MetadataType.ID3,
-        type: PlayerEvent.MetadataParsed,
-        metadata: {
-          messageData: metadataString
-        },
-        data: {
-          messageData: metadataString
-        },
-        timestamp: dateRangeEvent.timestamp,
-        start: startTime
-      };
-
-      this.fireEvent(bitmovinMetadataParsedEvent);
+      this.fireEvent(metadataParsedEvent);
     });
+  }
+
+  private emitMetadataEvent(timestamp: number, emsg: any) {
+    let metadataEvent = this.createBitmovinEvent(timestamp, emsg);
+
+    this.fireEvent(metadataEvent);
+  }
+
+  private createBitmovinEvent(timestamp: number, emsg: any) {
+    const startTime: number = Number(emsg.startTime);
+
+    delete emsg.startTime;
+    let metadataString = Object.keys(emsg).map((key) => `${key}=${emsg[key]}`).join(',');
+
+    let result: MetadataEvent = {
+      metadataType: MetadataType.ID3,
+      type: PlayerEvent.Metadata,
+      metadata: {
+        messageData: metadataString,
+      },
+      timestamp: timestamp,
+      start: startTime,
+    };
+
+    return result;
   }
 
   private onAdStarted = (event: AdEvent): void => {

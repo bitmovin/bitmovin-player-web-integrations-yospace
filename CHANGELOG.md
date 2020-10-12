@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Develop
 ## Added
-- Emit `metadataParsed` events for generated EMSG/ID3 tags in the DateRangeEmitter.
+- Emit `metadataParsed` and `metadata` events for generated EMSG/ID3 tags in the DateRangeEmitter.
 
 ## [1.2.14]
 ## Changed
