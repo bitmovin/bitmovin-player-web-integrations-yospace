@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## Develop
 ## Added
 - Emit `metadataParsed` and `metadata` events for generated EMSG/ID3 tags in the DateRangeEmitter.
+- Support for companion ads that have multiple `variations`.
 
 ## [1.2.14]
 ## Changed
