@@ -45,7 +45,7 @@ export class VastHelper {
       companionAds.forEach((vastCompanionAd: VAST.VastCreativeCompanion) => {
         if (vastCompanionAd.variations && vastCompanionAd.variations.length > 0) {
           Logger.log('Found Companion Ad: ' + stringify(vastCompanionAd));
-          vastCompanionAds.push(vastCompanionAd.variations[0]);
+          vastCompanionAds =  vastCompanionAds.concat(vastCompanionAd.variations);
         }
       });
     }
