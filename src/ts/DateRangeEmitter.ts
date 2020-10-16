@@ -1,17 +1,21 @@
-import { AdBreakEvent, AdEvent, MetadataEvent, PlayerAPI, TimeChangedEvent } from 'bitmovin-player';
+import { AdBreakEvent, AdEvent, MetadataEvent, PlayerAPI, TimeChangedEvent, PlayerEventBase, MetadataType, PlayerEvent, MetadataParsedEvent } from 'bitmovin-player';
 import { Logger } from './Logger';
+import { YospacePlayerEventCallback } from './BitmovinYospacePlayerAPI';
 import { YospaceLinearAd } from './InternalBitmovinYospacePlayer';
 import stringify from 'fast-safe-stringify';
 
 export class DateRangeEmitter {
   private player: PlayerAPI;
+  private eventHandlers: { [eventType: string]: YospacePlayerEventCallback[]; } = {};
   private _manager: YSSessionManager;
   private emsgEvents: any[] = [];
   private processedDateRangeEvents: { [key: string]: number };
   private currentTimeBase: number = 0;
 
-  constructor(player: PlayerAPI) {
+  constructor(player: PlayerAPI, eventHandlers?: { [eventType: string]: YospacePlayerEventCallback[]; }) {
     this.player = player;
+    this.eventHandlers = eventHandlers;
+
     this.player.on(this.player.exports.PlayerEvent.Metadata, this.onMetadata);
     this.player.on(this.player.exports.PlayerEvent.TimeChanged, this.onTimeChanged);
     this.player.on(this.player.exports.PlayerEvent.AdStarted, this.onAdStarted);
@@ -51,7 +55,7 @@ export class DateRangeEmitter {
         this.processedDateRangeEvents[dateRangeData.clientAttributes.comYospaceYmid] = startTime;
         Logger.log(
           '[BitmovinYospacePlayer] - currentTime=' + this.player.getCurrentTime() + ' metadata=' + stringify(
-          event));
+            event));
       }
 
       // create an S metadata event 0.1 seconds into the start of the EXT-X-DATERANGE
@@ -96,25 +100,65 @@ export class DateRangeEmitter {
 
       Logger.log('[BitmovinYospacePlayer] DateRange events which will be sent during upcoming break:');
       Logger.table(this.emsgEvents.map(({ startTime, YTYP, YDUR }) => {
-        return {'Type': YTYP, 'Start Time': startTime, 'Duration': YDUR};
+        return { 'Type': YTYP, 'Start Time': startTime, 'Duration': YDUR };
       }));
+
+      this.emitMetadataParsedEvents(event.timestamp);
     }
   };
 
   private onTimeChanged = (event: TimeChangedEvent): void => {
-    // Logger.log('[BitmovinYospacePlayer] - TimeChanged ' + stringify(event));
-
     while (this.emsgEvents.length > 0 && this.emsgEvents[0].startTime <= event.time) {
       let emsg = this.emsgEvents.shift();
 
       Logger.log('[BitmovinYospacePlayer] Sending: timestamp=' + event.timestamp + ' currentTime=' + event.time
         + ' absoluteTime=' + event.absoluteTime + ' emsg: ' + stringify(emsg));
+
+      this.emitMetadataEvent(event.timestamp, emsg);
+
       if (this.manager) {
         emsg.startTime = '';
         this.manager.reportPlayerEvent(YSPlayerEvents.METADATA, emsg);
       }
     }
   };
+
+  private emitMetadataParsedEvents(timestamp: number) {
+    this.emsgEvents.forEach(event => {
+      let emsg = Object.assign({}, event);
+
+      let metadataParsedEvent = this.createBitmovinEvent(timestamp, emsg) as MetadataParsedEvent;
+      metadataParsedEvent.data = metadataParsedEvent.metadata;
+      metadataParsedEvent.type = PlayerEvent.MetadataParsed;
+
+      this.fireEvent(metadataParsedEvent);
+    });
+  }
+
+  private emitMetadataEvent(timestamp: number, emsg: any) {
+    let metadataEvent = this.createBitmovinEvent(timestamp, emsg);
+
+    this.fireEvent(metadataEvent);
+  }
+
+  private createBitmovinEvent(timestamp: number, emsg: any) {
+    const startTime: number = Number(emsg.startTime);
+
+    delete emsg.startTime;
+    let metadataString = Object.keys(emsg).map((key) => `${key}=${emsg[key]}`).join(',');
+
+    let result: MetadataEvent = {
+      metadataType: MetadataType.ID3,
+      type: PlayerEvent.Metadata,
+      metadata: {
+        messageData: metadataString,
+      },
+      timestamp: timestamp,
+      start: startTime,
+    };
+
+    return result;
+  }
 
   private onAdStarted = (event: AdEvent): void => {
     let yospaceAd = event.ad as YospaceLinearAd;
@@ -142,4 +186,9 @@ export class DateRangeEmitter {
     Logger.log('[BitmovinYospacePlayer] Ad Break Finished for id');
   };
 
+  private fireEvent<E extends PlayerEventBase>(event: E): void {
+    if (this.eventHandlers[event.type]) {
+      this.eventHandlers[event.type].forEach((callback: YospacePlayerEventCallback) => callback(event));
+    }
+  }
 }
