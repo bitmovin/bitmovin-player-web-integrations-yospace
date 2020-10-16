@@ -1,4 +1,4 @@
-import { AdBreakEvent, AdEvent, MetadataEvent, PlayerAPI, TimeChangedEvent, PlayerEventBase, MetadataType, PlayerEvent, MetadataParsedEvent } from 'bitmovin-player';
+import { AdBreakEvent, AdEvent, MetadataEvent, PlayerAPI, TimeChangedEvent, PlayerEventBase, MetadataType, MetadataParsedEvent } from 'bitmovin-player';
 import { Logger } from './Logger';
 import { YospacePlayerEventCallback } from './BitmovinYospacePlayerAPI';
 import { YospaceLinearAd } from './InternalBitmovinYospacePlayer';
@@ -129,7 +129,7 @@ export class DateRangeEmitter {
 
       let metadataParsedEvent = this.createBitmovinEvent(timestamp, emsg) as MetadataParsedEvent;
       metadataParsedEvent.data = metadataParsedEvent.metadata;
-      metadataParsedEvent.type = PlayerEvent.MetadataParsed;
+      metadataParsedEvent.type = this.player.exports.PlayerEvent.MetadataParsed;
 
       this.fireEvent(metadataParsedEvent);
     });
@@ -148,8 +148,8 @@ export class DateRangeEmitter {
     let metadataString = Object.keys(emsg).map((key) => `${key}=${emsg[key]}`).join(',');
 
     let result: MetadataEvent = {
-      metadataType: MetadataType.ID3,
-      type: PlayerEvent.Metadata,
+      metadataType: 'ID3' as MetadataType,
+      type: this.player.exports.PlayerEvent.Metadata,
       metadata: {
         messageData: metadataString,
       },
