@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+# Develop
+## Fixed
+- Type error in `onVpaidAdBreakStarted` event handler. 
+
 ## [1.2.15]
 ## Added
 - Emit `metadataParsed` and `metadata` events for generated EMSG/ID3 tags in the DateRangeEmitter.
