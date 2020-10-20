@@ -69,7 +69,7 @@ export class VastHelper {
       let companionAdResource: CompanionAdResource;
       if (companion.staticResources && companion.staticResources.length > 0) {
         companionAdResource = {
-          url: companion.staticResources[0],
+          url: companion.staticResources[0].url,
           type: CompanionAdType.StaticResource,
         };
       } else if (companion.htmlResources && companion.htmlResources.length > 0) {
