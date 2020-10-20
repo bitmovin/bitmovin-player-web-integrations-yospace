@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 # Develop
 ## Fixed
 - Type error in `onVpaidAdBreakStarted` event handler. 
+- Correct expected format for `staticResource` in companion ad. Per section 3.15.1 of the VAST Spec.
 
 ## [1.2.15]
 ## Added
