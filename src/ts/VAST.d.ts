@@ -369,7 +369,7 @@ declare namespace VAST {
 
   interface StaticResource {
     url: string;
-    type: string;
+    creativeType: string;
   }
 
   interface VastCompanionTrackingEvents {
