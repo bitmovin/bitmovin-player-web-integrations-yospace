@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+# [1.2.16]
+## Changed
+- Update `bitmovin-player` to version `8.47.1-b.3`
+
+## Fixed
+- Type error in `onVpaidAdBreakStarted` event handler. 
+- Correct expected format for `staticResource` in companion ad. Per section 3.15.1 of the VAST Spec.
+
 ## [1.2.15]
 ## Added
 - Emit `metadataParsed` and `metadata` events for generated EMSG/ID3 tags in the DateRangeEmitter.
@@ -96,6 +104,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 - Initial yospace integration
 
+[1.2.16]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/1.2.15...1.2.16
+[1.2.15]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/1.2.14...1.2.15
 [1.2.14]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/1.2.13...1.2.14
 [1.2.13]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/1.2.12...1.2.13
 [1.2.12]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/1.2.11...1.2.12

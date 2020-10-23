@@ -360,11 +360,16 @@ declare namespace VAST {
     id: string | null;
     adSlotId: string | null;
     iframeResources: string [];
-    staticResources: string [];
+    staticResources: StaticResource [];
     trackingEvents: VastCompanionTrackingEvents;
     type: string | null;
     width: string;
     altText: string | null;
+  }
+
+  interface StaticResource {
+    url: string;
+    creativeType: string;
   }
 
   interface VastCompanionTrackingEvents {

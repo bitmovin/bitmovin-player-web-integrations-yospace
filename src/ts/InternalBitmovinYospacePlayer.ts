@@ -1267,7 +1267,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 
     const currentAd = this.getCurrentAd();
     const currentBreak = currentAd.adBreak;
-    Logger.log('[BitmovinYospacePlayer] tracking VPAID event ' + event + ' id=' + this.lastVPaidAd.getMediaID());
+    Logger.log('[BitmovinYospacePlayer] tracking VPAID event ' + event + ' id=' + currentAd.getMediaID());
     currentAd.getInteractiveUnit().track(
       event,
       this.player.getCurrentTime(), // The VPAID ad needs to implement the VPAID API otherwise we will report 0 here
