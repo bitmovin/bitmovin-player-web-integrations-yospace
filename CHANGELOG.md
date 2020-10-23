@@ -5,6 +5,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 # Develop
+## Changed
+- Update `bitmovin-player` to version `8.47.1-b.3`
+
 ## Fixed
 - Type error in `onVpaidAdBreakStarted` event handler. 
 - Correct expected format for `staticResource` in companion ad. Per section 3.15.1 of the VAST Spec.
