@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-# Develop
+# [1.2.16]
 ## Changed
 - Update `bitmovin-player` to version `8.47.1-b.3`
 
@@ -104,6 +104,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 - Initial yospace integration
 
+[1.2.16]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/1.2.15...1.2.16
+[1.2.15]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/1.2.14...1.2.15
 [1.2.14]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/1.2.13...1.2.14
 [1.2.13]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/1.2.12...1.2.13
 [1.2.12]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/1.2.11...1.2.12
