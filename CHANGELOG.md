@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+# [1.2.18]
+## Changed
+- Update `bitmovin-player` to version `8.50.0`
+- Remove suppression of `AdClicked` event so it can be consumed by integrators for VPAID ads. 
+
 # [1.2.17]
 ## Changed
 - Update `bitmovin-player` to version `8.48.2`
@@ -112,6 +117,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 - Initial yospace integration
 
+[1.2.18]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/1.2.17...1.2.18
+[1.2.17]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/1.2.16...1.2.17
 [1.2.16]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/1.2.15...1.2.16
 [1.2.15]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/1.2.14...1.2.15
 [1.2.14]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/1.2.13...1.2.14
