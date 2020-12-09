@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 # develop
 ## Changed
 - Update `bitmovin-player` to version `8.50.0`
+- Remove suppression of `AdClicked` event so it can be consumed by integrators for VPAID ads. 
 
 # [1.2.17]
 ## Changed

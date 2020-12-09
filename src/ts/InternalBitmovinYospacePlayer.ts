@@ -312,7 +312,6 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
         // Suppress all ad events
         this.player.exports.PlayerEvent.AdBreakFinished,
         this.player.exports.PlayerEvent.AdBreakStarted,
-        this.player.exports.PlayerEvent.AdClicked,
         this.player.exports.PlayerEvent.AdError,
         this.player.exports.PlayerEvent.AdFinished,
         this.player.exports.PlayerEvent.AdLinearityChanged,
