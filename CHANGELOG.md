@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+# develop
+## Fixed
+- Added a temporary fix for a bug on Safari mobile that results in duplicate ad events from Yospace, as a result of incorrect Position updates reported to the YS SDK. 
+
 # [1.2.18]
 ## Changed
 - Update `bitmovin-player` to version `8.50.0`

@@ -120,6 +120,8 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   // When exiting a VPAID, player.isLive() returns false, so we store the value on stream start
   private isLiveStream: boolean;
 
+  private lastTimeChangedTime: number;
+
   constructor(containerElement: HTMLElement, player: PlayerAPI, yospaceConfig: YospaceConfiguration = {}) {
     this.yospaceConfig = yospaceConfig;
     Logger.log('[BitmovinYospacePlayer] loading YospacePlayer with config= ' + stringify(this.yospaceConfig));
@@ -1047,8 +1049,17 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 
   private onTimeChanged = (event: TimeChangedEvent) => {
     if (!this.isVpaidActive) {
-      this.manager.reportPlayerEvent(YSPlayerEvents.POSITION, event.time);
+      // There is an outstanding bug on Safari mobile where upon exiting an ad break, 
+      // our TimeChanged event "rewinds" ~12 ms. This is a temporary fix. 
+      // If we report this "rewind" to Yospace, it results in duplicate ad events.
+      const timeDifference = event.time - this.lastTimeChangedTime;
+      if (timeDifference > 0 || timeDifference < -0.25) {
+        this.manager.reportPlayerEvent(YSPlayerEvents.POSITION, event.time);
+      } else {
+        Logger.warn('Encountered a small negative TimeChanged update, not reporting to Yospace. Difference was: ' + timeDifference);
+      }
     }
+    this.lastTimeChangedTime = event.time;
 
     if (this.isReturningVpaid) {
       Logger.log('[BitmovinYospacePlayer] sending YSPlayerEvents.CONTINUE to resume from VPAID ad');
