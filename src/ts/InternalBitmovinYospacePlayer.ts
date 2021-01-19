@@ -45,6 +45,8 @@ export interface YospaceLinearAd extends LinearAd {
   companionAds?: CompanionAd[];
   sequence: number;
   creativeId: string;
+  advertiser: string;
+  lineage: any[];
 }
 
 // Enums for yospace related vpaid ad tracking strings
@@ -741,7 +743,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       scheduleTime: this.toMagicTime(ysAdBreak.startPosition),
       ads: ysAdBreak.adverts.map(AdTranslator.mapYsAdvert),
       duration: ysAdBreak.getDuration(),
-      position: ysAdBreak.getPosition() as YospaceAdBreakPosition
+      position: ysAdBreak.getPosition() as YospaceAdBreakPosition,
     };
   }
 
@@ -1050,8 +1052,8 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 
   private onTimeChanged = (event: TimeChangedEvent) => {
     if (!this.isVpaidActive) {
-      // There is an outstanding bug on Safari mobile where upon exiting an ad break, 
-      // our TimeChanged event "rewinds" ~12 ms. This is a temporary fix. 
+      // There is an outstanding bug on Safari mobile where upon exiting an ad break,
+      // our TimeChanged event "rewinds" ~12 ms. This is a temporary fix.
       // If we report this "rewind" to Yospace, it results in duplicate ad events.
       const timeDifference = event.time - this.lastTimeChangedTime;
       if (timeDifference > 0 || timeDifference < -0.25) {
@@ -1428,7 +1430,7 @@ class AdTranslator {
       extensions: VastHelper.getExtensions(ysAd.advert),
       adSystem: ysAd.advert.AdSystem,
       sequence: ysAd.advert.sequence,
-      isFiller: ysAd.isFiller()
+      isFiller: ysAd.isFiller(),
     } as YospaceLinearAd;
   }
 }
