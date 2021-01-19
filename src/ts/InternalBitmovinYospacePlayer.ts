@@ -741,6 +741,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       scheduleTime: this.toMagicTime(ysAdBreak.startPosition),
       ads: ysAdBreak.adverts.map(AdTranslator.mapYsAdvert),
       duration: ysAdBreak.getDuration(),
+      position: ysAdBreak.getPosition() as YospaceAdBreakPosition
     };
   }
 
