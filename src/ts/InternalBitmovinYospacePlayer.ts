@@ -1416,6 +1416,7 @@ class AdTranslator {
       creativeId: ysAd.getCreativeID(),
       adTitle: ysAd.advert.AdTitle,
       advertiser: ysAd.advert.Advertiser,
+      lineage: ysAd.advert.AdvertLineage,
       height: mediaFile && mediaFile.height && parseInt(mediaFile.height),
       width: mediaFile && mediaFile.width && parseInt(mediaFile.width),
       clickThroughUrl: ysAd.advert.linear.clickThrough,

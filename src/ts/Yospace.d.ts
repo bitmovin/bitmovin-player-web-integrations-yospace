@@ -91,6 +91,7 @@ declare class VASTAd {
   id: string;
   AdTitle: string;
   Advertiser: string;
+  AdvertLineage: any[];
   vastXML: Element;
   Extensions: XMLDocument[];
   AdSystem: string;
