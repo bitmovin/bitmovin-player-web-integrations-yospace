@@ -89,6 +89,8 @@ declare class VASTAd {
    */
   linear: VASTLinear;
   id: string;
+  AdTitle: string;
+  Advertiser: string;
   vastXML: Element;
   Extensions: XMLDocument[];
   AdSystem: string;
@@ -112,6 +114,12 @@ declare class YSAdvert {
   getInteractiveUnit(): VASTInteractive;
 
   getMediaID(): string;
+
+  getAdvertID(): string;
+
+  getCreativeID(): string;
+
+  isFiller(): boolean;
 }
 
 declare class YSAdBreak {

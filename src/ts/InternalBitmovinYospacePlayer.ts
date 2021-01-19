@@ -44,6 +44,7 @@ export interface YospaceLinearAd extends LinearAd {
   adSystem?: string;
   companionAds?: CompanionAd[];
   sequence: number;
+  creativeId: string;
 }
 
 // Enums for yospace related vpaid ad tracking strings
@@ -1408,11 +1409,13 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 class AdTranslator {
   static mapYsAdvert(ysAd: YSAdvert): LinearAd {
     const mediaFile = ysAd.advert.linear.mediaFiles[0];
-
     return {
       isLinear: Boolean(ysAd.advert.linear),
       duration: ysAd.duration,
-      id: ysAd.advert.id,
+      id: ysAd.getAdvertID(),
+      creativeId: ysAd.getCreativeID(),
+      adTitle: ysAd.advert.AdTitle,
+      advertiser: ysAd.advert.Advertiser,
       height: mediaFile && mediaFile.height && parseInt(mediaFile.height),
       width: mediaFile && mediaFile.width && parseInt(mediaFile.width),
       clickThroughUrl: ysAd.advert.linear.clickThrough,
@@ -1424,6 +1427,7 @@ class AdTranslator {
       extensions: VastHelper.getExtensions(ysAd.advert),
       adSystem: ysAd.advert.AdSystem,
       sequence: ysAd.advert.sequence,
+      isFiller: ysAd.isFiller()
     } as YospaceLinearAd;
   }
 }
