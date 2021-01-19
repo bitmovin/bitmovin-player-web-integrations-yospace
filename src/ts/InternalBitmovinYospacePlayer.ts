@@ -548,11 +548,10 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   }
 
   private getCurrentAdBreak(): YSAdBreak | null {
-    let currentAd = this.getCurrentAd();
-    if (!currentAd) {
+    if (!this.manager) {
       return null;
     }
-    return currentAd.adBreak;
+    return this.manager.session.getCurrentBreak();
   }
 
   getYospaceManager(): YSSessionManager | null {
@@ -917,7 +916,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
         return undefined;
       }
 
-      return this.mapAdBreak(this.getCurrentAd().adBreak);
+      return this.mapAdBreak(this.getCurrentAdBreak());
     },
 
     getActiveAd: () => {

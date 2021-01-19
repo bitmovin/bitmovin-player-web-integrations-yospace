@@ -141,6 +141,8 @@ declare class YSSession {
 
   getLinearClickthrough(): string;
 
+  getCurrentBreak(): YSAdBreak;
+
   suppressAnalytics(state: boolean): any[];
 
   handleAdvertEnd(advert: YSAdvert): void;
