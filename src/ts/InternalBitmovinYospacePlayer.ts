@@ -123,7 +123,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   // When exiting a VPAID, player.isLive() returns false, so we store the value on stream start
   private isLiveStream: boolean;
 
-  private lastTimeChangedTime: number;
+  private lastTimeChangedTime: number = 0;
 
   constructor(containerElement: HTMLElement, player: PlayerAPI, yospaceConfig: YospaceConfiguration = {}) {
     this.yospaceConfig = yospaceConfig;
@@ -1056,7 +1056,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       // our TimeChanged event "rewinds" ~12 ms. This is a temporary fix.
       // If we report this "rewind" to Yospace, it results in duplicate ad events.
       const timeDifference = event.time - this.lastTimeChangedTime;
-      if (timeDifference > 0 || timeDifference < -0.25) {
+      if (timeDifference >= 0 || timeDifference < -0.25) {
         this.manager.reportPlayerEvent(YSPlayerEvents.POSITION, event.time);
       } else {
         Logger.warn('Encountered a small negative TimeChanged update, not reporting to Yospace. Difference was: ' + timeDifference);
