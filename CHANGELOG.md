@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Changed
 - Use `session.getCurrentBreak()` for the `ads.getCurrentAdBreak()`
+- Refactor `CreateAdBreakEvent` to take a `YospaceAdBreakEvent`.
 
 # [1.2.18]
 ## Changed

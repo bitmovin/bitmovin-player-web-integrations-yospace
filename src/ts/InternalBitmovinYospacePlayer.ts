@@ -582,14 +582,10 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     Logger.log('[BitmovinYospacePlayer] yospaceListenerAdapter.AD_BREAK_START');
     this.player.setPlaybackSpeed(1);
 
-    const adBreak = event.adBreak;
+    const adBreak = this.mapAdBreak(event.adBreak);
     const playerEvent = AdEventsFactory.createAdBreakEvent(
-      this.player,
-      adBreak.adBreakIdentifier,
-      this.toMagicTime(adBreak.startPosition),
       this.player.exports.PlayerEvent.AdBreakStarted,
-      adBreak.getDuration(),
-      adBreak.getPosition(),
+      adBreak,
     );
     this.fireEvent<YospaceAdBreakEvent>(playerEvent);
   };
@@ -700,14 +696,10 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   };
 
   private onAdBreakFinished = (event: BYSAdBreakEvent) => {
-    const adBreak = event.adBreak;
+    const adBreak = this.mapAdBreak(event.adBreak);
     const playerEvent = AdEventsFactory.createAdBreakEvent(
-      this.player,
-      adBreak.adBreakIdentifier,
-      this.toMagicTime(adBreak.startPosition),
       this.player.exports.PlayerEvent.AdBreakFinished,
-      adBreak.getDuration(),
-      adBreak.getPosition(),
+      adBreak,
     );
 
     this.fireEvent<YospaceAdBreakEvent>(playerEvent);
@@ -1437,22 +1429,13 @@ class AdTranslator {
 
 class AdEventsFactory {
   static createAdBreakEvent(
-    player: PlayerAPI,
-    adBreakId: string,
-    scheduleTime: number,
     type: PlayerEvent,
-    duration: number,
-    position: string,
+    adBreak: YospaceAdBreak,
   ): YospaceAdBreakEvent {
     return {
       timestamp: Date.now(),
       type: type,
-      adBreak: {
-        id: adBreakId, // can be null
-        scheduleTime: scheduleTime,
-        duration: duration,
-        position: position as YospaceAdBreakPosition,
-      },
+      adBreak: adBreak,
     };
   }
 
