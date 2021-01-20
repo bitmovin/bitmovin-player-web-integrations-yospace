@@ -44,6 +44,9 @@ export interface YospaceLinearAd extends LinearAd {
   adSystem?: string;
   companionAds?: CompanionAd[];
   sequence: number;
+  creativeId: string;
+  advertiser: string;
+  lineage: any[];
 }
 
 // Enums for yospace related vpaid ad tracking strings
@@ -120,7 +123,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   // When exiting a VPAID, player.isLive() returns false, so we store the value on stream start
   private isLiveStream: boolean;
 
-  private lastTimeChangedTime: number;
+  private lastTimeChangedTime: number = 0;
 
   constructor(containerElement: HTMLElement, player: PlayerAPI, yospaceConfig: YospaceConfiguration = {}) {
     this.yospaceConfig = yospaceConfig;
@@ -547,11 +550,10 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   }
 
   private getCurrentAdBreak(): YSAdBreak | null {
-    let currentAd = this.getCurrentAd();
-    if (!currentAd) {
+    if (!this.manager) {
       return null;
     }
-    return currentAd.adBreak;
+    return this.manager.session.getCurrentBreak();
   }
 
   getYospaceManager(): YSSessionManager | null {
@@ -580,14 +582,10 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     Logger.log('[BitmovinYospacePlayer] yospaceListenerAdapter.AD_BREAK_START');
     this.player.setPlaybackSpeed(1);
 
-    const adBreak = event.adBreak;
+    const adBreak = this.mapAdBreak(event.adBreak);
     const playerEvent = AdEventsFactory.createAdBreakEvent(
-      this.player,
-      adBreak.adBreakIdentifier,
-      this.toMagicTime(adBreak.startPosition),
       this.player.exports.PlayerEvent.AdBreakStarted,
-      adBreak.getDuration(),
-      adBreak.getPosition(),
+      adBreak,
     );
     this.fireEvent<YospaceAdBreakEvent>(playerEvent);
   };
@@ -698,14 +696,10 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   };
 
   private onAdBreakFinished = (event: BYSAdBreakEvent) => {
-    const adBreak = event.adBreak;
+    const adBreak = this.mapAdBreak(event.adBreak);
     const playerEvent = AdEventsFactory.createAdBreakEvent(
-      this.player,
-      adBreak.adBreakIdentifier,
-      this.toMagicTime(adBreak.startPosition),
       this.player.exports.PlayerEvent.AdBreakFinished,
-      adBreak.getDuration(),
-      adBreak.getPosition(),
+      adBreak,
     );
 
     this.fireEvent<YospaceAdBreakEvent>(playerEvent);
@@ -741,6 +735,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       scheduleTime: this.toMagicTime(ysAdBreak.startPosition),
       ads: ysAdBreak.adverts.map(AdTranslator.mapYsAdvert),
       duration: ysAdBreak.getDuration(),
+      position: ysAdBreak.getPosition() as YospaceAdBreakPosition,
     };
   }
 
@@ -916,7 +911,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
         return undefined;
       }
 
-      return this.mapAdBreak(this.getCurrentAd().adBreak);
+      return this.mapAdBreak(this.getCurrentAdBreak());
     },
 
     getActiveAd: () => {
@@ -1049,11 +1044,11 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 
   private onTimeChanged = (event: TimeChangedEvent) => {
     if (!this.isVpaidActive) {
-      // There is an outstanding bug on Safari mobile where upon exiting an ad break, 
-      // our TimeChanged event "rewinds" ~12 ms. This is a temporary fix. 
+      // There is an outstanding bug on Safari mobile where upon exiting an ad break,
+      // our TimeChanged event "rewinds" ~12 ms. This is a temporary fix.
       // If we report this "rewind" to Yospace, it results in duplicate ad events.
       const timeDifference = event.time - this.lastTimeChangedTime;
-      if (timeDifference > 0 || timeDifference < -0.25) {
+      if (timeDifference >= 0 || timeDifference < -0.25) {
         this.manager.reportPlayerEvent(YSPlayerEvents.POSITION, event.time);
       } else {
         Logger.warn('Encountered a small negative TimeChanged update, not reporting to Yospace. Difference was: ' + timeDifference);
@@ -1408,11 +1403,14 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 class AdTranslator {
   static mapYsAdvert(ysAd: YSAdvert): LinearAd {
     const mediaFile = ysAd.advert.linear.mediaFiles[0];
-
     return {
       isLinear: Boolean(ysAd.advert.linear),
       duration: ysAd.duration,
-      id: ysAd.advert.id,
+      id: ysAd.getAdvertID(),
+      creativeId: ysAd.getCreativeID(),
+      adTitle: ysAd.advert.AdTitle,
+      advertiser: ysAd.advert.Advertiser,
+      lineage: ysAd.advert.AdvertLineage,
       height: mediaFile && mediaFile.height && parseInt(mediaFile.height),
       width: mediaFile && mediaFile.width && parseInt(mediaFile.width),
       clickThroughUrl: ysAd.advert.linear.clickThrough,
@@ -1424,28 +1422,20 @@ class AdTranslator {
       extensions: VastHelper.getExtensions(ysAd.advert),
       adSystem: ysAd.advert.AdSystem,
       sequence: ysAd.advert.sequence,
+      isFiller: ysAd.isFiller(),
     } as YospaceLinearAd;
   }
 }
 
 class AdEventsFactory {
   static createAdBreakEvent(
-    player: PlayerAPI,
-    adBreakId: string,
-    scheduleTime: number,
     type: PlayerEvent,
-    duration: number,
-    position: string,
+    adBreak: YospaceAdBreak,
   ): YospaceAdBreakEvent {
     return {
       timestamp: Date.now(),
       type: type,
-      adBreak: {
-        id: adBreakId, // can be null
-        scheduleTime: scheduleTime,
-        duration: duration,
-        position: position as YospaceAdBreakPosition,
-      },
+      adBreak: adBreak,
     };
   }
 

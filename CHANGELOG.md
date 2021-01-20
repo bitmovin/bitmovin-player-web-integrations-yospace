@@ -8,6 +8,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## Fixed
 - Added a temporary fix for a bug on Safari mobile that results in duplicate ad events from Yospace, as a result of incorrect Position updates reported to the YS SDK. 
 
+## Added
+- `id`, `creativeId`, `adTitle`, `advertiser` and `lineage` properties to `YospaceLinearAd`.
+
+## Changed
+- Use `session.getCurrentBreak()` for the `ads.getCurrentAdBreak()`
+- Refactor `CreateAdBreakEvent` to take a `YospaceAdBreakEvent`.
+
 # [1.2.18]
 ## Changed
 - Update `bitmovin-player` to version `8.50.0`
