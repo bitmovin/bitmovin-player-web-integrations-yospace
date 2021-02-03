@@ -1079,7 +1079,8 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     }
 
     if (!this.suppressedEventsController.isSuppressed(this.player.exports.PlayerEvent.Paused)) {
-      this.fireEvent(event);
+      // Firing the pause event here causes timeshift errors in our analytics module
+      // this.fireEvent(event);
     } else {
       this.suppressedEventsController.remove(this.player.exports.PlayerEvent.Paused);
     }

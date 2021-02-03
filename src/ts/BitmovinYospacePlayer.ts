@@ -26,11 +26,12 @@ import SubtitlesTTMLModule from 'bitmovin-player/modules/bitmovinplayer-subtitle
 import ThumbnailModule from 'bitmovin-player/modules/bitmovinplayer-thumbnail';
 import CryptoModule from 'bitmovin-player/modules/bitmovinplayer-crypto';
 import PatchModule from 'bitmovin-player/modules/bitmovinplayer-patch';
-import AnalyticsModule from 'bitmovin-player/modules/bitmovinplayer-analytics';
 import EngineNativeModule from 'bitmovin-player/modules/bitmovinplayer-engine-native';
 import DRMModule from 'bitmovin-player/modules/bitmovinplayer-drm';
 import RemoteControlModule from 'bitmovin-player/modules/bitmovinplayer-remotecontrol';
 import ServiceWorkerClientModule from 'bitmovin-player/modules/bitmovinplayer-serviceworker-client';
+
+import { Bitmovin8Adapter } from 'bitmovin-analytics';
 
 import { ArrayUtils } from 'bitmovin-player-ui/dist/js/framework/arrayutils';
 import { PlayerVRAPI } from 'bitmovin-player';
@@ -101,7 +102,6 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     Player.addModule(ThumbnailModule);
     Player.addModule(CryptoModule);
     Player.addModule(PatchModule);
-    Player.addModule(AnalyticsModule);
     Player.addModule(DRMModule);
     Player.addModule(RemoteControlModule);
     Player.addModule(ServiceWorkerClientModule);
@@ -143,6 +143,8 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       this.bitmovinPlayer,
       this.yospaceConfig,
     ) as any as BitmovinYospacePlayerAPI;
+
+    const analyticsAdapter = new Bitmovin8Adapter(this.bitmovinYospacePlayer);
 
     this.player = this.bitmovinYospacePlayer;
   }
