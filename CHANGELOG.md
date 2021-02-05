@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+
+# develop
+## Changed
+- Use standalone Bitmovin Analytics Adapter for flexibility. And move initialization to `load()` to dynamically attach to the correct player based on source.
+
 # [1.2.19]
 ## Fixed
 - Added a temporary fix for a bug on Safari mobile that results in duplicate ad events from Yospace, as a result of incorrect Position updates reported to the YS SDK. 
