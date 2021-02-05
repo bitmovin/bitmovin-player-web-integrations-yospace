@@ -144,8 +144,6 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       this.yospaceConfig,
     ) as any as BitmovinYospacePlayerAPI;
 
-    const analyticsAdapter = new Bitmovin8Adapter(this.bitmovinYospacePlayer);
-
     this.player = this.bitmovinYospacePlayer;
   }
 
@@ -186,6 +184,8 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
             }
           }
 
+          new Bitmovin8Adapter(this.player);
+
           Logger.log('BitmovinYospacePlayer loading source after switching players- ' + stringify(source));
 
           this.player.load(source, forceTechnology, disableSeeking).then(resolve).catch(reject);
@@ -198,6 +198,8 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       } else if (isAssetTypePresent() && this.currentPlayerType === YospacePlayerType.Bitmovin) {
         switchPlayer(YospacePlayerType.BitmovinYospace);
       } else {
+        new Bitmovin8Adapter(this.player);
+
         Logger.log('BitmovinYospacePlayer loading source - ' + stringify(source));
         // Else load the source in the current player
         this.player.load(source, forceTechnology, disableSeeking).then(resolve).catch(reject);
