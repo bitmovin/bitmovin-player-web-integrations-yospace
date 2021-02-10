@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 # develop
 ## Fixed
-- Remove the [arrayAccessForm](https://github.com/x2js/x2js/blob/development/x2js.d.ts#L116), config option from `X2JS` initialization for parsing VAST Extensions. This was causing unpredictable arrays for the `Extension.CreativeParameters` property. Without the option, it consistently returns an object when there is only `CreativeParameter` property. 
+- Remove the [arrayAccessForm](https://github.com/x2js/x2js/blob/development/x2js.d.ts#L116), config option from `X2JS` initialization for parsing VAST Extensions. This was causing unpredictable arrays for the `Extension.CreativeParameters` property. Without the option, it consistently returns an object when there is only one `CreativeParameter` property. 
 
 # [1.2.19]
 ## Fixed
