@@ -10,7 +10,7 @@ export class VastHelper {
 
   static getExtensions(ad: VASTAd): any[] {
     return ad.Extensions.map((extension: XMLDocument) => {
-      return new X2JS({ arrayAccessFormPaths: [/./g] }).dom2js(extension);
+      return new X2JS().dom2js(extension);
     });
   }
 

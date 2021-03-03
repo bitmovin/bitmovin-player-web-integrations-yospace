@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 # develop
 ## Changed
 - Use standalone Bitmovin Analytics Adapter for flexibility. And move initialization to `load()` to dynamically attach to the correct player based on source.
+# [1.2.20]
+## Fixed
+- Remove the [arrayAccessForm](https://github.com/x2js/x2js/blob/development/x2js.d.ts#L116), config option from `X2JS` initialization for parsing VAST Extensions. This was causing unpredictable arrays for the `Extension.CreativeParameters` property. Without the option, it consistently returns an object when there is only one `CreativeParameter` property. 
 
 # [1.2.19]
 ## Fixed
@@ -133,6 +136,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 - Initial yospace integration
 
+[1.2.20]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/1.2.19...1.2.20
+[1.2.19]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/1.2.18...1.2.19
 [1.2.18]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/1.2.17...1.2.18
 [1.2.17]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/1.2.16...1.2.17
 [1.2.16]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/1.2.15...1.2.16
