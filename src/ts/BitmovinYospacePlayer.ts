@@ -26,11 +26,12 @@ import SubtitlesTTMLModule from 'bitmovin-player/modules/bitmovinplayer-subtitle
 import ThumbnailModule from 'bitmovin-player/modules/bitmovinplayer-thumbnail';
 import CryptoModule from 'bitmovin-player/modules/bitmovinplayer-crypto';
 import PatchModule from 'bitmovin-player/modules/bitmovinplayer-patch';
-import AnalyticsModule from 'bitmovin-player/modules/bitmovinplayer-analytics';
 import EngineNativeModule from 'bitmovin-player/modules/bitmovinplayer-engine-native';
 import DRMModule from 'bitmovin-player/modules/bitmovinplayer-drm';
 import RemoteControlModule from 'bitmovin-player/modules/bitmovinplayer-remotecontrol';
 import ServiceWorkerClientModule from 'bitmovin-player/modules/bitmovinplayer-serviceworker-client';
+
+import { Bitmovin8Adapter } from 'bitmovin-analytics';
 
 import { ArrayUtils } from 'bitmovin-player-ui/dist/js/framework/arrayutils';
 import { PlayerVRAPI } from 'bitmovin-player';
@@ -101,7 +102,6 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     Player.addModule(ThumbnailModule);
     Player.addModule(CryptoModule);
     Player.addModule(PatchModule);
-    Player.addModule(AnalyticsModule);
     Player.addModule(DRMModule);
     Player.addModule(RemoteControlModule);
     Player.addModule(ServiceWorkerClientModule);
@@ -184,6 +184,8 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
             }
           }
 
+          new Bitmovin8Adapter(this.player);
+
           Logger.log('BitmovinYospacePlayer loading source after switching players- ' + stringify(source));
 
           this.player.load(source, forceTechnology, disableSeeking).then(resolve).catch(reject);
@@ -196,6 +198,8 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       } else if (isAssetTypePresent() && this.currentPlayerType === YospacePlayerType.Bitmovin) {
         switchPlayer(YospacePlayerType.BitmovinYospace);
       } else {
+        new Bitmovin8Adapter(this.player);
+
         Logger.log('BitmovinYospacePlayer loading source - ' + stringify(source));
         // Else load the source in the current player
         this.player.load(source, forceTechnology, disableSeeking).then(resolve).catch(reject);
