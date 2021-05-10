@@ -30,6 +30,8 @@ import EngineNativeModule from 'bitmovin-player/modules/bitmovinplayer-engine-na
 import DRMModule from 'bitmovin-player/modules/bitmovinplayer-drm';
 import RemoteControlModule from 'bitmovin-player/modules/bitmovinplayer-remotecontrol';
 import ServiceWorkerClientModule from 'bitmovin-player/modules/bitmovinplayer-serviceworker-client';
+import TizenModule from 'bitmovin-player/modules/bitmovinplayer-tizen';
+import WebOsModule from 'bitmovin-player/modules/bitmovinplayer-webos';
 
 import { Bitmovin8Adapter } from 'bitmovin-analytics';
 
@@ -105,6 +107,8 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     Player.addModule(DRMModule);
     Player.addModule(RemoteControlModule);
     Player.addModule(ServiceWorkerClientModule);
+    Player.addModule(TizenModule);
+    Player.addModule(WebOsModule);
   }
 
   setup(): Promise<void> {

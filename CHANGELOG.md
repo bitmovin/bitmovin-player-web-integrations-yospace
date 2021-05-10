@@ -5,6 +5,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
+# [1.2.22]
+## Changed
+- Add Tizen and WebOS Bitmovin Modules
+
 # [1.2.21]
 ## Changed
 - Use standalone Bitmovin Analytics Adapter for flexibility. And move initialization to `load()` to dynamically attach to the correct player based on source.
