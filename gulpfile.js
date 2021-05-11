@@ -49,6 +49,7 @@ var production = false;
 
 // Deletes the target directory containing all generated files
 gulp.task('clean', del.bind(null, [paths.target.html]));
+gulp.task('cleanTizen', del.bind(null, tizenFiles));
 
 // TypeScript linting
 gulp.task('lint-ts', function() {
@@ -111,7 +112,7 @@ gulp.task('build', function(callback) {
     // First run 'clean', then the other tasks
     // TODO remove runSequence on Gulp 4.0 and use built in serial execution instead
     runSequence('clean',
-        ['html', 'browserify'],
+        ['html', 'browserify', 'cleanTizen', 'copyToTizen'],
         callback);
 });
 
@@ -159,6 +160,15 @@ gulp.task('serve', function() {
         catchBrowserifyErrors = true;
         gulp.watch(paths.source.ts, ['browserify']);
     });
+});
+
+var tizenFiles = [
+    './dist/js/bitmovin-player-yospace.min.js',
+    './dist/js/bitmovin-player-yospace.min.js.map'
+];
+gulp.task('copyToTizen', function() {
+    return gulp.src(tizenFiles)
+        .pipe(gulp.dest('../tizen/js'));
 });
 
 // Prepares the project for a npm release
