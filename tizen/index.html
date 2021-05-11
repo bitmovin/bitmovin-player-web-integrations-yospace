@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Bitmovin Demo</title>
+    <meta charset="UTF-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400" rel="stylesheet">
+
+    <script type="text/javascript" src="https://cdn.bitmovin.com/player/web/8/modules/bitmovinplayer-core.js"></script>
+    <script type="text/javascript" src="https://cdn.bitmovin.com/player/web/8/modules/bitmovinplayer-polyfill.js"></script>
+    <script type="text/javascript" src="https://cdn.bitmovin.com/player/web/8/modules/bitmovinplayer-engine-bitmovin.js"></script>
+    <script type="text/javascript" src="https://cdn.bitmovin.com/player/web/8/modules/bitmovinplayer-mserenderer.js"></script>
+    <script type="text/javascript" src="https://cdn.bitmovin.com/player/web/8/modules/bitmovinplayer-abr.js"></script>
+    <script type="text/javascript" src="https://cdn.bitmovin.com/player/web/8/modules/bitmovinplayer-drm.js"></script>
+    <script type="text/javascript" src="https://cdn.bitmovin.com/player/web/8/modules/bitmovinplayer-container-mp4.js"></script>
+    <script type="text/javascript" src="https://cdn.bitmovin.com/player/web/8/modules/bitmovinplayer-container-ts.js"></script>
+    <script type="text/javascript" src="https://cdn.bitmovin.com/player/web/8/modules/bitmovinplayer-xml.js"></script>
+    <script type="text/javascript" src="https://cdn.bitmovin.com/player/web/8/modules/bitmovinplayer-dash.js"></script>
+    <script type="text/javascript" src="https://cdn.bitmovin.com/player/web/8/modules/bitmovinplayer-hls.js"></script>
+    <script type="text/javascript" src="https://cdn.bitmovin.com/player/web/8/modules/bitmovinplayer-crypto.js"></script>
+    <script type="text/javascript" src="https://cdn.bitmovin.com/player/web/8/modules/bitmovinplayer-style.js"></script>
+    <script type="text/javascript" src="https://cdn.bitmovin.com/player/web/8/modules/bitmovinplayer-smooth.js"></script>
+    <script type="text/javascript" src="https://cdn.bitmovin.com/player/web/8/modules/bitmovinplayer-tizen.js"></script>
+
+    <script type="text/javascript" src="https://cdn.bitmovin.com/player/web/8/modules/bitmovinplayer-advertising-core.js"></script>
+    <script type="text/javascript" src="https://cdn.bitmovin.com/player/web/8/modules/bitmovinplayer-advertising-bitmovin.js"></script>
+    <script type="text/javascript" src="https://cdn.bitmovin.com/player/web/8/modules/bitmovinplayer-engine-native.js"></script>
+
+    <!-- Bootstrap 3.3.7 -->
+    <link rel="stylesheet" href="css/bootstrap.min.css" crossorigin="anonymous">
+    <link rel="stylesheet" href="css/bitmovin-demo.css">
+    <!--<link rel='stylesheet' href='https://cdn.bitmovin.com/player/web/8/bitmovinplayer-ui.css'>-->
+
+
+    <script type='text/javascript' src='js/vast-client.min.js'></script>
+
+    <script
+            src='https://code.jquery.com/jquery-3.4.1.min.js'
+            integrity='sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo='
+            crossorigin='anonymous'></script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js'></script>
+    <!--<script src="js/core-js.min.js"></script>-->
+    <!--https://mcarriga.s3.us-east-2.amazonaws.com/tub.min.js -->
+    <script type="text/javascript" src="js/bitmovin-player-yospace.min.js"></script>
+</head>
+<body>
+<div id="wrapper">
+
+    <div id="banner">
+        <div class="logo"><a href="https://bitmovin.com"><img src="images/bitmovin-logo.png"></a></div>
+        <div class="title"><h1 class="bitmovin-headline">Bitmovin Player Demo</h1></div>
+        <div class="clearfix"></div>
+    </div>
+
+    <div class="container-fluid">
+        <div class="content">
+            <div class="row bitmovin-description">
+                <div class="col-lg-12 text-center" id="source-names">
+
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-offset-1 col-md-10 col-lg-offset-2 col-lg-8">
+                    <div id="player"></div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-12 text-center">
+                    <p>For more information about the bitmovin player, please have a look at our online <a href="https://developer.bitmovin.com" target="_blank">Developer Section</a>.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    var yospacePlayer;
+
+    var liveSource = {
+        title: 'Live Stream',
+        hls: 'https://live-manifests-aka-qa.warnermediacdn.com/csmp/cmaf/live/2000073/cnn-clear/master.m3u8?yo.ad=true&yo.av=2&yo.pdt=true&yo.dr=true',
+        // hls: 'https://live-manifests-aka-qa.warnermediacdn.com/csmp/cmaf/live/2000073/timed-cnn-clear/master.m3u8?yo.av=2&yo.pdt=true&yo.dr=true',
+        // Yospace configuration
+        assetType: bitmovin.player.ads.yospace.YospaceAssetType.LINEAR,
+    };
+
+    var liveNoVpaidSource = {
+        title: 'Live Stream',
+        // hls: 'https://live-manifests-aka-qa.warnermediacdn.com/csmp/cmaf/live/2000073/cnn-clear/master.m3u8?yo.ad=true&yo.av=2&yo.pdt=true&yo.dr=true',
+        hls: 'https://live-manifests-aka-qa.warnermediacdn.com/csmp/cmaf/live/2000073/timed-cnn-clear-novpaid/master.m3u8?yo.av=2&yo.pdt=true&yo.dr=true&yo.pst=true',
+        // Yospace configuration
+        assetType: bitmovin.player.ads.yospace.YospaceAssetType.LINEAR,
+    };
+
+
+    var vodSource = {
+        title: 'VOD Stream',
+        hls: 'https://vod-manifests-aka-qa.warnermediacdn.com/csm/tcm/clear/3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c/master_cl.m3u8?afid=222591187&caid=2100555&conf_csid=tbs.com_videopage_test&context=182883174&nw=42448&prof=48804%3Amp4_plus_vast_truex&vdur=1800&yo.vp=true',
+        // hls: 'http://csm-e.cds1.yospace.com/access/d/400/u/0/1/130782300?f=0000130753172&format=vmap',
+
+        // Yospace configuration
+        assetType: bitmovin.player.ads.yospace.YospaceAssetType.VOD,
+        truexConfiguration: {},
+        // options: {
+        //   startOffset: 600
+        // }
+    };
+
+    var vodVpaidSource = {
+        title: 'VOD Stream',
+        hls: 'https://vod-manifests-aka-qa.warnermediacdn.com/csm/tcm/clear/3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c/master_cl.m3u8?afid=222591187&caid=2100555&conf_csid=tbs.com_videopage&context=182883174&nw=42448&prof=48804%3Atbs_web_vod&vdur=1800&yo.vp=true',
+        // Yospace configuration
+        assetType: bitmovin.player.ads.yospace.YospaceAssetType.VOD,
+    };
+
+    var artOfMotionSource = {
+        dash: 'https://bitmovin-a.akamaihd.net/content/MI201109210084_1/mpds/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.mpd',
+        hls: 'https://bitmovin-a.akamaihd.net/content/MI201109210084_1/m3u8s/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.m3u8',
+        progressive: 'https://bitmovin-a.akamaihd.net/content/MI201109210084_1/MI201109210084_mpeg-4_hd_high_1080p25_10mbits.mp4',
+        poster: 'https://bitmovin-a.akamaihd.net/content/MI201109210084_1/poster.jpg',
+    };
+
+    var truexAdFree = false
+
+    var conf = {
+        key: '18ca6ad5-9768-4129-bdf6-17685e0d14d2',
+        playback: {
+            muted: true,
+            autoplay: true,
+        },
+        logs: {
+            level: 'none',
+        },
+        ui: false,
+        tweaks: {
+            enable_seek_for_live: true,
+            resume_live_content_at_previous_position_after_ad_break: true
+        }
+    };
+
+    // Yospace configuration
+    var yospaceConfig = {
+        debug: false,
+        disableVpaidRenderer: false,
+        liveVpaidDurationAdjustment: 2,
+        disableStrictBreaks: false,
+        disableServiceWorker: false,
+    };
+
+    var sampleYospacePlayerPolicy = {
+        canMute: () => {
+            return true;
+        },
+        canSeek: () => {
+            return true;
+        },
+        canSeekTo: (seekTarget) => {
+            return seekTarget;
+        },
+        canSkip: () => {
+            return true;
+        },
+        canPause: () => {
+            return true;
+        },
+        canChangePlaybackSpeed: () => {
+            return true;
+        },
+    };
+
+    var playerContainer = document.getElementById('player');
+    yospacePlayer = new bitmovin.player.ads.yospace.BitmovinYospacePlayer(playerContainer, conf, yospaceConfig);
+
+    yospacePlayer.setup().then(function() {
+        yospacePlayer.setPolicy(sampleYospacePlayerPolicy);
+        yospacePlayer.load(artOfMotionSource);
+    })
+
+
+</script>
+</body>
+</html>
