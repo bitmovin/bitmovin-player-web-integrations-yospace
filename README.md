@@ -83,7 +83,7 @@ var yospaceConfig = {
 
 #### Tizen Demo
 - Run `npm run build-tizen`
-- Import the Tizen folder(as Gemeral -> Existing Project) into your Tizen Studio and run as a Tizen Web Application
+- Import the Tizen folder(as General -> Existing Project) into your Tizen Studio and run as a Tizen Web Application
 
 ## Limitations
 
