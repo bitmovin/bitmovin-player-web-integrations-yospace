@@ -61,6 +61,30 @@ var yospacePlayer = new bitmovin.player.ads.yospace.BitmovinYospacePlayer(player
 
 ```
 
+### Tizen
+#### Tizen Config
+- Include the following Tweaks to the PlayerConfig:
+```
+tweaks: {
+    ...
+    file_protocol : true, // Required if app is being loaded from file system
+    app_id : "Ff4zhu5kqV.TizenBitmovinPlayerAppMode" // this Tizen App Id should also be whitelisted in Player License and optionallt, Analaytics License
+}
+```
+- Make sure the app_id is whitelisted in your Player's License
+- In the `YospaceConfig` set the param `YospaceConfig.disableServiceWorker` to `true`
+```
+// Yospace configuration
+var yospaceConfig = {
+    ...
+    disableServiceWorker: true, //Disable Service Worker for Tizen Web App use
+};
+```
+
+#### Tizen Demo
+- Run `npm run build-tizen`
+- Import the Tizen folder(as Gemeral -> Existing Project) into your Tizen Studio and run as a Tizen Web Application
+
 ## Limitations
 
 - No support for ad tracking during live streams in Safari if EMSG tags are used. (EMSG tags are not supported by Safari)

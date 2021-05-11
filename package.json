@@ -7,7 +7,9 @@
   "scripts": {
     "prepublishOnly": "gulp npm-prepare",
     "build": "gulp build-prod",
-    "start": "gulp serve"
+    "build-tizen": "gulp build-prod && npm run copyToTizen",
+    "start": "gulp serve",
+    "copyToTizen": "cp ./dist/js/bitmovin-player-yospace.min.js ./tizen/js"
   },
   "repository": {
     "type": "git",

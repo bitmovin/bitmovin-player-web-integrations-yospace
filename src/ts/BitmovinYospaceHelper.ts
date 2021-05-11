@@ -3,8 +3,7 @@ export class BitmovinYospaceHelper {
     return navigator.userAgent.includes('Safari') &&
       !navigator.userAgent.includes('Chrome') &&
       !navigator.userAgent.includes('IEMobile') &&
-      !navigator.userAgent.includes('Edge') &&
-      !navigator.userAgent.includes('Tizen');
+      !navigator.userAgent.includes('Edge');
   }
 
   public static isSafariIOS(): boolean {
