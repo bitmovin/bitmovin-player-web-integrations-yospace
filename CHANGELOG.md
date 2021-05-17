@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+# [1.2.23]
+## Added
+- Missing MSERenderer Module for Tizen and WebOS support
+- Demo App for Samsung Tizen Web App
 
 # [1.2.22]
 ## Changed
