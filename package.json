@@ -22,7 +22,7 @@
   },
   "devDependencies": {
     "bitmovin-analytics": "^2.19.1",
-    "bitmovin-player": "^8.50.0",
+    "bitmovin-player": "8.50.0",
     "bitmovin-player-ui": "^3.6.0",
     "browser-sync": "^2.18.8",
     "browserify": "^14.1.0",
