@@ -107,8 +107,13 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     Player.addModule(DRMModule);
     Player.addModule(RemoteControlModule);
     Player.addModule(ServiceWorkerClientModule);
-    Player.addModule(TizenModule);
-    Player.addModule(WebosModule);
+
+    if (yospaceConfig.useTizen) {
+      Player.addModule(TizenModule);
+    }
+    if (yospaceConfig.useWebos) {
+      Player.addModule(WebosModule);
+    }
   }
 
   setup(): Promise<void> {
