@@ -7,10 +7,10 @@
 <DigestValue>giVkg44lqEgh6r74+2MnHRqs1GVEA/sorTvmMSN9Es0ScN70NzCT4rjYOFs9YbTK6cuCUq/ie2oe
 5AsR4nzf4Q==</DigestValue>
 </Reference>
-<Reference URI="README.md">
+<Reference URI="TizenBitmovinYospacePlayer.wgt">
 <DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha512"></DigestMethod>
-<DigestValue>zZxnBGIDLfQLTWF6l8igCV8yHhl18ha6RnxN//MPg0QZZhyNeA/8aDS+VQLLnYIU5n6wjbjjeObY
-pAo8e9mYlg==</DigestValue>
+<DigestValue>SJizxaCErJ4+08kQpewd7PtAhxNrgjRC6pieWCv9tf2haTw30SS9y3MqyfadMTQCrwynZ/ds3Eja
+53IRrZ6qnA==</DigestValue>
 </Reference>
 <Reference URI="bitmovin-icon.png">
 <DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha512"></DigestMethod>
@@ -79,13 +79,13 @@ mHD65L7bkQ==</DigestValue>
 </Reference>
 <Reference URI="index.html">
 <DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha512"></DigestMethod>
-<DigestValue>bWphUdOvnFHl21MyTEIyGjF6o/OI+9WzYKjjr9FJwnccHd1Q22HbkAc/yHv9QnksBEXTzdeX9ZbD
-Ww+hpWSD5g==</DigestValue>
+<DigestValue>5Q/zMwumjLQZDCM5PYGtmFxcq3Fg4N35Wdp0mwJf/SP3BzvJUrWbyJl3/EHo/87r5Jd+GfFml4Mr
+GD3eeMkQUw==</DigestValue>
 </Reference>
 <Reference URI="js%2Fbitmovin-player-yospace.min.js">
 <DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha512"></DigestMethod>
-<DigestValue>GIb9sdhcpRi7Q9GRkU4WYCyO7QJ2MdE38wS619lm0JMQPcwFbTgSeT8Y/XJ/OBofIjOhfXK3mtdE
-ddGxXKMocg==</DigestValue>
+<DigestValue>H/+IGS0aXBQvQl42zH2VXXTVaU0yhSByayC9chWAjSItPbogDXWH/ROLxfKaKnHEPPL9NsCJgnkV
+k4AXEt/ljw==</DigestValue>
 </Reference>
 <Reference URI="js%2Fbootstrap.min.js">
 <DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha512"></DigestMethod>
@@ -101,6 +101,11 @@ ugPLRGV4+g==</DigestValue>
 <DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha512"></DigestMethod>
 <DigestValue>Ua/7Woz9L5O0cwB/aYexmgoaD7lw3dWe9FvXejVdgqu71gRog3oJgjSWQR55fwWx+WKuk8cl7UwA
 1RS6QCadFA==</DigestValue>
+</Reference>
+<Reference URI="js%2Fsources.js">
+<DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha512"></DigestMethod>
+<DigestValue>y7klGGiyGeEctWYgIh7OTc7S4UTrLrZUfEwQCEmWY9L/M1cAtpPN1x1XR7noOIIoFpiVGPgqhMYW
+2d9KfP5QBg==</DigestValue>
 </Reference>
 <Reference URI="js%2Fvast-client.min.js">
 <DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha512"></DigestMethod>
@@ -122,11 +127,11 @@ QY10fG1EWQ==</DigestValue>
 </Reference>
 </SignedInfo>
 <SignatureValue>
-V1+wYHmrcRAi/DMuVCvJO5NjQ2A67iRlj1ekgp3qkD5XRUFojwCQJMkti/lqk3T9/mw/UlICMROA
-nHPEaCsRW3ocRgENQXsaFmTk/p6IcPw3+24cLaUxM5MU67gHn/egr4tdV+YP83UXAJP2NcVfSxaP
-dYhFnP/Q7lfQnfJcSbey/Z/9QUI+YLXnaxJ82jwAfRjexPI1yKE6yASNupbIL+MyFWhR2NPN3UtJ
-C7HMOoGei0GOgaB77VHWdWlLP6aSTX3Hwcwi2KhlJxt0rAIVER4JzshDYIsRFGdelKPuElsut1h4
-9uK1zuVq6USxOEpkUvPW2bBWrVvryfWSjyTaLg==
+d8Jz4SKUd2ZDz5KXcuIkp/+xt8HmzahkLp9t4k2Bww5zvJwUspIyurihTk7Kl7p8S7OJAB5onenK
+TxQnvjXwYu+eGhK0SobRfdFrKILjHuWMyudhxh9FwB41ePCVlCv66FrvOuZqxjSJabvRBpJQJKXa
+yXMl1b3t5rkIQJx4C1uDkHKXd8YVivJc4n6zjk95bhSyg4tRinsHnuDlyex0SFZja+FzXd1PUxDp
+Hbc4DmImPPl8DO443q9Y+MX8iUh1BX681ExaOpeJH8HJP9ypu6vPDl4BqfkFYchnVZHlEqpWcus0
+LbDlWOO5NcYkltLPcxX0yehr3tdZ3/DuzbdrCw==
 </SignatureValue>
 <KeyInfo>
 <X509Data>
