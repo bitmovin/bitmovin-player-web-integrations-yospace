@@ -1,6 +1,3 @@
-/* eslint-env browser */
-import {sources} from "../../../tizen/js/sources";
-
 var yospacePlayer;
 
 setupControllerEvents();
@@ -25,7 +22,7 @@ var conf = {
     enable_seek_for_live: true,
     resume_live_content_at_previous_position_after_ad_break: true,
     file_protocol: true,
-    app_id: 'com.bitmovin.demo.webapp',
+    app_id: 'com.bitmovin.bitmovinyospaceplayer',
     BACKWARD_BUFFER_PURGE_INTERVAL: 10
   }
 };

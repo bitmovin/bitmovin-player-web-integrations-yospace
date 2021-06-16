@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+# [Unreleased]
+## Added
+- WebOS Module and Demo Folder
+- YospaceConfig param for `useTizen` and `useWebos` to guard adding those modules
+- Bumped Bitmovin Player version to `8.58.0` for required Tizen/WebOS bug fixes
+- Missing DRM API added in 8.58.0 API
+
+## Changed
+-Tizen Demo Updates for latest SmartTv Convig params in YospaceConfig
+
 # [1.2.23]
 ## Added
 - Missing MSERenderer Module for Tizen and WebOS support

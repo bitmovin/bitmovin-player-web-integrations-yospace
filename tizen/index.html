@@ -14,6 +14,8 @@
 
 
     <script type='text/javascript' src='js/vast-client.min.js'></script>
+    <script type='text/javascript' src='https://cdn.bitmovin.com/player/web/8/bitmovinplayer-ui.js'></script>
+    <link rel='stylesheet' href='https://cdn.bitmovin.com/player/web/8/bitmovinplayer-ui.css'>
 
     <script
             src='https://code.jquery.com/jquery-3.4.1.min.js'
@@ -72,7 +74,7 @@ var conf = {
     logs: {
         level: 'none',
     },
-    ui: false,
+    //ui: false,
     tweaks: {
         enable_seek_for_live: true,
         resume_live_content_at_previous_position_after_ad_break: true,
@@ -116,6 +118,78 @@ var playerContainer = document.getElementById('player');
 yospacePlayer = new bitmovin.player.ads.yospace.BitmovinYospacePlayer(playerContainer, conf, yospaceConfig);
 
 yospacePlayer.setup().then(function() {
+    bitmovin.playerui.UIFactory.buildDefaultUI(yospacePlayer);
+
+    yospacePlayer.on('playbackfinished', function(event) {
+        console.info(event.time + ' - [YoSpacePlayer] playbackFinished: ' + JSON.stringify(event));
+    });
+
+    yospacePlayer.on('ready', function(event) {
+        console.info(event.time + ' - [YoSpacePlayer] ready: ' + JSON.stringify(event));
+    });
+
+    yospacePlayer.on('error', function(event) {
+        console.error(event.time + ' - [YoSpacePlayer] Error: ' + JSON.stringify(event));
+    });
+
+    yospacePlayer.on('warning', function(event) {
+        console.warn(event.time + ' - [YoSpacePlayer] Warning: ' + JSON.stringify(event));
+    });
+
+    yospacePlayer.on('play', function(event) {
+        console.info(event.time + ' - [YoSpacePlayer] play: ' + JSON.stringify(event));
+    });
+
+    yospacePlayer.on('timechanged', function(event) {
+        //console.trace(event.time + ' - [YoSpacePlayer] timechanged: ' + JSON.stringify(event));
+    });
+
+    yospacePlayer.on('adbreakstarted', function(event) {
+        console.info(event.time + ' - [YoSpacePlayer] AdBreakStarted: ' + JSON.stringify(event));
+    });
+
+    yospacePlayer.on('adbreakfinished', function(event) {
+        console.info(event.time + ' - [YoSpacePlayer] AdBreakFinished: ' + JSON.stringify(event));
+    });
+
+    yospacePlayer.on('adstarted', function(event) {
+        console.info(event.time + ' - [YoSpacePlayer] AdStarted: ' + JSON.stringify(event));
+    });
+
+    yospacePlayer.on('adfinished', function(event) {
+        console.info(event.time + ' - [YoSpacePlayer] AdFinished: ' + JSON.stringify(event));
+    });
+
+    yospacePlayer.on('adquartile', function(event) {
+        console.info(event.time + ' - [YoSpacePlayer] AdQuartileEvent: ' + JSON.stringify(event));
+    });
+
+    yospacePlayer.on('admanifestloaded', function(event) {
+        console.info(event.time + ' - [YoSpacePlayer] AdManifestLoaded: ' + JSON.stringify(event));
+    });
+
+    yospacePlayer.on('subtitleadded', function(event) {
+        console.info(event.time + ' - [YoSpacePlayer] SubtitleAdded: ' + JSON.stringify(event));
+        if (yospacePlayer.subtitles.list().length > 0) {
+            yospacePlayer.subtitles.enable(yospacePlayer.subtitles.list()[0].id)
+        }
+    });
+
+    yospacePlayer.on('playing', function (event) {
+        console.info(event.time + ' - [YoSpacePlayer] playing: ' + JSON.stringify(event));
+        if (yospacePlayer.subtitles.list().length > 0) {
+            yospacePlayer.subtitles.enable(yospacePlayer.subtitles.list()[0].id)
+        }
+    });
+
+    yospacePlayer.on('metadataparsed', function (event) {
+        console.debug(event.time + ' - [YoSpacePlayer] metadataParsed: ' + JSON.stringify(event));
+    });
+
+    yospacePlayer.on('metadata', function (event) {
+        console.debug(event.time + ' - [YoSpacePlayer] metadata: ' + JSON.stringify(event));
+    });
+
     yospacePlayer.setPolicy(sampleYospacePlayerPolicy);
     yospacePlayer.load(sources.vodSource);
 })

@@ -1,8 +1,32 @@
 import {
-  AudioQuality, AudioTrack, DownloadedAudioData, DownloadedVideoData, LogLevel, LowLatencyAPI, MetadataType, Player,
-  PlayerAPI, PlayerBufferAPI, PlayerConfig, PlayerEvent, PlayerEventCallback, PlayerManifestAPI, PlayerType,
-  QueryParameters, SegmentMap, Snapshot, SourceConfig, StreamType, SupportedTechnologyMode, Technology, Thumbnail,
-  TimeRange, VideoQuality, ViewMode, ViewModeOptions,
+  AudioQuality,
+  AudioTrack,
+  DownloadedAudioData,
+  DownloadedVideoData,
+  DrmAPI,
+  LogLevel,
+  LowLatencyAPI,
+  MetadataType,
+  Player,
+  PlayerAPI,
+  PlayerBufferAPI,
+  PlayerConfig,
+  PlayerEvent,
+  PlayerEventCallback,
+  PlayerManifestAPI,
+  PlayerType,
+  QueryParameters,
+  SegmentMap,
+  Snapshot,
+  SourceConfig,
+  StreamType,
+  SupportedTechnologyMode,
+  Technology,
+  Thumbnail,
+  TimeRange,
+  VideoQuality,
+  ViewMode,
+  ViewModeOptions,
 } from 'bitmovin-player/modules/bitmovinplayer-core';
 import { InternalBitmovinYospacePlayer } from './InternalBitmovinYospacePlayer';
 
@@ -437,7 +461,7 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     return this.player.getVideoBufferLength();
   }
 
-  getVideoElement(): HTMLVideoElement | HTMLObjectElement {
+  getVideoElement(): HTMLVideoElement {
     return this.player.getVideoElement();
   }
 
@@ -580,4 +604,6 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   unmute(issuer?: string): void {
     return this.player.unmute();
   }
+
+  readonly drm: DrmAPI;
 }
