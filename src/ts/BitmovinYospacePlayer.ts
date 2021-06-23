@@ -1,8 +1,32 @@
 import {
-  AudioQuality, AudioTrack, DownloadedAudioData, DownloadedVideoData, LogLevel, LowLatencyAPI, MetadataType, Player,
-  PlayerAPI, PlayerBufferAPI, PlayerConfig, PlayerEvent, PlayerEventCallback, PlayerManifestAPI, PlayerType,
-  QueryParameters, SegmentMap, Snapshot, SourceConfig, StreamType, SupportedTechnologyMode, Technology, Thumbnail,
-  TimeRange, VideoQuality, ViewMode, ViewModeOptions,
+  AudioQuality,
+  AudioTrack,
+  DownloadedAudioData,
+  DownloadedVideoData,
+  DrmAPI,
+  LogLevel,
+  LowLatencyAPI,
+  MetadataType,
+  Player,
+  PlayerAPI,
+  PlayerBufferAPI,
+  PlayerConfig,
+  PlayerEvent,
+  PlayerEventCallback,
+  PlayerManifestAPI,
+  PlayerType,
+  QueryParameters,
+  SegmentMap,
+  Snapshot,
+  SourceConfig,
+  StreamType,
+  SupportedTechnologyMode,
+  Technology,
+  Thumbnail,
+  TimeRange,
+  VideoQuality,
+  ViewMode,
+  ViewModeOptions,
 } from 'bitmovin-player/modules/bitmovinplayer-core';
 import { InternalBitmovinYospacePlayer } from './InternalBitmovinYospacePlayer';
 
@@ -31,7 +55,7 @@ import DRMModule from 'bitmovin-player/modules/bitmovinplayer-drm';
 import RemoteControlModule from 'bitmovin-player/modules/bitmovinplayer-remotecontrol';
 import ServiceWorkerClientModule from 'bitmovin-player/modules/bitmovinplayer-serviceworker-client';
 import TizenModule from 'bitmovin-player/modules/bitmovinplayer-tizen';
-import WebOsModule from 'bitmovin-player/modules/bitmovinplayer-webos';
+import WebosModule from 'bitmovin-player/modules/bitmovinplayer-webos';
 
 import { Bitmovin8Adapter } from 'bitmovin-analytics';
 
@@ -107,8 +131,13 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     Player.addModule(DRMModule);
     Player.addModule(RemoteControlModule);
     Player.addModule(ServiceWorkerClientModule);
-    Player.addModule(TizenModule);
-    Player.addModule(WebOsModule);
+
+    if (yospaceConfig.useTizen) {
+      Player.addModule(TizenModule);
+    }
+    if (yospaceConfig.useWebos) {
+      Player.addModule(WebosModule);
+    }
   }
 
   setup(): Promise<void> {
@@ -432,7 +461,7 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     return this.player.getVideoBufferLength();
   }
 
-  getVideoElement(): HTMLVideoElement | HTMLObjectElement {
+  getVideoElement(): HTMLVideoElement {
     return this.player.getVideoElement();
   }
 
@@ -575,4 +604,6 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   unmute(issuer?: string): void {
     return this.player.unmute();
   }
+
+  readonly drm: DrmAPI;
 }

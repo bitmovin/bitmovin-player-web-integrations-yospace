@@ -1,4 +1,7 @@
 dist
 node_modules
 .idea
-
+.DS_Store
+src/.DS_Store
+tizen/.DS_Store
+**/*.DS_Store

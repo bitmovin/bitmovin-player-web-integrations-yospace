@@ -94,6 +94,8 @@ export interface YospaceConfiguration {
   liveVpaidDurationAdjustment?: number;
   disableStrictBreaks?: boolean;
   breakTolerance?: number;
+  useTizen?: boolean;
+  useWebos?: boolean;
 }
 
 export interface BitmovinYospacePlayerExports extends PlayerExports {
