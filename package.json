@@ -7,9 +7,10 @@
   "scripts": {
     "prepublishOnly": "gulp npm-prepare",
     "build": "gulp build-prod",
-    "build-tizen": "gulp build-prod && npm run copyToTizen",
+    "build-tv": "gulp build-prod && npm run copyToTizen && npm run copyToWebOS",
     "start": "gulp serve",
-    "copyToTizen": "cp ./dist/js/bitmovin-player-yospace.min.js ./tizen/js"
+    "copyToTizen": "cp ./dist/js/bitmovin-player-yospace.min.js ./tizen/js",
+    "copyToWebOS": "cp ./dist/js/bitmovin-player-yospace.min.js ./WebOS/src/js"
   },
   "repository": {
     "type": "git",
@@ -22,7 +23,7 @@
   },
   "devDependencies": {
     "bitmovin-analytics": "^2.19.1",
-    "bitmovin-player": "8.50.0",
+    "bitmovin-player": "8.58.0",
     "bitmovin-player-ui": "^3.6.0",
     "browser-sync": "^2.18.8",
     "browserify": "^14.1.0",

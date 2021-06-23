@@ -73,16 +73,18 @@ tweaks: {
 ```
 - Make sure the app_id is whitelisted in your Player's License
 - In the `YospaceConfig` set the param `YospaceConfig.disableServiceWorker` to `true`
+- In the `YospaceConfig` set the param `YospaceConfig.useTizen` to `true`
 ```
 // Yospace configuration
 var yospaceConfig = {
     ...
     disableServiceWorker: true, //Disable Service Worker for Tizen Web App use
+    useTizen: true,
 };
 ```
 
 #### Tizen Demo
-- Run `npm run build-tizen`
+- Run `npm run build-tv`
 - Import the Tizen folder(as General -> Existing Project) into your Tizen Studio and run as a Tizen Web Application
 
 ## Limitations
