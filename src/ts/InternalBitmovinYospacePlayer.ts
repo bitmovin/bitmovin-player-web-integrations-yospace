@@ -641,14 +641,16 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
         + ' seekable.end=' + this.player.getSeekableRange().end);
       Logger.log(VastHelper.buildDataUriWithoutTracking(currentAd.advert));
 
-      this.player.ads.schedule({
+      const adConfig: AdConfig = {
         tag: {
           url: VastHelper.buildDataUriWithoutTracking(currentAd.advert),
           type: 'vast',
         },
         position: position,
         replaceContentDuration: replaceContentDuration,
-      } as AdConfig).catch((reason: string) => {
+      } as any
+
+      this.player.ads.schedule(adConfig).catch((reason: string) => {
         const error = new PlayerError(this.player.exports.ErrorCode.MODULE_ADVERTISING_ERROR, {
           code: UNDEFINED_VAST_ERROR_CODE,
           message: reason,
@@ -1273,6 +1275,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 
     const currentAd = this.getCurrentAd();
     const currentBreak = currentAd.adBreak;
+
     Logger.log('[BitmovinYospacePlayer] tracking VPAID event ' + event + ' id=' + currentAd.getMediaID());
     currentAd.getInteractiveUnit().track(
       event,

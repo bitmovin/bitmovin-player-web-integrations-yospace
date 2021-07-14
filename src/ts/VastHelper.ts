@@ -17,8 +17,19 @@ export class VastHelper {
   static buildDataUriWithoutTracking(ad: VASTAd): string {
     // build a valid VAST xml data uri to schedule only the current vpaid ad
     const vastXML = ad.vastXML;
-    const trackingEvents = ['TrackingEvents', 'Tracking'];
-    this.removeXmlNodes(trackingEvents, vastXML);
+
+    // NOTE: Previously the only XML nodes from the VAST we were removing were
+    // Tracking and TrackingEvents. It was noted originally that Yospace wasn't
+    // surfacing Default Impressions so those had to be included so Bitmovin
+    // could trigger them.
+    //
+    // After testing on a later release YS SDK 1.8.1, it appears Yospace is now
+    // able to fire the Default Impressions, and because of that, duplicate impressions
+    // were firing in some cases. It is now assumed that Yospace will handling
+    // all beaconing, and Bitmovin will just render the physical VPAID.
+    const beaconingEvents = ['TrackingEvents', 'Tracking', 'Impression'];
+    this.removeXmlNodes(beaconingEvents, vastXML);
+
     const vastVersion = vastXML.parentElement.getAttribute('version');
     const vastXMLString = '<VAST version="' + vastVersion + '">' + vastXML.outerHTML + '</VAST>';
     return 'data:text/xml,' + encodeURIComponent(vastXMLString);
