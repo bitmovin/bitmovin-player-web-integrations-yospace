@@ -2,29 +2,68 @@
 ///<reference path="VAST.d.ts"/>
 
 import {
-  AdBreakEvent, AdEvent, AdQuartile, AdQuartileEvent, BufferLevel, BufferType, ErrorEvent, MediaType, MetadataEvent,
-  PlaybackEvent, PlayerAPI, PlayerBufferAPI, PlayerError, PlayerEvent, PlayerEventBase, PlayerEventCallback, SeekEvent,
-  TimeChangedEvent, TimeRange,
+  AdBreakEvent,
+  AdEvent,
+  AdQuartile,
+  AdQuartileEvent,
+  BufferLevel,
+  BufferType,
+  ErrorEvent,
+  MediaType,
+  MetadataEvent,
+  ModuleName,
+  ModuleReadyEvent,
+  PlaybackEvent,
+  PlayerAPI,
+  PlayerBufferAPI,
+  PlayerError,
+  PlayerEvent,
+  PlayerEventBase,
+  PlayerEventCallback,
+  SeekEvent,
+  TimeChangedEvent,
+  TimeRange,
 } from 'bitmovin-player/modules/bitmovinplayer-core';
 
 import {
-  BYSAdBreakEvent, BYSAdEvent, BYSAnalyticsFiredEvent, BYSListenerEvent, YospaceAdListenerAdapter,
+  BYSAdBreakEvent,
+  BYSAdEvent,
+  BYSAnalyticsFiredEvent,
+  BYSListenerEvent,
+  YospaceAdListenerAdapter,
 } from './YospaceListenerAdapter';
-import { DefaultBitmovinYospacePlayerPolicy } from './BitmovinYospacePlayerPolicy';
-import { ArrayUtils } from 'bitmovin-player-ui/dist/js/framework/arrayutils';
-import { VastHelper } from './VastHelper';
+import {DefaultBitmovinYospacePlayerPolicy} from './BitmovinYospacePlayerPolicy';
+import {ArrayUtils} from 'bitmovin-player-ui/dist/js/framework/arrayutils';
+import {VastHelper} from './VastHelper';
 import {
-  BitmovinYospacePlayerAPI, BitmovinYospacePlayerPolicy, UNDEFINED_VAST_ERROR_CODE, YospaceAdBreak, YospaceAdBreakEvent,
-  YospaceAssetType, YospaceCompanionAd, YospaceConfiguration, YospaceErrorCode, YospaceErrorEvent, YospaceEventBase,
-  YospacePlayerEvent, YospacePlayerEventCallback, YospacePolicyErrorCode, YospacePolicyErrorEvent, YospaceSourceConfig, YospaceAdBreakPosition,
+  BitmovinYospacePlayerAPI,
+  BitmovinYospacePlayerPolicy,
+  UNDEFINED_VAST_ERROR_CODE,
+  YospaceAdBreak,
+  YospaceAdBreakEvent,
+  YospaceAdBreakPosition,
+  YospaceAssetType,
+  YospaceCompanionAd,
+  YospaceConfiguration,
+  YospaceErrorCode,
+  YospaceErrorEvent,
+  YospaceEventBase,
+  YospacePlayerEvent,
+  YospacePlayerEventCallback,
+  YospacePolicyErrorCode,
+  YospacePolicyErrorEvent,
+  YospaceSourceConfig,
 } from './BitmovinYospacePlayerAPI';
-import { YospacePlayerError } from './YospaceError';
+import {YospacePlayerError} from './YospaceError';
 import {
-  AdConfig, CompanionAd, LinearAd, PlayerAdvertisingAPI,
+  AdConfig,
+  CompanionAd,
+  LinearAd,
+  PlayerAdvertisingAPI,
 } from 'bitmovin-player/modules/bitmovinplayer-advertising-core';
-import { Logger } from './Logger';
-import { DateRangeEmitter } from './DateRangeEmitter';
-import { BitmovinYospaceHelper } from './BitmovinYospaceHelper';
+import {Logger} from './Logger';
+import {DateRangeEmitter} from './DateRangeEmitter';
+import {BitmovinYospaceHelper} from './BitmovinYospaceHelper';
 import stringify from 'fast-safe-stringify';
 
 interface StreamPart {
@@ -995,7 +1034,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   };
 
   private registerPlayerEvents(): void {
-    this.player.on(this.player.exports.PlayerEvent.SourceLoaded, this.onReady);
+    this.player.on(this.player.exports.PlayerEvent.ModuleReady, this.onReady);
     this.player.on(this.player.exports.PlayerEvent.Playing, this.onPlaying);
     this.player.on(this.player.exports.PlayerEvent.TimeChanged, this.onTimeChanged);
     this.player.on(this.player.exports.PlayerEvent.Paused, this.onPause);
@@ -1021,7 +1060,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   }
 
   private unregisterPlayerEvents(): void {
-    this.player.off(this.player.exports.PlayerEvent.SourceLoaded, this.onReady);
+    this.player.off(this.player.exports.PlayerEvent.ModuleReady, this.onReady);
     this.player.off(this.player.exports.PlayerEvent.Playing, this.onPlaying);
     this.player.off(this.player.exports.PlayerEvent.TimeChanged, this.onTimeChanged);
     this.player.off(this.player.exports.PlayerEvent.Paused, this.onPause);
@@ -1050,43 +1089,45 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   // through YoSpace the event is not actually fired because YoSPace does not yet think this Ad has actually started
   // So in the handleAdStart method we check the list of scheduled prerolls(this.scheduledPrerolls) and skip scheduling the alredy scheduled adverts, BUT there
   // we will then fire the AdStart event so the timing with YoSpace aligns
-  private onReady = () => {
-    this.manager.session.timeline.getAllElements().forEach( timelineElement => { // loop through each AdBreak in timeline
-      if (timelineElement.type === YSTimelineElement.ADVERT && timelineElement.offset === 0 && timelineElement.adBreak.adverts[0].hasInteractiveUnit() === true) { // check if preroll and if there is an Advert type element and check if it is VPAID
-        timelineElement.adBreak.adverts.forEach(ysAdvert => { // loop through each individual advert in the preroll
-          if (ysAdvert.hasInteractiveUnit()) { // Check individual advert if it is a vpaid ad
-            // Schedule the Preroll Advert into the Bitmovin Ads Module as a preroll
-            Logger.log('[InternalBYP] Found Pre-roll Ad with Id: ' + ysAdvert.getAdvertID() + ' during onReady check. Scheduling this Ad into Bitmovin Ad Module');
-            this.player.ads.schedule({
-              tag: {
-                url: VastHelper.buildDataUriWithoutTracking(this.manager.session.timeline.getAllElements()[0].adBreak.adverts[0].advert),
-                type: 'vast',
-              },
-              position: 'pre', // should this be pre or just pull the position?
-              replaceContentDuration: ysAdvert.duration,
-            } as AdConfig).then(() => {
-              // if Ad Scheduled without Error then we ad this ad to the list of prerolls to be IGNORED during handleAdStart method
-              this.scheduledPrerolls.push(ysAdvert.getAdvertID());
-              Logger.log('[InternalBYP] Successfully scheduled Ad with Id: ' + ysAdvert.getAdvertID() + ' during onReady check');
-            }).catch((reason: string) => {
-              const error = new PlayerError(this.player.exports.ErrorCode.MODULE_ADVERTISING_ERROR, {
-                code: UNDEFINED_VAST_ERROR_CODE,
-                message: reason,
-              });
-              Logger.log('[InternalBYP] Not able to schedule Ad with Id: ' + ysAdvert.getAdvertID() + ' into Bitmovin Ad Module during onReady check. Reason: ', reason);
+  private onReady = (event: ModuleReadyEvent) => {
+    if (event.name === ModuleName.Advertising) {
+      this.manager.session.timeline.getAllElements().forEach( timelineElement => { // loop through each AdBreak in timeline
+        if (timelineElement.type === YSTimelineElement.ADVERT && timelineElement.offset === 0 && timelineElement.adBreak.adverts[0].hasInteractiveUnit() === true) { // check if preroll and if there is an Advert type element and check if it is VPAID
+          timelineElement.adBreak.adverts.forEach(ysAdvert => { // loop through each individual advert in the preroll
+            if (ysAdvert.hasInteractiveUnit()) { // Check individual advert if it is a vpaid ad
+              // Schedule the Preroll Advert into the Bitmovin Ads Module as a preroll
+              Logger.log('[InternalBYP] Found Pre-roll Ad with Id: ' + ysAdvert.getAdvertID() + ' during onReady check. Scheduling this Ad into Bitmovin Ad Module');
+              this.player.ads.schedule({
+                tag: {
+                  url: VastHelper.buildDataUriWithoutTracking(this.manager.session.timeline.getAllElements()[0].adBreak.adverts[0].advert),
+                  type: 'vast',
+                },
+                position: 'pre', // should this be pre or just pull the position?
+                replaceContentDuration: ysAdvert.duration,
+              } as AdConfig).then(() => {
+                // if Ad Scheduled without Error then we ad this ad to the list of prerolls to be IGNORED during handleAdStart method
+                this.scheduledPrerolls.push(ysAdvert.getAdvertID());
+                Logger.log('[InternalBYP] Successfully scheduled Ad with Id: ' + ysAdvert.getAdvertID() + ' during onReady check');
+              }).catch((reason: string) => {
+                const error = new PlayerError(this.player.exports.ErrorCode.MODULE_ADVERTISING_ERROR, {
+                  code: UNDEFINED_VAST_ERROR_CODE,
+                  message: reason,
+                });
+                Logger.log('[InternalBYP] Not able to schedule Ad with Id: ' + ysAdvert.getAdvertID() + ' into Bitmovin Ad Module during onReady check. Reason: ', reason);
 
-              this.fireEvent<ErrorEvent>({
-                timestamp: Date.now(),
-                type: this.player.exports.PlayerEvent.AdError,
-                code: error.code,
-                name: error.message,
-                data: error.data,
+                this.fireEvent<ErrorEvent>({
+                  timestamp: Date.now(),
+                  type: this.player.exports.PlayerEvent.AdError,
+                  code: error.code,
+                  name: error.message,
+                  data: error.data,
+                });
               });
-            });
-          }
-        });
-      }
-    });
+            }
+          });
+        }
+      });
+    }
   };
 
   private onPlaying = () => {
