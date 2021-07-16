@@ -161,6 +161,16 @@
     autoplay = $.urlParam('autoplay').toLowerCase() === 'true'
   }
 
+  var aggressiveVpaid = true
+  if ($.urlParam('aggressiveVpaid')) {
+    aggressiveVpaid = $.urlParam('aggressiveVpaid').toLowerCase() === 'true'
+  }
+
+  var vpaid = true
+  if ($.urlParam('vpaid')) {
+    vpaid = $.urlParam('vpaid').toLowerCase() === 'true'
+  }
+
   function deselectCustomLoadButton() {
     $(customStreamButton).removeClass('active');
   }
@@ -400,7 +410,8 @@
   // Yospace configuration
   var yospaceConfig = {
     debug: debugOverride,
-    disableVpaidRenderer: false,
+    disableVpaidRenderer: !vpaid,
+    disableAggressiveVpaidPreroll: !aggressiveVpaid,
     liveVpaidDurationAdjustment: 2,
     disableStrictBreaks: false,
     disableServiceWorker: false,
@@ -462,17 +473,21 @@
   yospacePlayer.setup().then(() => {
     bitmovin.playerui.UIFactory.buildDefaultUI(yospacePlayer);
 
-      yospacePlayer.on('ready', function(event) {
-          console.error('[BYP] ready ', cloneDeepSimple(event));
+    yospacePlayer.on('ready', function(event) {
+      console.log('[BYP] ready ', cloneDeepSimple(event));
 
-          if (!autoplay) {
-            yospacePlayer.play();
-          }
-      })
+      if (!autoplay) {
+        yospacePlayer.play();
+      }
+    })
 
-      yospacePlayer.on('moduleready', function(event) {
-          console.error('[BYP] moduleready ', cloneDeepSimple(event));
-      })
+    yospacePlayer.on('moduleready', function(event) {
+      console.log('[BYP] moduleready ', cloneDeepSimple(event));
+    })
+
+    yospacePlayer.on('playing', function(event) {
+      console.log('[BYP] playing ', cloneDeepSimple(event))
+    })
 
     yospacePlayer.on('yospaceerror', function(event) {
       console.error('[BYP] yospaceerror ', cloneDeepSimple(event));

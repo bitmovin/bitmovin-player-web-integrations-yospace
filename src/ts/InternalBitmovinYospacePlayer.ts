@@ -657,16 +657,20 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   // to show. Below are the related tickets:
   // https://jiraprod.turner.com/browse/MECBM-659
   // https://jiraprod.turner.com/browse/MECBM-592
-  private handleAggressiveVpaidStart = () => {
+  private scheduleAggressiveVpaidPreroll = () => {
+    if (this.yospaceConfig.disableAggressiveVpaidPreroll) {
+      Logger.log('[BitmovinYospacePlayer] Aggressive VPAID preroll rendering is disabled');
+      return;
+    }
+
     const firstVpaidAd = this.getFirstPrerollVpaidAd();
 
     if (!firstVpaidAd) {
-      Logger.log('[InternalBYP] No VPAID was found in the first pre-roll position, skipping aggressive scheduling');
       return;
     }
 
     const firstVpaidAdId = firstVpaidAd.getAdvertID();
-    Logger.log(`[InternalBYP] Found Pre-roll Ad with Id: ${firstVpaidAdId} during onReady check. Scheduling this Ad into Bitmovin Ad Module`);
+    Logger.log(`[BitmovinYospacePlayer] Found VPAID Pre-Roll in first slot: ${firstVpaidAdId}. Aggressively scheduling before Yospace notifications start.`);
 
     const adConfig: AdBreakConfig = {
       id: firstVpaidAdId,
@@ -679,13 +683,13 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     };
 
     // TODO: Confirm if this earlier triggering of the VPAID active flag has detrimental effects
-    this.isVpaidActive = true;
+    // this.isVpaidActive = true;
 
     this.player.ads.schedule(adConfig)
       .then(() => {
         // if Ad Scheduled without Error then we ad this ad to the list of prerolls to be IGNORED during handleAdStart method
         this.scheduledPrerolls.push(firstVpaidAdId);
-        Logger.log(`[InternalBYP] Successfully scheduled Ad with Id: ${firstVpaidAdId} during onReady check`);
+        Logger.log(`[BitmovinYospacePlayer] Successfully scheduled Ad with Id: ${firstVpaidAdId} during onReady check`);
       })
       .catch(this.fireAdError);
   }
@@ -1139,7 +1143,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 
   private onModuleReady = (event: ModuleReadyEvent) => {
     if (event.name === ModuleName.Advertising) {
-      this.handleAggressiveVpaidStart()
+      this.scheduleAggressiveVpaidPreroll()
     }
   };
 
