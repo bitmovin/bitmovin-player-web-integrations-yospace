@@ -57,9 +57,11 @@ import {
 import {YospacePlayerError} from './YospaceError';
 import {
   AdConfig,
+  AdBreakConfig,
   CompanionAd,
   LinearAd,
   PlayerAdvertisingAPI,
+  AdTagType,
 } from 'bitmovin-player/modules/bitmovinplayer-advertising-core';
 import {Logger} from './Logger';
 import {DateRangeEmitter} from './DateRangeEmitter';
@@ -649,76 +651,72 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     }
   };
 
+  // Due to the noted issues around ad startup / initialization time, in the case of VPAID ads
+  // this manifests as an ad flickering. To workaround that, this flow attempts to schedule a VPAID
+  // ad earlier in the playback flow so the underlying Yospace stitched ad doesn't have a chance
+  // to show. Below are the related tickets:
+  // https://jiraprod.turner.com/browse/MECBM-659
+  // https://jiraprod.turner.com/browse/MECBM-592
+  private handleAggressiveVpaidStart = () => {
+    const firstVpaidAd = this.getFirstPrerollVpaidAd();
+
+    if (!firstVpaidAd) {
+      Logger.log('[InternalBYP] No VPAID was found in the first pre-roll position, skipping aggressive scheduling');
+      return;
+    }
+
+    const firstVpaidAdId = firstVpaidAd.getAdvertID();
+    Logger.log(`[InternalBYP] Found Pre-roll Ad with Id: ${firstVpaidAdId} during onReady check. Scheduling this Ad into Bitmovin Ad Module`);
+
+    const adConfig: AdBreakConfig = {
+      id: firstVpaidAdId,
+      tag: {
+        url: VastHelper.buildDataUriWithoutTracking(firstVpaidAd.advert),
+        type: AdTagType.VAST,
+      },
+      position: 'pre', // In this case we're guaranteed to be in a pre-roll position
+      replaceContentDuration: firstVpaidAd.duration,
+    };
+
+    // TODO: Confirm if this earlier triggering of the VPAID active flag has detrimental effects
+    this.isVpaidActive = true;
+
+    this.player.ads.schedule(adConfig)
+      .then(() => {
+        // if Ad Scheduled without Error then we ad this ad to the list of prerolls to be IGNORED during handleAdStart method
+        this.scheduledPrerolls.push(firstVpaidAdId);
+        Logger.log(`[InternalBYP] Successfully scheduled Ad with Id: ${firstVpaidAdId} during onReady check`);
+      })
+      .catch(this.fireAdError);
+  }
+
+  private getFirstPrerollVpaidAd = (): YSAdvert | null => {
+    const viableAdverts = this.manager.session.timeline.getAllElements()
+      // Filter timeline elements to include all viable pre-roll adverts
+      .filter( el => el.type === YSTimelineElement.ADVERT && el.offset === 0)
+      // Return all adverts in the first slot
+      .map( el => el.adBreak.adverts[0])
+      // Only include interactive units
+      .filter(advert => advert.hasInteractiveUnit())
+
+    if (viableAdverts.length === 1) {
+      return viableAdverts[0];
+    } else {
+      // No viable pre-roll VPAID adverts found
+      return null;
+    }
+  } 
+
   private handleAdStart = (currentAd: YSAdvert, yospaceCompanionAds?: YospaceCompanionAd[]) => {
-    let isTruexAd = currentAd.advert.AdSystem === 'trueX';
+    // We no longer support TrueX, guarding against potential TrueX
+    // ads which may still get trafficked.
+    const isTruexAd = currentAd.advert.AdSystem === 'trueX';
+    const canRenderVpaid = !this.yospaceConfig.disableVpaidRenderer && currentAd.hasInteractiveUnit();
 
-    // Display all VPAID ads & Truex ads if a TruexConfiguration is present
-    if (!this.yospaceConfig.disableVpaidRenderer && currentAd.hasInteractiveUnit() && (!isTruexAd
-      || this.yospaceSourceConfig.truexConfiguration)) {
-      this.isVpaidActive = true;
-      Logger.log('[BitmovinYospacePlayer] suppressing Yospace analytics');
-      this.manager.session.suppressAnalytics(true);
-      Logger.log('[BitmovinYospacePlayer] - sending YSPlayerEvents.PAUSE at start of VPAID');
-      this.manager.reportPlayerEvent(YSPlayerEvents.PAUSE, this.player.getCurrentTime());
-      let position = String(this.player.getCurrentTime());
-      let replaceContentDuration = currentAd.duration;
-
-      // workaround for back to back VPAIDs on live
-      if (this.isLive() && this.yospaceConfig.liveVpaidDurationAdjustment) {
-        replaceContentDuration = replaceContentDuration - this.yospaceConfig.liveVpaidDurationAdjustment;
-        Logger.log('[BitmovinYospacePlayer] Adjusting replace content duration by '
-          + this.yospaceConfig.liveVpaidDurationAdjustment + ' - ' + replaceContentDuration);
-      }
-
-      // If we are scheduling a VPAID for Truex, do not add a replaceContentDuration,
-      // as we seek over the ad break when appropriate in TUB
-      if (!this.isLive() && isTruexAd) {
-        replaceContentDuration = 0;
-      }
-
-      Logger.log(
-        '[BitmovinYospacePlayer] Schedule VPAID: ' + currentAd.advert.id + ' truex: ' + isTruexAd + ' replaceDuration='
-        + replaceContentDuration + ' position=' + position + ' seekable.start=' + this.player.getSeekableRange().start
-        + ' seekable.end=' + this.player.getSeekableRange().end);
-      Logger.log(VastHelper.buildDataUriWithoutTracking(currentAd.advert));
-
-      // Before Scheduling a vpaid into Bitmovin Ad Module we need to check if we already scheduled it as a preroll
-      if (!this.scheduledPrerolls.some(ad => currentAd.getAdvertID())) {
-        const adConfig: AdConfig = {
-          tag: {
-            url: VastHelper.buildDataUriWithoutTracking(currentAd.advert),
-            type: 'vast',
-          },
-          position: position,
-          replaceContentDuration: replaceContentDuration,
-        } as any;
-
-        this.player.ads.schedule(adConfig).catch((reason: string) => {
-          const error = new PlayerError(this.player.exports.ErrorCode.MODULE_ADVERTISING_ERROR, {
-            code: UNDEFINED_VAST_ERROR_CODE,
-            message: reason,
-          });
-
-          this.fireEvent<ErrorEvent>({
-            timestamp: Date.now(),
-            type: this.player.exports.PlayerEvent.AdError,
-            code: error.code,
-            name: error.message,
-            data: error.data,
-          });
-        });
-      } else { // If the Preroll was already scheduledi in the onReady Event - Due to scheduling these preroll ads BEFORE even YoSpace thinks they are scheduled the trackVpaidEvent isnt fired
-        // Fire defaultImpression event for any preroll ads that were scheduled in onReady event.
-        // This is because when we first try to fire the AdStarted defaultImpression YS does not actually fire it since it's BEFORE YS thinks the ad has started
-        Logger.log('[InternalBYP] onAdStarted.handleAdStart - Ad with Id: ' + currentAd.getAdvertID() + ' already scheduled by onReady Pre-roll workflow. Skipping for now, but firing AdStarted Tracking Event');
-        this.trackVpaidEvent(VpaidTrackingEvent.AdStarted);
-
-        // In case the same ad with the same advertId comes up later, - we want to remove this from the list of scheduled Ads
-        delete this.scheduledPrerolls[this.scheduledPrerolls.indexOf(currentAd.getAdvertID())];
-        Logger.log('[InternalBYP] onAdStarted.handleAdStart - Ad with Id: ' + currentAd.getAdvertID() + ' removed from list of already scheduled ads');
-      }
-    } else if (isTruexAd && !this.yospaceSourceConfig.truexConfiguration) {
-      Logger.warn('TrueX ad not rendered because a truexConfiguration was not specified');
+    if (canRenderVpaid && !isTruexAd) {
+      this.scheduleVpaid(currentAd);
+    } else if (isTruexAd) {
+      Logger.warn('TrueX is no longer supported, all ads and configuration will be ignored');
     }
 
     const playerEvent = AdEventsFactory.createAdEvent(
@@ -738,6 +736,64 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 
     this.fireEvent<AdEvent>(playerEvent);
   };
+
+  private scheduleVpaid = (currentAd: YSAdvert) => {
+    this.isVpaidActive = true;
+
+    Logger.log('[BitmovinYospacePlayer] Scheduling VPAID - suppressing Yospace analytics');
+    this.manager.session.suppressAnalytics(true);
+
+    // Here we notify Yospace to pause. This does not actually pause the ad, but registers
+    // to the reporting system to pause. At this point, along with suppressAnalytics, the
+    // Bitmovin player will handle:
+    //  -- Scheduling and rendering the VPAID
+    //  -- Surfacing Ad events, including quartile events
+    //  -- Using the Yospace advert track() method to notify as specific ad events are triggered
+    Logger.log('[BitmovinYospacePlayer] Scheduling VPAID - sending YSPlayerEvents.PAUSE at start of VPAID');
+    this.manager.reportPlayerEvent(YSPlayerEvents.PAUSE, this.player.getCurrentTime());
+
+    const currentAdId = currentAd.getAdvertID();
+
+    if (this.scheduledPrerolls.includes(currentAdId)) {
+      // Fire 'defaultImpression' event for any preroll ads that were scheduled in onReady event.
+      // This is because when we first try to fire the AdStarted defaultImpression YS does not
+      // actually fire it since it's BEFORE YS thinks the ad has started.
+      Logger.log(`[BitmovinYospacePlayer] Skipped VPAID - Ad with Id: ${currentAdId} VPAID has already been scheduled through`);
+      this.trackVpaidEvent(VpaidTrackingEvent.AdStarted);
+
+      // Removed tracked advert ID to prevent potential duplicate tracking in the future
+      this.scheduledPrerolls = this.scheduledPrerolls.filter(adId => adId !== currentAdId)
+      Logger.log(`[BitmovinYospacePlayer] Skipped VPAID - Ad with Id: ${currentAdId} removing scheduled`);
+    } else {
+      const adConfig: AdBreakConfig = {
+        id: currentAdId,
+        tag: {
+          url: VastHelper.buildDataUriWithoutTracking(currentAd.advert),
+          type: AdTagType.VAST,
+        },
+        position: String(this.player.getCurrentTime()),
+        replaceContentDuration: currentAd.duration,
+      };
+
+      Logger.log('[BitmovinYospacePlayer] Scheduling VPAID: ', adConfig);
+      this.player.ads.schedule(adConfig).catch(this.fireAdError);
+    }
+  }
+
+  private fireAdError = (reason: string) => {
+    const error = new PlayerError(this.player.exports.ErrorCode.MODULE_ADVERTISING_ERROR, {
+      code: UNDEFINED_VAST_ERROR_CODE,
+      message: reason,
+    });
+
+    this.fireEvent<ErrorEvent>({
+      timestamp: Date.now(),
+      type: this.player.exports.PlayerEvent.AdError,
+      code: error.code,
+      name: error.message,
+      data: error.data,
+    });
+  }
 
   private onAdFinished = (event: BYSAdEvent) => {
     const playerEvent = AdEventsFactory.createAdEvent(
@@ -1034,7 +1090,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   };
 
   private registerPlayerEvents(): void {
-    this.player.on(this.player.exports.PlayerEvent.ModuleReady, this.onReady);
+    this.player.on(this.player.exports.PlayerEvent.ModuleReady, this.onModuleReady);
     this.player.on(this.player.exports.PlayerEvent.Playing, this.onPlaying);
     this.player.on(this.player.exports.PlayerEvent.TimeChanged, this.onTimeChanged);
     this.player.on(this.player.exports.PlayerEvent.Paused, this.onPause);
@@ -1060,7 +1116,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   }
 
   private unregisterPlayerEvents(): void {
-    this.player.off(this.player.exports.PlayerEvent.ModuleReady, this.onReady);
+    this.player.off(this.player.exports.PlayerEvent.ModuleReady, this.onModuleReady);
     this.player.off(this.player.exports.PlayerEvent.Playing, this.onPlaying);
     this.player.off(this.player.exports.PlayerEvent.TimeChanged, this.onTimeChanged);
     this.player.off(this.player.exports.PlayerEvent.Paused, this.onPause);
@@ -1081,52 +1137,9 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     this.player.off(this.player.exports.PlayerEvent.AdQuartile, this.onVpaidAdQuartile);
   }
 
-  // Here we are going to check if the YoSpace manager has any PreRoll ads in it's timeline
-  // If there are prerolls and they are detected as VPAID we will schedule them into the Bitmovin Ad Module Now
-  // If Scheduling works without error we will populate a list of which adverts(this.scheduledPrerolls) we have already scheduled
-  // So that we do not schedule them AGAIN in the handleAdStart method
-  // There is a bit of a timing issue with doing it this way in that when we try to track the defaultimpression/AdStarted event
-  // through YoSpace the event is not actually fired because YoSPace does not yet think this Ad has actually started
-  // So in the handleAdStart method we check the list of scheduled prerolls(this.scheduledPrerolls) and skip scheduling the alredy scheduled adverts, BUT there
-  // we will then fire the AdStart event so the timing with YoSpace aligns
-  private onReady = (event: ModuleReadyEvent) => {
+  private onModuleReady = (event: ModuleReadyEvent) => {
     if (event.name === ModuleName.Advertising) {
-      this.manager.session.timeline.getAllElements().forEach( timelineElement => { // loop through each AdBreak in timeline
-        if (timelineElement.type === YSTimelineElement.ADVERT && timelineElement.offset === 0 && timelineElement.adBreak.adverts[0].hasInteractiveUnit() === true) { // check if preroll and if there is an Advert type element and check if it is VPAID
-          timelineElement.adBreak.adverts.forEach(ysAdvert => { // loop through each individual advert in the preroll
-            if (ysAdvert.hasInteractiveUnit()) { // Check individual advert if it is a vpaid ad
-              // Schedule the Preroll Advert into the Bitmovin Ads Module as a preroll
-              Logger.log('[InternalBYP] Found Pre-roll Ad with Id: ' + ysAdvert.getAdvertID() + ' during onReady check. Scheduling this Ad into Bitmovin Ad Module');
-              this.player.ads.schedule({
-                tag: {
-                  url: VastHelper.buildDataUriWithoutTracking(this.manager.session.timeline.getAllElements()[0].adBreak.adverts[0].advert),
-                  type: 'vast',
-                },
-                position: 'pre', // should this be pre or just pull the position?
-                replaceContentDuration: ysAdvert.duration,
-              } as AdConfig).then(() => {
-                // if Ad Scheduled without Error then we ad this ad to the list of prerolls to be IGNORED during handleAdStart method
-                this.scheduledPrerolls.push(ysAdvert.getAdvertID());
-                Logger.log('[InternalBYP] Successfully scheduled Ad with Id: ' + ysAdvert.getAdvertID() + ' during onReady check');
-              }).catch((reason: string) => {
-                const error = new PlayerError(this.player.exports.ErrorCode.MODULE_ADVERTISING_ERROR, {
-                  code: UNDEFINED_VAST_ERROR_CODE,
-                  message: reason,
-                });
-                Logger.log('[InternalBYP] Not able to schedule Ad with Id: ' + ysAdvert.getAdvertID() + ' into Bitmovin Ad Module during onReady check. Reason: ', reason);
-
-                this.fireEvent<ErrorEvent>({
-                  timestamp: Date.now(),
-                  type: this.player.exports.PlayerEvent.AdError,
-                  code: error.code,
-                  name: error.message,
-                  data: error.data,
-                });
-              });
-            }
-          });
-        }
-      });
+      this.handleAggressiveVpaidStart()
     }
   };
 

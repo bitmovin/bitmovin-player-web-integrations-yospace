@@ -156,6 +156,11 @@
     debugOverride = $.urlParam('debug').toLowerCase() === 'true'
   }
 
+  var autoplay = true
+  if ($.urlParam('autoplay')) {
+    autoplay = $.urlParam('autoplay').toLowerCase() === 'true'
+  }
+
   function deselectCustomLoadButton() {
     $(customStreamButton).removeClass('active');
   }
@@ -355,7 +360,7 @@
     // which should traffic the specific pre-roll VPAID in question
     hls: 'https://clips-manifests-aka.warnermediacdn.com/csm/cnn/clips/2021-07/368712-ec9cb1bb02b24c03bfa0459155237716/cmaf/master_cl_de.m3u8?tearsheet=53185979&afid=145854967&caid=me7c8c3cfb8ac1963d5d7f00c473dfa6244d9d3b77&conf_csid=cnn.com_misc_default_videopage&context=330357111&nw=48804&playername=top-2.3.0&prof=48804:cnn_web_vod&vdur=110.54394&yo.vp=true&guID=5f6b8b6a031cec0a3f961d00155b1092&playerType=standard&refdom=other&transactionID=16256935477496952422741234&_fw_gdpr=0&_fw_us_privacy=1YNN&audio=unmuted&vpmute=0&cep_params=MTZCNj1jZXBfc2VudCZzaG9ydF9zb3VyY2VfaWQ9c2VfdmlkZW8tbGFuZGluZyZzb3VyY2VfaWQ9c2VjdGlvbl92aWRlby1sYW5kaW5nJjE1TFA9Y2VwX2Jyc2YmMTVMUT1jZXBfYnJzZiYxNFdRPWNlcF9pYWJ0JjE1SDQ9Y2VwX2lhYnQmMTRWRD1jZXBfaWFidCYxNUgyPWNlcF9pYWJ0JjE0VEg9Y2VwX2lhYnQmMTVESD1jZXBfaWFidCYxNUhZPWNlcF9pYWJ0JjE2Qjc9Y2VwX3NlbnQmMlBDRz1jZXBfdGFncyYyUENGPWNlcF90YWdzJkY4VD1jZXBfdGFncyZCTFg9Y2VwX3RhZ3MmQkoxPWNlcF90YWdzJktLVj1jZXBfdGFncyZCTEw9Y2VwX3RhZ3MmQkxIPWNlcF90YWdzJjgwRj1jZXBfdGFncyY4OVM9Y2VwX3RhZ3MmNTRSPWNlcF90YWdzJjU1Sj1jZXBfdGFncyYySlA3PWNlcF90YWdzJjU4SDA9Y2VwX3RhZ3MmQkpGPWNlcF90YWdzJjJQQ0M9Y2VwX3RhZ3MmMkpQMT1jZXBfdGFncyYxM00xPWNlcF90YWdzJjIyTD1jZXBfdGFncyY1RkI9Y2VwX3RhZ3MmNTFSPWNlcF90YWdzJkNYNz1jZXBfdGFncyY4QjQ9Y2VwX3RhZ3M%3D&krux_params=X2Z3dTozODYxMjM6dTZhbzMyZnNyPTEmX2Z3dTozODYxMjM6dTZhb3Bsazh6PTEmX2Z3dTozODYxMjM6dTZhbjc3cWo3PTEmX2Z3dTozODYxMjM6cm5haDdrc2NsPTEmX2Z3dTozODYxMjM6cDR0enFxenFwPTEmX2Z3dTozODYxMjM6bm9hb2xkOG8yPTEmX2Z3dTozODYxMjM6dGVnMjhmZmVmPTEma3J1eF91c2VyPXZremt2NTNiMw%3D%3D&proxmc_params=OTk5OTk4PXBjb25pZA%3D%3D&isFirst=true&vpa=1&spec=extreme_weather&ias_optm_params=ZnI9ZmFsc2UmYWR0PXZlcnlMb3cmYWxjPXZlcnlMb3cmZGxtPXZlcnlMb3cmZHJnPXZlcnlMb3cmaGF0PXZlcnlMb3cmb2ZmPXZlcnlMb3cmdmlvPWxvdyZpZD1kNGQwYzBhZS1kZjZhLTExZWItYTM2Mi0wMjRiYTBjZmU4ZjQ%3D&_fw_ar=0&protocol=ssl&inFocus=true&_fw_vcid2=48804:a219_6875742552084010470&krux_user=vkzkv53b3&zwmc=1376263557779073499&ifyr=KFFNJNCZ-E-9ANX&hkgc=db8abafb-b568-11ea-8557-139eb0150001&goiz=b7ef8a9331454947b24dd1025b94b854&app_csid=cnn.com_us_extremeweather_videopage&yo.av=2',
     assetType: bitmovin.player.ads.yospace.YospaceAssetType.VOD,
-    poster: 'https://bitmovin-a.akamaihd.net/content/sintel/poster.png',
+    // poster: 'https://bitmovin-a.akamaihd.net/content/sintel/poster.png',
   };
 
   var vodMidVpaidSource = {
@@ -378,7 +383,7 @@
     key: '18ca6ad5-9768-4129-bdf6-17685e0d14d2',
     playback: {
       muted: false,
-      autoplay: false, // Fix for Pre-roll 'blip' does not work with autoplay enabled
+      autoplay: autoplay, // Fix for Pre-roll 'blip' does not work with autoplay enabled
     },
     logs: {
       level: 'none',
@@ -398,7 +403,7 @@
     disableVpaidRenderer: false,
     liveVpaidDurationAdjustment: 2,
     disableStrictBreaks: false,
-      disableServiceWorker: false,
+    disableServiceWorker: false,
   };
 
   var sampleYospacePlayerPolicy = {
@@ -459,7 +464,10 @@
 
       yospacePlayer.on('ready', function(event) {
           console.error('[BYP] ready ', cloneDeepSimple(event));
-          yospacePlayer.play();
+
+          if (!autoplay) {
+            yospacePlayer.play();
+          }
       })
 
       yospacePlayer.on('moduleready', function(event) {
