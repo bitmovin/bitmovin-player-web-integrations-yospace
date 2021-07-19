@@ -701,7 +701,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       // Return all adverts in the first slot
       .map( el => el.adBreak.adverts[0])
       // Only include interactive units
-      .filter(advert => advert.hasInteractiveUnit())
+      .filter(advert => advert.hasInteractiveUnit());
 
     if (viableAdverts.length === 1) {
       return viableAdverts[0];
@@ -709,7 +709,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       // No viable pre-roll VPAID adverts found
       return null;
     }
-  } 
+  };
 
   private handleAdStart = (currentAd: YSAdvert, yospaceCompanionAds?: YospaceCompanionAd[]) => {
     // We no longer support TrueX, guarding against potential TrueX
@@ -766,7 +766,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       this.trackVpaidEvent(VpaidTrackingEvent.AdStarted);
 
       // Removed tracked advert ID to prevent potential duplicate tracking in the future
-      this.scheduledPrerolls = this.scheduledPrerolls.filter(adId => adId !== currentAdId)
+      this.scheduledPrerolls = this.scheduledPrerolls.filter(adId => adId !== currentAdId);
       Logger.log(`[BitmovinYospacePlayer] Skipped VPAID - Ad with Id: ${currentAdId} removing scheduled`);
     } else {
       const adConfig: AdBreakConfig = {
@@ -1142,7 +1142,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 
   private onModuleReady = (event: ModuleReadyEvent) => {
     if (event.name === ModuleName.Advertising) {
-      this.scheduleAggressiveVpaidPreroll()
+      this.scheduleAggressiveVpaidPreroll();
     }
   };
 
