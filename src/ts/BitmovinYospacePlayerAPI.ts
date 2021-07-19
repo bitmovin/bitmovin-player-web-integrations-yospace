@@ -91,6 +91,7 @@ export interface YospaceConfiguration {
   debug?: boolean;
   disableServiceWorker?: boolean;
   disableVpaidRenderer?: boolean;
+  disableAggressiveVpaidPreroll?: boolean;
   liveVpaidDurationAdjustment?: number;
   disableStrictBreaks?: boolean;
   breakTolerance?: number;
