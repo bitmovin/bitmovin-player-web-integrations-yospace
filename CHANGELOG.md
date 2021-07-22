@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-# [Unreleased]
+# [1.2.23]
 ## Added
 - WebOS Module and Demo Folder
 - YospaceConfig param for `useTizen` and `useWebos` to guard adding those modules
@@ -13,11 +13,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Changed
 -Tizen Demo Updates for latest SmartTv Convig params in YospaceConfig
-
-# [1.2.23]
-## Added
-- Missing MSERenderer Module for Tizen and WebOS support
-- Demo App for Samsung Tizen Web App
 
 # [1.2.22]
 ## Changed
