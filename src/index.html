@@ -90,6 +90,26 @@
                 </div>
             </div>
         </div>
+
+        <div class='row'>
+          <div class='col'>
+              <div class='input-group mb-3'>
+                  <select class='custom-select col-12' id='tearsheet-override'>
+                      <option value='0' selected>Override Ad Tearsheet</option>
+                      <option value="55085793" data-id="141403_CNN_Fuji_VPAID_30s_307518956_6.30">55085793 - Fuji Film 30s</option>
+                      <option value="54510215" data-id="139334_CNN_Invesco_Markets_VPAID_15s_306893272_6.28.21">54510215 - Invesco Limited 15s</option>
+                      <option value="54510215" data-id="139334_CNN_Invesco_Markets_VPAID_15s_306893272_6.28.21">54510215 - Invesco Limited 30s</option>
+                      <option value="52125737" data-id="138227_CNN_IBM CA Cash_Desktop_15s_VPAID_289436970_NEW_2.25.21">52125737 - IBM Corp 15s</option>
+                      <option value="54476788" data-id="141744_CNN_Farmers_Q3_15s_VPAID_2371065_6.24.21">54476788 - Farmers 15s</option>
+                      <option value="54476788" data-id="141744_CNN_Farmers_Q3_30s_VPAID_2371066_6.24.21">54476788 - Farmers 30s</option>
+                      <option value="50323493" data-id="138527_CNN_ROS_Tobacco_Free_Kids_293007205_VPAID_30s_1.7">50323493 - Tobacco Free Kids 30s</option>
+                      <option value="49929643" data-id="138222_CNN_IBM CA_VPAID_289542595_15s_NEW_2.25.21">49929643 - IBM Corp-2 30s</option>
+                      <option value="55085793" data-id="141403_CNN_Fuji_Vpaid_with_mp4_30_307581174_7.1">55085793 - Fuji Film-2 30s</option>
+                      <option value="51153356" data-id="141403_CNN_Fuji_Vpaid_with_mp4_30_307581174_7.1">51153356 - Association of AM Railroads 15s</option>
+                  </select>
+              </div>
+          </div>
+        </div>
     </div>
     <div class="content">
         <div class="player-wrapper">
@@ -186,6 +206,16 @@
     return JSON.parse(JSON.stringify(obj))
   }
 
+  function overrideSourceAdKvps(source) {
+    var overrideEl = document.getElementById('tearsheet-override')
+    if (overrideEl.value === '0') {
+      return source
+    }
+
+    source.hls = source.hls + '&tearsheet=' + overrideEl.value
+    return source
+  }
+
   vodButton.on('click', function() {
     vodButton.button('toggle');
     deselectCustomLoadButton();
@@ -199,6 +229,8 @@
     deselectCustomLoadButton();
 
     yospacePlayer.unload();
+
+    source = overrideSourceAdKvps(vodPreVpaidSource)
     yospacePlayer.load(vodPreVpaidSource);
   });
 

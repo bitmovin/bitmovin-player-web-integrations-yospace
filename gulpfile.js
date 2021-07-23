@@ -147,7 +147,7 @@ gulp.task('serve', function() {
             server: {
                 baseDir: [paths.target.html],
                 index: 'index.html',
-                https: true,
+                https: false,
                 routes: {
                     '/yospace': './yospace',
                     '/js': './dist/js/'
