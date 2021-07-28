@@ -23,6 +23,18 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Use standalone Bitmovin Analytics Adapter for flexibility. And move initialization to `load()` to dynamically attach to the correct player based on source.
 	- Note: This change required updating to TypeScript version 3. 
 
+# [1.2.20-2]
+## Added
+- Workaround for failed VPAID rendering for Extensions
+
+## Fixed
+- Additional Quartile beacons fired at the end of playback for some Ads
+
+# [1.2.20-1]
+## Fixed
+- Duplicate `defaultImpression` events fired for VPAID pre-rolls
+- VPAID pre-roll stuttering
+
 # [1.2.20]
 ## Fixed
 - Remove the [arrayAccessForm](https://github.com/x2js/x2js/blob/development/x2js.d.ts#L116), config option from `X2JS` initialization for parsing VAST Extensions. This was causing unpredictable arrays for the `Extension.CreativeParameters` property. Without the option, it consistently returns an object when there is only one `CreativeParameter` property. 

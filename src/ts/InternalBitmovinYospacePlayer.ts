@@ -675,11 +675,16 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     const adConfig: AdBreakConfig = {
       id: firstVpaidAdId,
       tag: {
-        url: VastHelper.buildDataUriWithoutTracking(firstVpaidAd.advert),
+        url: VastHelper.buildDataUriWithoutTracking({
+          ad: firstVpaidAd.advert,
+          removeImpressions: true,
+          removeTrackingBeacons: true,
+          removeUnsupportedExtensions: true,
+        }),
         type: AdTagType.VAST,
       },
       position: 'pre', // In this case we're guaranteed to be in a pre-roll position
-      replaceContentDuration: firstVpaidAd.duration,
+      replaceContentDuration: this.getVpaidContentDurationAdjustment(firstVpaidAd.duration),
     };
 
     // TODO: Confirm if this earlier triggering of the VPAID active flag has detrimental effects
@@ -701,7 +706,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       // Return all adverts in the first slot
       .map( el => el.adBreak.adverts[0])
       // Only include interactive units
-      .filter(advert => advert.hasInteractiveUnit())
+      .filter(advert => advert.hasInteractiveUnit());
 
     if (viableAdverts.length === 1) {
       return viableAdverts[0];
@@ -709,7 +714,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       // No viable pre-roll VPAID adverts found
       return null;
     }
-  } 
+  };
 
   private handleAdStart = (currentAd: YSAdvert, yospaceCompanionAds?: YospaceCompanionAd[]) => {
     // We no longer support TrueX, guarding against potential TrueX
@@ -766,22 +771,47 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       this.trackVpaidEvent(VpaidTrackingEvent.AdStarted);
 
       // Removed tracked advert ID to prevent potential duplicate tracking in the future
-      this.scheduledPrerolls = this.scheduledPrerolls.filter(adId => adId !== currentAdId)
+      this.scheduledPrerolls = this.scheduledPrerolls.filter(adId => adId !== currentAdId);
       Logger.log(`[BitmovinYospacePlayer] Skipped VPAID - Ad with Id: ${currentAdId} removing scheduled`);
     } else {
       const adConfig: AdBreakConfig = {
         id: currentAdId,
         tag: {
-          url: VastHelper.buildDataUriWithoutTracking(currentAd.advert),
+          url: VastHelper.buildDataUriWithoutTracking({
+            ad: currentAd.advert,
+            removeImpressions: true,
+            removeTrackingBeacons: true,
+            removeUnsupportedExtensions: true,
+          }),
           type: AdTagType.VAST,
         },
         position: String(this.player.getCurrentTime()),
-        replaceContentDuration: currentAd.duration,
+        replaceContentDuration: this.getVpaidContentDurationAdjustment(currentAd.duration),
       };
 
       Logger.log('[BitmovinYospacePlayer] Scheduling VPAID: ', adConfig);
       this.player.ads.schedule(adConfig).catch(this.fireAdError);
     }
+  }
+
+  private getVpaidContentDurationAdjustment(duration: number) {
+    // Workaround for back to back VPAIDs on live
+    let replaceDuration = duration;
+
+    if (!this.isLive()) {
+      return replaceDuration;
+    }
+
+    // Previously we were assuming the incoming duration was always greater than the
+    // replacement duration, which isn't a guaranteed given some VPAID ads
+    const { liveVpaidDurationAdjustment } = this.yospaceConfig;
+
+    if (liveVpaidDurationAdjustment && replaceDuration > liveVpaidDurationAdjustment) {
+      replaceDuration = replaceDuration - liveVpaidDurationAdjustment;
+      Logger.log(`[BitmovinYospacePlayer] Adjusted content duration from ${duration} to ${replaceDuration}`);
+    }
+
+    return replaceDuration;
   }
 
   private fireAdError = (reason: string) => {
@@ -1143,9 +1173,9 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 
   private onModuleReady = (event: ModuleReadyEvent) => {
     if (event.name === ModuleName.Advertising) {
-      this.scheduleAggressiveVpaidPreroll()
+      this.scheduleAggressiveVpaidPreroll();
     }
-  };
+  }
 
   private onPlaying = () => {
     if (this.isVpaidActive) {
@@ -1167,6 +1197,14 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   };
 
   private onTimeChanged = (event: TimeChangedEvent) => {
+    this.lastTimeChangedTime = event.time;
+
+    if (this.isReturningVpaid) {
+      Logger.log('[BitmovinYospacePlayer] sending YSPlayerEvents.CONTINUE to resume from VPAID ad');
+      this.manager.reportPlayerEvent(YSPlayerEvents.CONTINUE, event.time);
+      this.isReturningVpaid = false;
+    }
+
     if (!this.isVpaidActive) {
       // There is an outstanding bug on Safari mobile where upon exiting an ad break,
       // our TimeChanged event "rewinds" ~12 ms. This is a temporary fix.
@@ -1177,13 +1215,6 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       } else {
         Logger.warn('Encountered a small negative TimeChanged update, not reporting to Yospace. Difference was: ' + timeDifference);
       }
-    }
-    this.lastTimeChangedTime = event.time;
-
-    if (this.isReturningVpaid) {
-      Logger.log('[BitmovinYospacePlayer] sending YSPlayerEvents.CONTINUE to resume from VPAID ad');
-      this.manager.reportPlayerEvent(YSPlayerEvents.CONTINUE, event.time);
-      this.isReturningVpaid = false;
     }
 
     // fire magic time-changed event
@@ -1343,6 +1374,9 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     this.cleanUpVpaidAd();
 
     Logger.log('[BitmovinYospacePlayer] firing VPAID aderror event');
+    if (this.lastVPaidAd === null) {
+      this.lastVPaidAd = this.getCurrentAd();
+    }
     this.fireEvent<AdEvent>({
       timestamp: Date.now(),
       type: this.player.exports.PlayerEvent.AdError,
@@ -1527,6 +1561,9 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 
 class AdTranslator {
   static mapYsAdvert(ysAd: YSAdvert): LinearAd {
+    if (!ysAd || !ysAd.advert || !ysAd.advert.linear || !ysAd.advert.linear.mediaFiles[0]) {
+      return null;
+    }
     const mediaFile = ysAd.advert.linear.mediaFiles[0];
     return {
       isLinear: Boolean(ysAd.advert.linear),
