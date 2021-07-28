@@ -797,21 +797,21 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   private getVpaidContentDurationAdjustment(duration: number) {
     // Workaround for back to back VPAIDs on live
     let replaceDuration = duration;
-    
+
     if (!this.isLive()) {
-      return replaceDuration
+      return replaceDuration;
     }
-    
+
     // Previously we were assuming the incoming duration was always greater than the
     // replacement duration, which isn't a guaranteed given some VPAID ads
-    const { liveVpaidDurationAdjustment } = this.yospaceConfig
+    const { liveVpaidDurationAdjustment } = this.yospaceConfig;
 
     if (liveVpaidDurationAdjustment && replaceDuration > liveVpaidDurationAdjustment) {
       replaceDuration = replaceDuration - liveVpaidDurationAdjustment;
       Logger.log(`[BitmovinYospacePlayer] Adjusted content duration from ${duration} to ${replaceDuration}`);
     }
 
-    return replaceDuration
+    return replaceDuration;
   }
 
   private fireAdError = (reason: string) => {

@@ -7,10 +7,10 @@ import { Logger } from './Logger';
 import stringify from 'fast-safe-stringify';
 
 interface UriBuilderData {
-  ad: VASTAd,
-  removeTrackingBeacons: boolean,
-  removeImpressions: boolean,
-  removeUnsupportedExtensions: boolean,
+  ad: VASTAd;
+  removeTrackingBeacons: boolean;
+  removeImpressions: boolean;
+  removeUnsupportedExtensions: boolean;
 }
 
 export class VastHelper {
@@ -23,7 +23,7 @@ export class VastHelper {
 
   static buildDataUriWithoutTracking(data: UriBuilderData): string {
     // build a valid VAST xml data uri to schedule only the current vpaid ad
-    const { ad, removeImpressions, removeTrackingBeacons, removeUnsupportedExtensions } = data
+    const { ad, removeImpressions, removeTrackingBeacons, removeUnsupportedExtensions } = data;
     const vastXML = ad.vastXML;
 
     // NOTE: Previously the only XML nodes from the VAST we were removing were
