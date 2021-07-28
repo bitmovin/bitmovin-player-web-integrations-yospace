@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+# [1.2.20-2]
+## Added
+- Workaround for failed VPAID rendering for Extensions
+
+## Fixed
+- Additional Quartile beacons fired at the end of playback for some Ads
+
 # [1.2.20-1]
 ## Fixed
 - Duplicate `defaultImpression` events fired for VPAID pre-rolls
