@@ -679,7 +679,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
           ad: firstVpaidAd.advert,
           removeImpressions: true,
           removeTrackingBeacons: true,
-          removeUnsupportedExtensions: true,
+          removeUnsupportedExtensions: false,
         }),
         type: AdTagType.VAST,
       },
