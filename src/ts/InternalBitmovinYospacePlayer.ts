@@ -1376,11 +1376,26 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     Logger.log('[BitmovinYospacePlayer] firing VPAID aderror event');
     if (this.lastVPaidAd === null) {
       this.lastVPaidAd = this.getCurrentAd();
+      // TODO: this.lastVpaidAd can and sometimes is still null at this point
+      //   We could possibly check if it was a preroll ad and then get it from this.getFirstPrerollVpaidAd()?
     }
+
+    // TODO: In the Bitmovin API, the 'AdError' is of type 'ErrorEvent' and not 'AdEvent'
+    //  This event Type should be switched to a 'ErrorEvent' instead - but we need to figure out if that will cause any issues inside of this Integration
+    //  The 'ErrorEvent' allows access to properties 'code', 'data', 'message', and 'name' - But removes the 'ad' property
+    //  The 'AdEvent' allows access to the 'ad' property, but not 'code', 'data', 'message', and 'name' properties
     this.fireEvent<AdEvent>({
       timestamp: Date.now(),
       type: this.player.exports.PlayerEvent.AdError,
       ad: AdTranslator.mapYsAdvert(this.lastVPaidAd),
+      // @ts-ignore
+      code: (event.code) ? event.code :  undefined,
+      // @ts-ignore
+      data: (event.data) ? event.data : undefined,
+      // @ts-ignore
+      message: (event.message) ? event.message : undefined,
+      // @ts-ignore
+      name: (event.name) ? event.name : undefined,
     });
   };
 
