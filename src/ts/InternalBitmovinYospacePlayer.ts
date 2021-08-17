@@ -680,7 +680,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
           removeImpressions: true,
           removeTrackingBeacons: true,
           removeUnsupportedExtensions: false,
-        }),
+        }, this.yospaceConfig),
         type: AdTagType.VAST,
       },
       position: 'pre', // In this case we're guaranteed to be in a pre-roll position
@@ -782,7 +782,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
             removeImpressions: true,
             removeTrackingBeacons: true,
             removeUnsupportedExtensions: true,
-          }),
+          }, this.yospaceConfig),
           type: AdTagType.VAST,
         },
         position: String(this.player.getCurrentTime()),

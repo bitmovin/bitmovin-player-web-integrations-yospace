@@ -97,6 +97,7 @@ export interface YospaceConfiguration {
   breakTolerance?: number;
   useTizen?: boolean;
   useWebos?: boolean;
+  vpaidStaticVastXmlOverride?: string;
 }
 
 export interface BitmovinYospacePlayerExports extends PlayerExports {
