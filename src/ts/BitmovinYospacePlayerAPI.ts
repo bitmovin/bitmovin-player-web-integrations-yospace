@@ -91,11 +91,13 @@ export interface YospaceConfiguration {
   debug?: boolean;
   disableServiceWorker?: boolean;
   disableVpaidRenderer?: boolean;
+  disableAggressiveVpaidPreroll?: boolean;
   liveVpaidDurationAdjustment?: number;
   disableStrictBreaks?: boolean;
   breakTolerance?: number;
   useTizen?: boolean;
   useWebos?: boolean;
+  vpaidStaticVastXmlOverride?: string;
 }
 
 export interface BitmovinYospacePlayerExports extends PlayerExports {

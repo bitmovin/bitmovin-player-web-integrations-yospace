@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+# [1.2.24]
+## Changed
+- Bitmovin player to version [8.66.0](https://bitmovin.com/docs/player/releases/web/web-8-66-0)
+- Flag `removeUnsupportedExtensions `to `false`
+
+## Fixed
+- Bitmovin Ad Module error when encountering AdVerifications in nested Extension
+- Playback occasionally freezing on Tizen when switching periods/discontinuities
+
+## Added
+- YospaceConfig parameter `vpaidStaticVastXmlOverride` for overriding VPAID xml files for testing
+
 # [1.2.23]
 ## Added
 - WebOS Module and Demo Folder
@@ -22,6 +34,18 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## Changed
 - Use standalone Bitmovin Analytics Adapter for flexibility. And move initialization to `load()` to dynamically attach to the correct player based on source.
 	- Note: This change required updating to TypeScript version 3. 
+
+# [1.2.20-2]
+## Added
+- Workaround for failed VPAID rendering for Extensions
+
+## Fixed
+- Additional Quartile beacons fired at the end of playback for some Ads
+
+# [1.2.20-1]
+## Fixed
+- Duplicate `defaultImpression` events fired for VPAID pre-rolls
+- VPAID pre-roll stuttering
 
 # [1.2.20]
 ## Fixed

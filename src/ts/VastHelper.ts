@@ -2,9 +2,21 @@
 ///<reference path="VAST.d.ts"/>
 
 import X2JS = require('x2js');
-import { CompanionAdResource, CompanionAdType, YospaceCompanionAd } from './BitmovinYospacePlayerAPI';
+import {
+  CompanionAdResource,
+  CompanionAdType,
+  YospaceCompanionAd,
+  YospaceConfiguration,
+} from './BitmovinYospacePlayerAPI';
 import { Logger } from './Logger';
 import stringify from 'fast-safe-stringify';
+
+interface UriBuilderData {
+  ad: VASTAd;
+  removeTrackingBeacons: boolean;
+  removeImpressions: boolean;
+  removeUnsupportedExtensions: boolean;
+}
 
 export class VastHelper {
 
@@ -14,13 +26,46 @@ export class VastHelper {
     });
   }
 
-  static buildDataUriWithoutTracking(ad: VASTAd): string {
+  static buildDataUriWithoutTracking(data: UriBuilderData, yospaceConfiguration?: YospaceConfiguration): string {
     // build a valid VAST xml data uri to schedule only the current vpaid ad
+    const { ad, removeImpressions, removeTrackingBeacons, removeUnsupportedExtensions } = data;
     const vastXML = ad.vastXML;
-    const trackingEvents = ['TrackingEvents', 'Tracking'];
-    this.removeXmlNodes(trackingEvents, vastXML);
+
+    // NOTE: Previously the only XML nodes from the VAST we were removing were
+    // Tracking and TrackingEvents. It was noted originally that Yospace wasn't
+    // surfacing Default Impressions so those had to be included so Bitmovin
+    // could trigger them.
+    //
+    // After testing on a later release YS SDK 1.8.1, it appears Yospace is now
+    // able to fire the Default Impressions, and because of that, duplicate impressions
+    // were firing in some cases. It is now assumed that Yospace will handling
+    // all beaconing, and Bitmovin will just render the physical VPAID.
+    if (removeTrackingBeacons) {
+      const beaconingEvents = ['TrackingEvents', 'Tracking'];
+      this.removeXmlNodes(beaconingEvents, vastXML);
+    }
+
+    if (removeImpressions) {
+      const impressions = ['Impression'];
+      this.removeXmlNodes(impressions, vastXML);
+    }
+
+    // It appears in some cases the Bitmovin ad module fails to parse specific
+    // Extensions. This is related to recursive Extensions:
+    // https://jiraprod.turner.com/browse/MECBM-663
+    if (removeUnsupportedExtensions) {
+      const unsupportedExtensions = ['AVID'];
+      this.removeXmlNodes(unsupportedExtensions, vastXML);
+    }
+
     const vastVersion = vastXML.parentElement.getAttribute('version');
-    const vastXMLString = '<VAST version="' + vastVersion + '">' + vastXML.outerHTML + '</VAST>';
+    let vastXMLString = '<VAST version="' + vastVersion + '">' + vastXML.outerHTML + '</VAST>';
+
+    if (yospaceConfiguration && yospaceConfiguration.vpaidStaticVastXmlOverride) {
+      Logger.log('Overriding VAST XML from vpaidStaticVastXmlOverride with value: ' + yospaceConfiguration.vpaidStaticVastXmlOverride);
+      vastXMLString = yospaceConfiguration.vpaidStaticVastXmlOverride;
+    }
+
     return 'data:text/xml,' + encodeURIComponent(vastXMLString);
   }
 
