@@ -13,6 +13,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Bitmovin Ad Module error when encountering AdVerifications in nested Extension
 - Playback occasionally freezing on Tizen when switching periods/discontinuities
 
+## Added
+- YospaceConfig parameter `vpaidStaticVastXmlOverride` for overriding VPAID xml files for testing
+
 # [1.2.23]
 ## Added
 - WebOS Module and Demo Folder
