@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+# [Unreleased]
+## Changed
+- Bitmovin player to version [8.66.0](https://bitmovin.com/docs/player/releases/web/web-8-66-0)
+- Flag `removeUnsupportedExtensions `to `false`
+
+## Fixed
+- Bitmovin Ad Module error when encountering AdVerifications in nested Extension
+- Playback occasionally freezing on Tizen when switching periods/discontinuities
+
+## Added
+- YospaceConfig parameter `vpaidStaticVastXmlOverride` for overriding VPAID xml files for testing
+
 # [1.2.23]
 ## Added
 - WebOS Module and Demo Folder

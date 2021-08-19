@@ -2,7 +2,12 @@
 ///<reference path="VAST.d.ts"/>
 
 import X2JS = require('x2js');
-import { CompanionAdResource, CompanionAdType, YospaceCompanionAd } from './BitmovinYospacePlayerAPI';
+import {
+  CompanionAdResource,
+  CompanionAdType,
+  YospaceCompanionAd,
+  YospaceConfiguration,
+} from './BitmovinYospacePlayerAPI';
 import { Logger } from './Logger';
 import stringify from 'fast-safe-stringify';
 
@@ -21,7 +26,7 @@ export class VastHelper {
     });
   }
 
-  static buildDataUriWithoutTracking(data: UriBuilderData): string {
+  static buildDataUriWithoutTracking(data: UriBuilderData, yospaceConfiguration?: YospaceConfiguration): string {
     // build a valid VAST xml data uri to schedule only the current vpaid ad
     const { ad, removeImpressions, removeTrackingBeacons, removeUnsupportedExtensions } = data;
     const vastXML = ad.vastXML;
@@ -54,7 +59,12 @@ export class VastHelper {
     }
 
     const vastVersion = vastXML.parentElement.getAttribute('version');
-    const vastXMLString = '<VAST version="' + vastVersion + '">' + vastXML.outerHTML + '</VAST>';
+    let vastXMLString = '<VAST version="' + vastVersion + '">' + vastXML.outerHTML + '</VAST>';
+
+    if (yospaceConfiguration && yospaceConfiguration.vpaidStaticVastXmlOverride) {
+      Logger.log('Overriding VAST XML from vpaidStaticVastXmlOverride with value: ' + yospaceConfiguration.vpaidStaticVastXmlOverride);
+      vastXMLString = yospaceConfiguration.vpaidStaticVastXmlOverride;
+    }
 
     return 'data:text/xml,' + encodeURIComponent(vastXMLString);
   }
