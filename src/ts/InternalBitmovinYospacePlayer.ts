@@ -634,6 +634,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   };
 
   private onAdStarted = (event: BYSAdEvent) => {
+    console.log('mcarria - onAdStarted');
     const currentAd = this.getCurrentAd();
 
     if (currentAd && currentAd.advert && currentAd.advert.vastXML && currentAd.advert.vastXML.outerHTML) {
@@ -799,6 +800,8 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     let replaceDuration = duration;
 
     if (!this.isLive()) {
+      replaceDuration = 0;
+      Logger.log(`[BitmovinYospacePlayer] Adjusted VPAID content duration from ${duration} to ${replaceDuration} for VOD stream`);
       return replaceDuration;
     }
 
@@ -808,7 +811,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 
     if (liveVpaidDurationAdjustment && replaceDuration > liveVpaidDurationAdjustment) {
       replaceDuration = replaceDuration - liveVpaidDurationAdjustment;
-      Logger.log(`[BitmovinYospacePlayer] Adjusted content duration from ${duration} to ${replaceDuration}`);
+      Logger.log(`[BitmovinYospacePlayer] Adjusted VPAID content duration from ${duration} to ${replaceDuration} for LIVE stream`);
     }
 
     return replaceDuration;
