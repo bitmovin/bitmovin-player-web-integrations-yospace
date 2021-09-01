@@ -634,7 +634,6 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   };
 
   private onAdStarted = (event: BYSAdEvent) => {
-    console.log('mcarria - onAdStarted');
     const currentAd = this.getCurrentAd();
 
     if (currentAd && currentAd.advert && currentAd.advert.vastXML && currentAd.advert.vastXML.outerHTML) {
@@ -800,8 +799,13 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     let replaceDuration = duration;
 
     if (!this.isLive()) {
-      replaceDuration = 0;
-      Logger.log(`[BitmovinYospacePlayer] Adjusted VPAID content duration from ${duration} to ${replaceDuration} for VOD stream`);
+      let baseVodReplaceDuration = 2; // 2 seconds for extra return space for VPAID ads which stitch in a full duration, i.e. 15 seconds of content
+      if (duration < baseVodReplaceDuration) {
+        replaceDuration = duration * 0.75; // some scaling factor
+        Logger.log(`[BitmovinYospacePlayer] Adjusted VPAID content duration from ${duration} to ${replaceDuration} for VOD stream`);
+      } else {
+        // the adDuration here is now assumed to be something like 15 seconds
+      }
       return replaceDuration;
     }
 
