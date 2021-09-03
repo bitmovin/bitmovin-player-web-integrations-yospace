@@ -175,7 +175,9 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       this.yospaceConfig.liveVpaidDurationAdjustment = 2;
     }
     if (!this.yospaceConfig.vodVpaidDurationAdjustment) {
-      this.yospaceConfig.vodVpaidDurationAdjustment = 2;
+      // In the case of VOD pre-rolls, a high number here can result in the ad content
+      // re-appearing for a brief moment right before returning to media playback.
+      this.yospaceConfig.vodVpaidDurationAdjustment = 0.5;
     }
 
     this.player = player;
