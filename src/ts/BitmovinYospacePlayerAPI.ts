@@ -93,6 +93,7 @@ export interface YospaceConfiguration {
   disableVpaidRenderer?: boolean;
   disableAggressiveVpaidPreroll?: boolean;
   liveVpaidDurationAdjustment?: number;
+  vodVpaidDurationAdjustment?: number;
   disableStrictBreaks?: boolean;
   breakTolerance?: number;
   useTizen?: boolean;

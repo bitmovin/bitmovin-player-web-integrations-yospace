@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+# [1.2.25]
+## Added
+- YospaceConfig parameter `vodVpaidDurationAdjustment` for corrective VPAID timings on VOD
+
+## Fixed
+- Sequential VPAIDs sometimes getting skipped on VOD assets
+
 # [1.2.24]
 ## Changed
 - Bitmovin player to version [8.66.0](https://bitmovin.com/docs/player/releases/web/web-8-66-0)
