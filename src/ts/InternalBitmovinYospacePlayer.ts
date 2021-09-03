@@ -174,6 +174,9 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     if (!this.yospaceConfig.liveVpaidDurationAdjustment) {
       this.yospaceConfig.liveVpaidDurationAdjustment = 2;
     }
+    if (!this.yospaceConfig.vodVpaidDurationAdjustment) {
+      this.yospaceConfig.vodVpaidDurationAdjustment = 2;
+    }
 
     this.player = player;
 
@@ -795,29 +798,29 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   }
 
   private getVpaidContentDurationAdjustment(duration: number) {
-    // Workaround for back to back VPAIDs on live
+    // Workaround for back to back VPAIDs on VOD and Live
     let replaceDuration = duration;
+    const { liveVpaidDurationAdjustment, vodVpaidDurationAdjustment} = this.yospaceConfig;
+    let replaceDurationAdjustment = this.isLive()
+      ? liveVpaidDurationAdjustment
+      : vodVpaidDurationAdjustment;
 
-    if (!this.isLive()) {
-      let baseVodReplaceDuration = 2; // 2 seconds for extra return space for VPAID ads which stitch in a full duration, i.e. 15 seconds of content
-      if (duration < baseVodReplaceDuration) {
-        replaceDuration = duration * 0.75; // some scaling factor
-        Logger.log(`[BitmovinYospacePlayer] Adjusted VPAID content duration from ${duration} to ${replaceDuration} for VOD stream`);
-      } else {
-        // the adDuration here is now assumed to be something like 15 seconds
-      }
-      return replaceDuration;
+    // Ensure if no defaults are supplied we default to 2 seconds
+    replaceDurationAdjustment = replaceDurationAdjustment || 2;
+
+    // In some cases VOD and Live VPAID durations are incorrectly reported. This can
+    // lead to durations of 1 second or less. This scaling factor accounts for those
+    // cases and instead of using the supplied duration adjustment will scale the
+    // duration instead.
+    const durationScalingFactor = 0.75;
+
+    if (replaceDuration < replaceDurationAdjustment) {
+      replaceDuration = replaceDuration * durationScalingFactor;
+    } else {
+      replaceDuration = replaceDuration - replaceDurationAdjustment;
     }
 
-    // Previously we were assuming the incoming duration was always greater than the
-    // replacement duration, which isn't a guaranteed given some VPAID ads
-    const { liveVpaidDurationAdjustment } = this.yospaceConfig;
-
-    if (liveVpaidDurationAdjustment && replaceDuration > liveVpaidDurationAdjustment) {
-      replaceDuration = replaceDuration - liveVpaidDurationAdjustment;
-      Logger.log(`[BitmovinYospacePlayer] Adjusted VPAID content duration from ${duration} to ${replaceDuration} for LIVE stream`);
-    }
-
+    Logger.log(`[BitmovinYospacePlayer] Adjusted VPAID content duration from ${duration} to ${replaceDuration} for ${this.isLive() ? 'Live' : 'VOD'} stream`);
     return replaceDuration;
   }
 
