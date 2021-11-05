@@ -71,7 +71,7 @@ tweaks: {
     app_id : "Ff4zhu5kqV.TizenBitmovinPlayerAppMode" // this Tizen App Id should also be allow-listed in Player License and optionally, Analaytics License
 }
 ```
-- Make sure the app_id is whitelisted in your Player's License
+- Make sure the app_id is allow-listed in your Player's License
 - In the `YospaceConfig` set the param `YospaceConfig.disableServiceWorker` to `true`
 - In the `YospaceConfig` set the param `YospaceConfig.useTizen` to `true`
 ```
