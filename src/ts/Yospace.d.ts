@@ -1,218 +1,167 @@
-interface YSSessionManagerDelegateFunction {
-  (state: YSSessionResult, result: YSSessionStatus): void;
+declare interface YSAdBreak {
+  getAdverts: any;
+  getDuration: any;
+  getExtensions: any;
+  getIdentifier: any;
+  getPosition: any;
+  getRemainingTime: any;
+  getStart: any;
+  getType: any;
+  isActive: any;
+  setAdvertsInactivePriorTo: any;
+  setInactive: any;
+  onNonLinearTrackingEvent: any;
+  // ...
 }
 
-declare enum YSSessionResult {
-  INITIALISED,
-  NO_ANALYTICS,
-  NOT_INITIALISED,
+declare interface YSAdvert {
+  addMacroSubstitution: any;
+  getAdType: any;
+  getAdVerifications: any;
+  getCompanionAdsByType: any;
+  getCompanionRequired: any;
+  getDuration: any;
+  getErrors: any;
+  getExtensions: any;
+  getIdentifier: any;
+  getIndustryIcons: any;
+  getInteractiveCreative: any;
+  getLineage: any;
+  getLinearCreative: any;
+  getMacroSubstitutions: any;
+  getNonLinearCreativesByType: any;
+  getProperties: any;
+  getProperty: any;
+  getRemainingTime: any;
+  getSequence: any;
+  getSkipOffset: any;
+  getStart: any;
+  isActive: any;
+  isFiller: any;
+  isNonLinear: any;
+  removeMacroSubstitution: any;
+  // ...
 }
 
-declare enum YSSessionStatus {
-  CONNECTION_ERROR,
-  CONNECTION_TIMEOUT,
-  MALFORMED_URL,
-  NON_YOSPACE_URL,
-  NO_LIVEPAUSE,
+declare interface YSSession {
+  // PlaybackEventHandler methods
+  onTimedMetadata: any;
+  onPlayerEvent: any;
+  onPlayheadUpdate: any;
+  onViewSizeChange: any;
+  onVolumeChange: any;
+
+  // SessionVOD
+  getContentPositionForPlayhead: (num: number) => number;
+  getPlayheadForContentPosition: (num: number) => number;
+
+  // Session methods
+  addAnalyticObserver: any;
+  analyticsSuppressed: any;
+  canChangeVolume: any;
+  canClickThrough: any;
+  canPause: any;
+  canResize: any;
+  canResizeCreative: any;
+  canSkip: any;
+  canStop: any;
+  getAdBreaks: () => any[];
+  getAdBreaksByType: any;
+  getCurrentAdBreak: any;
+  getCurrentAdvert: any;
+  getIdentifier: any;
+  getNonLinearAdBreaks: any;
+  getPlaybackMode: any;
+  getPlaybackUrl: any;
+  getResultCode: () => number;
+  getSessionResult: any;
+  removeAllNonLinearAdBreaks: any;
+  removeAnalyticObserver: any;
+  removeNonLinearAdBreak: any;
+  setPlaybackPolicyHandler: any;
+  shutdown: any;
+  willSeekTo: any;
+  suppressAnalytics: (bool: boolean) => void;
+  // ...
 }
 
-interface YSSessionManagerDefault {
-  LOW_FREQ: number;   // Low-Priority Poll Interval (mSecs)
-  HIGH_FREQ: number;  // High-Priority Poll Interval (mSecs)
-  USE_ID3: boolean;   // Use ID3 tags instead of playback position
-                      // (Note that this should never be user-modified)
-  AD_DEBUG: boolean;  // Should Ad debugging be found and printed (from yo.ad)
-  DEBUGGING: boolean; // Should trace messages be output to the console?
-  STRICT_BREAKS: boolean; // Should previous ad beacons be ignored for missed breaks
+declare interface SessionVOD {
+  create: any;
+  // ...
 }
 
-declare class YSSessionManager {
-  static DEFAULTS: YSSessionManagerDefault;
-
-  listener: any;
-  player: Object;
-  poller: any;
-  session: YSSession;
-
-  static createForLive(url: string, properties: Object, delegate: YSSessionManagerDelegateFunction): YSSessionManager;
-
-  static createForLivePause(url: string, properties: Object,
-                            delegate: YSSessionManagerDelegateFunction): YSSessionManager;
-
-  static createForNonLinear(url: string, properties: Object,
-                            delegate: YSSessionManagerDelegateFunction): YSSessionManager;
-
-  static createForVoD(url: string, properties: Object, delegate: YSSessionManagerDelegateFunction): YSSessionManager;
-
-  masterPlaylist(): string;
-
-  registerPlayer(cb_obj: Object): void;
-
-  /** @deprecated */
-  isYospaceStream(): boolean;
-
-  reportPlayerEvent(evt: YSPlayerEvents, data?: any): void;
-
-  shutdown(): void;
+declare interface SessionLive {
+  create: any;
+  // ...
 }
 
-declare enum YSPlayerEvents {
-  CLICK,
-  CONTINUE,
-  END,
-  ERROR,
-  FULLSCREEN,
-  LINEAR_EVENT,
-  METADATA,
-  MUTE,
-  NONLINEAR,
-  NONLINEAR_EVENT,
-  PAUSE,
-  POSITION,
-  READY,
-  RESUME,
-  SEEK_END,
-  SEEK_START,
-  STALL,
-  START,
+declare interface SessionNLSO {
+  create: any;
+  // ...
 }
 
-declare class VASTLinear {
-  skipOffset: number;
-  clickThrough: string;
-  mediaFiles: any[];
+declare const YospaceAdManagement: YospaceAdManagement;
+
+interface AnalyticEventObserver {
+  // ...
 }
 
-declare class VASTAd {
-  /**
-   * The linear creative contained within this Ad, or null where the ad does not contain a linear creative.
-   */
-  linear: VASTLinear;
-  id: string;
-  AdTitle: string;
-  Advertiser: string;
-  AdvertLineage: any[];
-  vastXML: Element;
-  Extensions: XMLDocument[];
-  AdSystem: string;
-  sequence: number;
-}
+declare interface YospaceAdManagement {
+  CAT_AD_BREAK_EVENTS: 1;
+  CAT_TIME_BASED_EVENTS: 2;
+  CONNECTION_ERROR: -1;
+  CONNECTION_TIMEOUT: -2;
+  DEBUG_ALL: number;
+  DEBUG_HTTP_REQUESTS: 32;
+  DEBUG_LIFECYCLE: 2;
+  DEBUG_PARSING: 64;
+  DEBUG_PLAYBACK: 1;
+  DEBUG_POLLING: 4;
+  DEBUG_REPORTS: 8;
+  DEBUG_STATE_MACHINE: 16;
+  DEBUG_VALIDATION: 128;
+  MALFORMED_URL: -3;
+  UNKNOWN_FORMAT: -20;
 
-declare class YSAdvert {
-  advert: VASTAd;
-  duration: number;
-  adBreak: YSAdBreak;
-  isActive: boolean;
-
-  adPaused(): void;
-
-  adResumed(): void;
-
-  setActive(active: boolean): void;
-
-  hasInteractiveUnit(): boolean;
-
-  getInteractiveUnit(): VASTInteractive;
-
-  getMediaID(): string;
-
-  getAdvertID(): string;
-
-  getCreativeID(): string;
-
-  isFiller(): boolean;
-}
-
-declare class YSAdBreak {
-  adBreakDescription?: string;
-  adBreakIdentifier: string;
-  adBreakStart: number;
-  adverts: YSAdvert[];
-  startPosition: number;
-
-  getDuration(): number;
-  getPosition(): string;
-}
-
-declare class YSSession {
-  static BREAK_TOLERANCE: number;
-  currentAdvert: YSAdvert;
-  timeline: YSTimeline;
-
-  getLinearClickthrough(): string;
-
-  getCurrentBreak(): YSAdBreak;
-
-  suppressAnalytics(state: boolean): any[];
-
-  handleAdvertEnd(advert: YSAdvert): void;
-}
-
-declare class YSPlayerPolicy {
-  constructor(_session: YSSession);
-
-  /**
-   * New fullscreen state requested (true to enter fullscreen, false to leave fullscreen)
-   * @param newState
-   */
-  canChangeFullScreen(newState: boolean): boolean;
-
-  canClickThrough(): boolean;
-
-  canExpandCreative(): boolean;
-
-  canMute(): boolean;
-
-  canPause(): boolean;
-
-  /**
-   * Determine whether the player is allowed to seek from the current playhead position
-   */
-  canSeek(): boolean;
-
-  /**
-   * Determine whether the player is permitted to seek to a permitted point in the stream.
-   * Based on the provided location, the nearest permissible location is returned which should be
-   * used by the player to override the viewers chosen seek location.
-   * This is to enable the ability to prevent skipping over adverts.
-   * @param offset
-   */
-  canSeekTo(offset: number): number;
-
-  /**
-   * @return 0+ if skip is permitted
-   * the value is the delay in seconds before skip is permitted, otherwise -1 which means the advert is not skippable
-   */
-  canSkip(): number;
-
-  canStart(): boolean;
-}
-
-declare class YSTimelineElement {
-  static ADVERT: string;
-  static VOD: string;
-  static LIVE: string;
-
-  offset: number;
-  duration: number;
-  type: string;
-  adBreak: YSAdBreak;
-
-  getType(): string;
-
-  getAdverts(): YSAdBreak;
-}
-
-declare class YSTimeline {
-  getAllElements(): YSTimelineElement[];
-}
-
-declare class VASTInteractive {
-  track(ev: string, position: number, asset: string, brktime: string): void;
-
-  src: string;
-}
-
-declare class YSParseUtils {
-  static NAMESPACES: boolean;
+  AdBreak: any;
+  AdVerification: any;
+  Advert: any;
+  AdvertEventHandler: any;
+  AdvertWrapper: any;
+  AnalyticBroker: any;
+  AnalyticEventObserver: AnalyticEventObserver;
+  CompanionAds: any;
+  Creative: any;
+  CreativeEventHandler: any;
+  IconClickFallbackImage: any;
+  IndustryIcon: any;
+  InteractiveCreative: any;
+  LinearCreative: any;
+  NonLinearCreative: any;
+  PlaybackEventHandler: any;
+  PlaybackMode: any;
+  PlaybackPolicy: any;
+  PlaybackPolicyHandler: any;
+  PlayerEvent: { START: 0, STOP: 1, PAUSE: 2, RESUME: 3, STALL: 4, CONTINUE: 5, ADVERT_REWIND: 6, ADVERT_SKIP: 7, SEEK: 8 };
+  Resource: any;
+  ResourceType: any;
+  Session: any;
+  SessionDVRLive: any;
+  SessionLive: SessionLive;
+  SessionNLSO: SessionNLSO;
+  SessionProperties: any;
+  SessionResult: {
+    NOT_INITIALISED: number;
+    INITIALISED: number;
+    FAILED: number;
+    NO_ANALYTICS: number;
+  };
+  SessionVOD: SessionVOD;
+  TimedMetadata: any;
+  VASTProperty: any;
+  VerificationEventHandler: any;
+  ViewSize: any;
+  ViewableEvent: any;
+  YoLog: any;
+  // ...
 }
