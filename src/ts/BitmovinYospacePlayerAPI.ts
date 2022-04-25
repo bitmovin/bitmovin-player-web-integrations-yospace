@@ -151,9 +151,11 @@ export enum YospaceErrorCode {
   CONNECTION_ERROR = 1005,
   CONNECTION_TIMEOUT = 1006,
   MALFORMED_URL = 1007,
-  NO_LIVEPAUSE = 1008,
-  NON_YOSPACE_URL = 1009,
+  // Deprecated
+  // NO_LIVEPAUSE = 1008,
+  // NON_YOSPACE_URL = 1009,
   HLS_SOURCE_MISSING = 1010,
+  UNKNOWN_FORMAT = 1011,
 }
 
 export enum YospacePolicyErrorCode {
