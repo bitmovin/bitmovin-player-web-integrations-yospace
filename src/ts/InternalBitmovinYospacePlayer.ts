@@ -68,6 +68,9 @@ import { DateRangeEmitter } from './DateRangeEmitter';
 import { BitmovinYospaceHelper } from './BitmovinYospaceHelper';
 import stringify from 'fast-safe-stringify';
 
+const toSeconds = (ms: number): number => ms / 1000;
+const toMilliseconds = (s: number): number => s * 1000;
+
 interface StreamPart {
   start: number;
   end: number;
