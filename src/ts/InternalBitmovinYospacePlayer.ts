@@ -191,7 +191,8 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 
     if (this.yospaceConfig.breakTolerance) {
       Logger.log('[BitmovinYospacePlayer] setting YSSession.BREAK_TOLERANCE to ' + this.yospaceConfig.breakTolerance);
-      YSSession.BREAK_TOLERANCE = this.yospaceConfig.breakTolerance;
+      // TODO find equiv on v3 session
+      // YSSession.BREAK_TOLERANCE = this.yospaceConfig.breakTolerance;
     }
 
     this.wrapPlayer();
