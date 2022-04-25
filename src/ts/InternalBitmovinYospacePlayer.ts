@@ -983,6 +983,8 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
             this.player.seek(seekTarget, 'ad-skip');
           }
 
+          this.session.onPlayerEvent(YospaceAdManagement.PlayerEvent.ADVERT_SKIP);
+
           this.fireEvent({
             timestamp: Date.now(),
             type: this.player.exports.PlayerEvent.AdSkipped,
