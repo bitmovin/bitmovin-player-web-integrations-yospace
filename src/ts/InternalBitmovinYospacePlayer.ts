@@ -61,7 +61,7 @@ import {
   CompanionAd,
   LinearAd,
   PlayerAdvertisingAPI,
-  AdTagType,
+  VastAdExtension,
 } from 'bitmovin-player/modules/bitmovinplayer-advertising-core';
 import {Logger} from './Logger';
 import {DateRangeEmitter} from './DateRangeEmitter';
@@ -81,9 +81,9 @@ interface StreamPartMapping {
 
 // TODO: remove this when it's available in the Player
 export interface YospaceLinearAd extends LinearAd {
-  extensions: any[];
+  extensions: VastAdExtension[];
   adSystem?: string;
-  companionAds?: CompanionAd[];
+  companionAds?: YospaceCompanionAd[];
   sequence: number;
   creativeId: string;
   advertiser: string;
