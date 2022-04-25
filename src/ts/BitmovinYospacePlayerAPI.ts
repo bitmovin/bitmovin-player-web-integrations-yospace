@@ -85,6 +85,7 @@ export enum CompanionAdType {
   StaticResource = 'staticresource',
   HtmlResource = 'htmlresource',
   IFrameResource = 'iframeresource',
+  UnknownResource = 'unknownresource',
 }
 
 export interface YospaceConfiguration {
