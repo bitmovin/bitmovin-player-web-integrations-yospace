@@ -49,14 +49,8 @@
             <div class="col-12">
                 <div class="btn-group btn-group-toggle" data-toggle="buttons">
                     <label class="btn btn-outline-secondary active">
-                        <input type="radio" name="options" id="option-vod" autocomplete="off" checked>VOD
+                        <input type="radio" name="options" id="option-vod" autocomplete="off" checked>Yospace VOD
                     </label>
-                    <label class="btn btn-outline-secondary">
-                        <input type="radio" name="options" id="option-vod-pre-vpaid" autocomplete="off" checked>VOD Preroll VPAID
-                    </label>
-                    <label class="btn btn-outline-secondary">
-                      <input type="radio" name="options" id="option-vod-mid-vpaid" autocomplete="off" checked>VOD Midroll VPAID
-                  </label>
                 </div>
             </div>
         </div>
@@ -64,10 +58,7 @@
             <div class="col-12">
                 <div class="btn-group btn-group-toggle" data-toggle="buttons">
                     <label class="btn btn-outline-secondary">
-                        <input type="radio" name="options" id="option-live" autocomplete="off">Live
-                    </label>
-                    <label class="btn btn-outline-secondary">
-                        <input type="radio" name="options" id="option-live-novpaid" autocomplete="off">Live No VPAID
+                        <input type="radio" name="options" id="option-live" autocomplete="off">Yospace Live
                     </label>
                     <label class="btn btn-outline-secondary">
                         <input type="radio" name="options" id="option-aom" autocomplete="off">Art of motion
@@ -152,10 +143,7 @@
   var yospacePlayer;
 
   var vodButton = $('#option-vod').parent();
-  var vodPreVpaidButton = $('#option-vod-pre-vpaid').parent();
-  var vodMidVpaidButton = $('#option-vod-mid-vpaid').parent();
   var trueXButton = $('#option-vod-truex').parent();
-  var liveNoVpaidButton = $('#option-live-novpaid').parent();
   var liveButton = $('#option-live').parent();
   var artOfMotionButton = $('#option-aom').parent();
   var customStreamButton = $('#load-custom-steam');
@@ -224,24 +212,6 @@
     yospacePlayer.load(vodSource);
   });
 
-  vodPreVpaidButton.on('click', function() {
-    vodPreVpaidButton.button('toggle');
-    deselectCustomLoadButton();
-
-    yospacePlayer.unload();
-
-    source = overrideSourceAdKvps(vodPreVpaidSource)
-    yospacePlayer.load(vodPreVpaidSource);
-  });
-
-  vodMidVpaidButton.on('click', function() {
-    vodPreVpaidButton.button('toggle');
-    deselectCustomLoadButton();
-
-    yospacePlayer.unload();
-    yospacePlayer.load(vodMidVpaidSource);
-  });
-
   trueXButton.on('click', function() {
     trueXButton.button('toggle');
     deselectCustomLoadButton();
@@ -256,14 +226,6 @@
 
     yospacePlayer.unload();
     yospacePlayer.load(liveSource);
-  });
-
-  liveNoVpaidButton.on('click', function() {
-    liveNoVpaidButton.button('toggle');
-    deselectCustomLoadButton();
-
-    yospacePlayer.unload();
-    yospacePlayer.load(tbseFpSource);
   });
 
   artOfMotionButton.on('click', () => {
@@ -352,26 +314,18 @@
 
   var liveSource = {
     title: 'Live Stream',
-    hls: 'https://live-manifests-aka-qa.warnermediacdn.com/csmp/cmaf/live/2000073/cnn-clear/master.m3u8?yo.ad=true&yo.av=2&yo.pdt=true&yo.dr=true',
+    hls: 'https://csm-e-sdk-validation.bln1.yospace.com/csm/extlive/yospace02,hlssample42.m3u8?yo.br=true&yo.av=3',
+    // hls: 'https://live-manifests-aka-qa.warnermediacdn.com/csmp/cmaf/live/2000073/cnn-clear/master.m3u8?yo.ad=true&yo.av=2&yo.pdt=true&yo.dr=true',
     // hls: 'https://live-manifests-aka-qa.warnermediacdn.com/csmp/cmaf/live/2000073/timed-cnn-clear/master.m3u8?yo.av=2&yo.pdt=true&yo.dr=true',
     // Yospace configuration
     assetType: bitmovin.player.ads.yospace.YospaceAssetType.LINEAR,
   };
 
-  var liveNoVpaidSource = {
-    title: 'Live Stream',
-    // hls: 'https://live-manifests-aka-qa.warnermediacdn.com/csmp/cmaf/live/2000073/cnn-clear/master.m3u8?yo.ad=true&yo.av=2&yo.pdt=true&yo.dr=true',
-    hls: 'https://live-manifests-aka-qa.warnermediacdn.com/csmp/cmaf/live/2000073/timed-cnn-clear-novpaid/master.m3u8?yo.av=2&yo.pdt=true&yo.dr=true&yo.pst=true',
-    // Yospace configuration
-    assetType: bitmovin.player.ads.yospace.YospaceAssetType.LINEAR,
-  };
-
-
   var vodSource = {
     title: 'VOD Stream',
-    hls: 'https://vod-manifests-aka-qa.warnermediacdn.com/csm/tcm/clear/3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c/master_cl.m3u8?afid=222591187&caid=2100555&conf_csid=tbs.com_videopage_test&context=182883174&nw=42448&prof=48804%3Amp4_plus_vast_truex&vdur=1800&yo.vp=true',
+    // hls: 'https://vod-manifests-aka-qa.warnermediacdn.com/csm/tcm/clear/3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c/master_cl.m3u8?afid=222591187&caid=2100555&conf_csid=tbs.com_videopage_test&context=182883174&nw=42448&prof=48804%3Amp4_plus_vast_truex&vdur=1800&yo.vp=true',
     // hls: 'http://csm-e.cds1.yospace.com/access/d/400/u/0/1/130782300?f=0000130753172&format=vmap',
-
+    hls: 'https://csm-e-sdk-validation.bln1.yospace.com/csm/access/207411697/c2FtcGxlL21hc3Rlci5tM3U4?yo.av=3',
     // Yospace configuration
     assetType: bitmovin.player.ads.yospace.YospaceAssetType.VOD,
     truexConfiguration: {},
@@ -389,28 +343,6 @@
       vastConfigUrl: 'https://qa-get.truex.com/a2a6aa9ae3d7bd9b8b2675781696b28d50ca0736/vast?dimension_1=#e{series.title}&dimension_2=#{slot.position}&dimension_3=#e{asset.title}&dimension_4=#e{asset.id}&dimension_5=truex_sold&stream_id=#{request.videoRandom}&stream_position=preroll&cb=#e{random}'
     },
   };
-
-  var vodPreVpaidSource = {
-    // title: 'VOD Stream',
-    // hls: 'https://vod-manifests-aka-qa.warnermediacdn.com/csm/tcm/clear/3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c/master_cl.m3u8?afid=222591187&caid=2100555&conf_csid=tbs.com_videopage&context=182883174&nw=42448&prof=48804%3Atbs_web_vod&vdur=1800&yo.vp=true',
-    // // Yospace configuration
-    // assetType: bitmovin.player.ads.yospace.YospaceAssetType.VOD,
-
-    // Override with CNN Pre-Roll VPAID
-    title: 'VPAID Clips Pre-Roll',
-    // An additional KVP has been added at the start of the params. This is a tearsheet property
-    // which should traffic the specific pre-roll VPAID in question
-    hls: 'https://clips-manifests-aka.warnermediacdn.com/csm/cnn/clips/2021-07/368712-ec9cb1bb02b24c03bfa0459155237716/cmaf/master_cl_de.m3u8?tearsheet=53185979&afid=145854967&caid=me7c8c3cfb8ac1963d5d7f00c473dfa6244d9d3b77&conf_csid=cnn.com_misc_default_videopage&context=330357111&nw=48804&playername=top-2.3.0&prof=48804:cnn_web_vod&vdur=110.54394&yo.vp=true&guID=5f6b8b6a031cec0a3f961d00155b1092&playerType=standard&refdom=other&transactionID=16256935477496952422741234&_fw_gdpr=0&_fw_us_privacy=1YNN&audio=unmuted&vpmute=0&cep_params=MTZCNj1jZXBfc2VudCZzaG9ydF9zb3VyY2VfaWQ9c2VfdmlkZW8tbGFuZGluZyZzb3VyY2VfaWQ9c2VjdGlvbl92aWRlby1sYW5kaW5nJjE1TFA9Y2VwX2Jyc2YmMTVMUT1jZXBfYnJzZiYxNFdRPWNlcF9pYWJ0JjE1SDQ9Y2VwX2lhYnQmMTRWRD1jZXBfaWFidCYxNUgyPWNlcF9pYWJ0JjE0VEg9Y2VwX2lhYnQmMTVESD1jZXBfaWFidCYxNUhZPWNlcF9pYWJ0JjE2Qjc9Y2VwX3NlbnQmMlBDRz1jZXBfdGFncyYyUENGPWNlcF90YWdzJkY4VD1jZXBfdGFncyZCTFg9Y2VwX3RhZ3MmQkoxPWNlcF90YWdzJktLVj1jZXBfdGFncyZCTEw9Y2VwX3RhZ3MmQkxIPWNlcF90YWdzJjgwRj1jZXBfdGFncyY4OVM9Y2VwX3RhZ3MmNTRSPWNlcF90YWdzJjU1Sj1jZXBfdGFncyYySlA3PWNlcF90YWdzJjU4SDA9Y2VwX3RhZ3MmQkpGPWNlcF90YWdzJjJQQ0M9Y2VwX3RhZ3MmMkpQMT1jZXBfdGFncyYxM00xPWNlcF90YWdzJjIyTD1jZXBfdGFncyY1RkI9Y2VwX3RhZ3MmNTFSPWNlcF90YWdzJkNYNz1jZXBfdGFncyY4QjQ9Y2VwX3RhZ3M%3D&krux_params=X2Z3dTozODYxMjM6dTZhbzMyZnNyPTEmX2Z3dTozODYxMjM6dTZhb3Bsazh6PTEmX2Z3dTozODYxMjM6dTZhbjc3cWo3PTEmX2Z3dTozODYxMjM6cm5haDdrc2NsPTEmX2Z3dTozODYxMjM6cDR0enFxenFwPTEmX2Z3dTozODYxMjM6bm9hb2xkOG8yPTEmX2Z3dTozODYxMjM6dGVnMjhmZmVmPTEma3J1eF91c2VyPXZremt2NTNiMw%3D%3D&proxmc_params=OTk5OTk4PXBjb25pZA%3D%3D&isFirst=true&vpa=1&spec=extreme_weather&ias_optm_params=ZnI9ZmFsc2UmYWR0PXZlcnlMb3cmYWxjPXZlcnlMb3cmZGxtPXZlcnlMb3cmZHJnPXZlcnlMb3cmaGF0PXZlcnlMb3cmb2ZmPXZlcnlMb3cmdmlvPWxvdyZpZD1kNGQwYzBhZS1kZjZhLTExZWItYTM2Mi0wMjRiYTBjZmU4ZjQ%3D&_fw_ar=0&protocol=ssl&inFocus=true&_fw_vcid2=48804:a219_6875742552084010470&krux_user=vkzkv53b3&zwmc=1376263557779073499&ifyr=KFFNJNCZ-E-9ANX&hkgc=db8abafb-b568-11ea-8557-139eb0150001&goiz=b7ef8a9331454947b24dd1025b94b854&app_csid=cnn.com_us_extremeweather_videopage&yo.av=2',
-    assetType: bitmovin.player.ads.yospace.YospaceAssetType.VOD,
-    // poster: 'https://bitmovin-a.akamaihd.net/content/sintel/poster.png',
-  };
-
-  var vodMidVpaidSource = {
-    title: 'VPAID Clips Mid-Roll',
-    hls: 'https://vod-manifests-aka-qa.warnermediacdn.com/csm/tcm/clear/3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c/master_cl.m3u8?afid=222591187&caid=2100555&conf_csid=tbs.com_videopage&context=182883174&nw=42448&prof=48804%3Atbs_web_vod&vdur=1800&yo.vp=true',
-    //hls: 'https://vod-manifests-aka-qa.warnermediacdn.com/csm/tcm/clear/3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c/master_cl.m3u8?afid=222591187&caid=2100555&conf_csid=tbs.com_videopage&context=181740194&nw=42448&prof=48804:tbs_web_vod&vdur=1800&yo.vp=true&yo.av=2&yo.ad=true',
-    assetType: bitmovin.player.ads.yospace.YospaceAssetType.VOD
-  }
 
   var artOfMotionSource = {
     dash: 'https://bitmovin-a.akamaihd.net/content/MI201109210084_1/mpds/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.mpd',
@@ -442,10 +374,6 @@
   // Yospace configuration
   var yospaceConfig = {
     debug: debugOverride,
-    disableVpaidRenderer: !vpaid,
-    disableAggressiveVpaidPreroll: !aggressiveVpaid,
-    liveVpaidDurationAdjustment: 2,
-    vodVpaidDurationAdjustment: 0,
     disableStrictBreaks: false,
     disableServiceWorker: false,
   };
