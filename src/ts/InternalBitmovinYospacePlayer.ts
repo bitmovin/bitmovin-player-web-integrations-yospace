@@ -54,7 +54,7 @@ import {
   YospacePolicyErrorEvent,
   YospaceSourceConfig,
 } from './BitmovinYospacePlayerAPI';
-import {YospacePlayerError} from './YospaceError';
+import { YospacePlayerError } from './YospaceError';
 import {
   AdConfig,
   AdBreakConfig,
@@ -63,9 +63,9 @@ import {
   PlayerAdvertisingAPI,
   VastAdExtension,
 } from 'bitmovin-player/modules/bitmovinplayer-advertising-core';
-import {Logger} from './Logger';
-import {DateRangeEmitter} from './DateRangeEmitter';
-import {BitmovinYospaceHelper} from './BitmovinYospaceHelper';
+import { Logger } from './Logger';
+import { DateRangeEmitter } from './DateRangeEmitter';
+import { BitmovinYospaceHelper } from './BitmovinYospaceHelper';
 import stringify from 'fast-safe-stringify';
 
 interface StreamPart {
