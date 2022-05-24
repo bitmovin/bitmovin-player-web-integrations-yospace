@@ -65,12 +65,10 @@ declare interface YSSession {
   canResizeCreative: any;
   canSkip: any;
   canStop: any;
-  getAdBreaks: () => any[];
-  getAdBreaksByType: any;
+  getAdBreaksByType: (type: BreakType['LINEAR'] | BreakType['NONLINEAR'] | BreakType['DISPLAY']) => YSAdBreak[];
   getCurrentAdBreak: any;
   getCurrentAdvert: any;
   getIdentifier: any;
-  getNonLinearAdBreaks: any;
   getPlaybackMode: any;
   getPlaybackUrl: any;
   getResultCode: () => number;
@@ -106,9 +104,15 @@ interface AnalyticEventObserver {
   // ...
 }
 
+type BreakType = {
+  LINEAR: 0;
+  NONLINEAR: 1;
+  DISPLAY: 2;
+};
+
 declare interface YospaceAdManagement {
   CAT_AD_BREAK_EVENTS: 1;
-  CAT_TIME_BASED_EVENTS: 2;
+  CAT_TIMELINE_EVENTS: 2;
   CONNECTION_ERROR: -1;
   CONNECTION_TIMEOUT: -2;
   DEBUG_ALL: number;
@@ -122,6 +126,8 @@ declare interface YospaceAdManagement {
   DEBUG_VALIDATION: 128;
   MALFORMED_URL: -3;
   UNKNOWN_FORMAT: -20;
+
+  BreakType: BreakType;
 
   AdBreak: any;
   AdVerification: any;

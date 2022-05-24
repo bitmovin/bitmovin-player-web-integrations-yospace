@@ -7,7 +7,6 @@ import {
 export enum YospaceAssetType {
   LINEAR,
   VOD,
-  LINEAR_START_OVER,
 }
 
 export enum YospacePlayerType {

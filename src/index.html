@@ -563,6 +563,10 @@
       updateAdEventTable()
     })
 
+    yospacePlayer.on('playbackfinished', function(event) {
+      console.debug('[BYP] Playback Finished: ', cloneDeepSimple(event));
+    })
+
     yospacePlayer.on('timechanged', function(event) {
       if (debugOverride) {
         // This log is noisy, only output when debug is enabled
