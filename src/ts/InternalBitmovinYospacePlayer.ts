@@ -133,12 +133,6 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       this.dateRangeEmitter = new DateRangeEmitter(this.player, this.eventHandlers);
     }
 
-    if (this.yospaceConfig.breakTolerance) {
-      Logger.log('[BitmovinYospacePlayer] setting YSSession.BREAK_TOLERANCE to ' + this.yospaceConfig.breakTolerance);
-      // TODO find equiv on v3 session
-      // YSSession.BREAK_TOLERANCE = this.yospaceConfig.breakTolerance;
-    }
-
     this.wrapPlayer();
   }
 

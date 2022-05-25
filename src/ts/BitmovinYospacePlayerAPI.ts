@@ -91,7 +91,6 @@ export interface YospaceConfiguration {
   debug?: boolean;
   disableServiceWorker?: boolean;
   disableStrictBreaks?: boolean;
-  breakTolerance?: number;
   useTizen?: boolean;
   useWebos?: boolean;
 }
