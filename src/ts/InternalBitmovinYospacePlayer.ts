@@ -258,8 +258,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       }
 
       if (this.yospaceConfig.debug) {
-        // TODO test debugging. Official docs missing for how to enable.
-        // YospaceAdManagement.Session.DEBUGGING = YospaceAdManagement.DEBUG_ALL;
+        YospaceAdManagement.YoLog.setDebugFlags(YospaceAdManagement.DEBUG_ALL);
       }
 
       switch (source.assetType) {
