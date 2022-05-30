@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Update to Yospace SDK v3
 - Change getYospaceManager to getYospaceSession
 - Remove all configuration related to VPAID
+- Remove support for LINEAR_START_OVER
 - Deprecate some error codes
 
 ## Added

@@ -133,12 +133,6 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       this.dateRangeEmitter = new DateRangeEmitter(this.player, this.eventHandlers);
     }
 
-    if (this.yospaceConfig.breakTolerance) {
-      Logger.log('[BitmovinYospacePlayer] setting YSSession.BREAK_TOLERANCE to ' + this.yospaceConfig.breakTolerance);
-      // TODO find equiv on v3 session
-      // YSSession.BREAK_TOLERANCE = this.yospaceConfig.breakTolerance;
-    }
-
     this.wrapPlayer();
   }
 
@@ -264,8 +258,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       }
 
       if (this.yospaceConfig.debug) {
-        // TODO test debugging. Official docs missing for how to enable.
-        // YospaceAdManagement.Session.DEBUGGING = YospaceAdManagement.DEBUG_ALL;
+        YospaceAdManagement.YoLog.setDebugFlags(YospaceAdManagement.DEBUG_ALL);
       }
 
       switch (source.assetType) {
@@ -274,9 +267,6 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
           break;
         case YospaceAssetType.VOD:
           YospaceAdManagement.SessionVOD.create(url, properties, onInitComplete);
-          break;
-        case YospaceAssetType.LINEAR_START_OVER:
-          YospaceAdManagement.SessionNLSO.create(url, properties, onInitComplete);
           break;
         default:
           Logger.error('Undefined YospaceSourceConfig.assetType; Could not obtain session;');
@@ -954,7 +944,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
         return [];
       }
 
-      return this.session.getAdBreaks()
+      return this.session.getAdBreaksByType(YospaceAdManagement.BreakType.LINEAR)
         .map((adBreak: YSAdBreak) => this.mapAdBreak(adBreak));
     },
 
@@ -1129,7 +1119,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   };
 
   private calculateAdParts() {
-    this.adParts = this.session.getAdBreaks().map((adBreak) => ({
+    this.adParts = this.session.getAdBreaksByType(YospaceAdManagement.BreakType.LINEAR).map((adBreak) => ({
       start: toSeconds(adBreak.getStart()),
       end: toSeconds(adBreak.getStart()) + toSeconds(adBreak.getDuration()),
       adBreak: adBreak,
