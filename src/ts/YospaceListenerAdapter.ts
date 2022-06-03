@@ -86,7 +86,7 @@ export class YospaceAdListenerAdapter {
     const event: BYSAnalyticsFiredEvent = {
       type: BYSListenerEvent.ANALYTICS_FIRED,
       call_id: type,
-    } as BYSAnalyticsFiredEvent;
+    };
 
     this.emitEvent(event);
   }
