@@ -14,8 +14,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - LINEAR_START_OVER support
 - `NO_LIVEPAUSE` error (code `1008`)
 - `NON_YOSPACE_URL` error (code `1009`)
+- `companionClickTrackingURLTemplates` array from Companion Ads
+- `creativeTrackingEvents` array from Companion Ads
 ## Added
--`clickThroughUrlOpened` method to Companion Ads, which should be fired when the ad is interacted with
+- `clickThroughUrlOpened` method to Companion Ads, which should be fired when the ad is interacted with
+- `canBeShown` method to Companion Ads, which indicates if the companion ad is currently active and can be shown
+- `shownToUser` method to Companion Ads, which should be fired when the ad is shown to the user
+- `hiddenFromUser` method to Companion Ads, which should be fired when the ad is hidden from the user
+- `onTrackingEvent` method to Companion Ads // TODO update this documentation after response from Yospace Support
 - `UNKNOWN_FORMAT` error (code `1011`)
 
 # [1.2.25]

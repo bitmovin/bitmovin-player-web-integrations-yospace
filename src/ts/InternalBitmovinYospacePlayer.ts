@@ -619,15 +619,28 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       },
       adSlotId: companionAd.getProperty('adSlotId')?.value,
       companionClickThroughURLTemplate: companionAd.getClickThroughUrl(),
+      canBeShown: () => {
+        const isVisible = companionAd.isVisible();
+
+        Logger.log('[BitmovinYospacePlayer] - companion ad can be shown:', isVisible);
+
+        return isVisible;
+      },
+      shownToUser: () => {
+        Logger.log('[BitmovinYospacePlayer] - companion ad shown to user.');
+
+        companionAd.setVisible(true);
+      },
+      hiddenFromUser: () => {
+        Logger.log('[BitmovinYospacePlayer] - companion ad hidden from user.');
+
+        companionAd.setVisible(false);
+      },
       clickThroughUrlOpened: () => {
         Logger.log('[BitmovinYospacePlayer] - Triggering click through on companion ad.');
         companionAd.onClickThrough();
       },
       onTrackingEvent: (event: string) => companionAd.onTrackingEvent(event),
-      // TODO wait for yospace support response for how to map
-      companionClickTrackingURLTemplates: [],
-      // TODO wait for yospace support response for how to map
-      creativeTrackingEvents: [],
       width: companionAd.getProperty('width')?.value,
       height: companionAd.getProperty('height')?.value,
     }));

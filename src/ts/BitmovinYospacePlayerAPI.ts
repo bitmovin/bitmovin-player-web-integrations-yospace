@@ -69,9 +69,11 @@ export interface YospaceAdBreakEvent extends PlayerEventBase {
 export interface YospaceCompanionAd extends CompanionAd {
   id: string;
   resource: CompanionAdResource;
-  creativeTrackingEvents?: string [];
   companionClickThroughURLTemplate?: string;
-  companionClickTrackingURLTemplates?: string [];
+  canBeShown: () => boolean;
+  shownToUser: () => void;
+  hiddenFromUser: () => void;
+  onTrackingEvent: (event: string) => void;
   adSlotId: string | null;
 }
 
