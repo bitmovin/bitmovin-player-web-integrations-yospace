@@ -521,12 +521,12 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     return Boolean(this.getCurrentAd());
   }
 
-  private getCurrentAdDuration(): number | null {
+  private getCurrentAdDuration(): number {
     if (this.isAdActive()) {
       return this.getAdDuration(this.getCurrentAd());
     }
 
-    return null;
+    return 0;
   }
 
   private getCurrentAd(): YSAdvert | null {
@@ -619,15 +619,28 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       },
       adSlotId: companionAd.getProperty('adSlotId')?.value,
       companionClickThroughURLTemplate: companionAd.getClickThroughUrl(),
+      canBeShown: () => {
+        const isVisible = companionAd.isVisible();
+
+        Logger.log('[BitmovinYospacePlayer] - companion ad can be shown:', isVisible);
+
+        return isVisible;
+      },
+      shownToUser: () => {
+        Logger.log('[BitmovinYospacePlayer] - companion ad shown to user.');
+
+        companionAd.setVisible(true);
+      },
+      hiddenFromUser: () => {
+        Logger.log('[BitmovinYospacePlayer] - companion ad hidden from user.');
+
+        companionAd.setVisible(false);
+      },
       clickThroughUrlOpened: () => {
         Logger.log('[BitmovinYospacePlayer] - Triggering click through on companion ad.');
         companionAd.onClickThrough();
       },
       onTrackingEvent: (event: string) => companionAd.onTrackingEvent(event),
-      // TODO wait for yospace support response for how to map
-      companionClickTrackingURLTemplates: [],
-      // TODO wait for yospace support response for how to map
-      creativeTrackingEvents: [],
       width: companionAd.getProperty('width')?.value,
       height: companionAd.getProperty('height')?.value,
     }));
@@ -807,7 +820,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     // reset all local attributes
     this.unregisterPlayerEvents();
     if (this.session) {
-      Logger.log('[BitmovinYospacePlayer] - sending YSPlayerEvent.END');
+      Logger.log('[BitmovinYospacePlayer] - sending YospaceAdManagement.PlayerEvent.STOP');
       this.session.onPlayerEvent(YospaceAdManagement.PlayerEvent.STOP);
       this.session.shutdown();
       this.session = null;
@@ -1026,11 +1039,11 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 
   private onPlaying = () => {
     if (!this.startSent) {
-      Logger.log('[BitmovinYospacePlayer] - sending YSPlayerEvent.START');
+      Logger.log('[BitmovinYospacePlayer] - sending YospaceAdManagement.PlayerEvent.START');
       this.startSent = true;
       this.session.onPlayerEvent(YospaceAdManagement.PlayerEvent.START);
     } else {
-      Logger.log('[BitmovinYospacePlayer] - sending YSPlayerEvent.RESUME');
+      Logger.log('[BitmovinYospacePlayer] - sending YospaceAdManagement.PlayerEvent.RESUME');
       this.session.onPlayerEvent(YospaceAdManagement.PlayerEvent.RESUME);
     }
   };
@@ -1057,7 +1070,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   };
 
   private onPause = (event: PlaybackEvent) => {
-    Logger.log('[BitmovinYospacePlayer] - sending YSPlayerEvents.PAUSE');
+    Logger.log('[BitmovinYospacePlayer] - sending YospaceAdManagement.PlayerEvent.PAUSE');
     this.session.onPlayerEvent(YospaceAdManagement.PlayerEvent.PAUSE);
 
     if (!this.suppressedEventsController.isSuppressed(this.player.exports.PlayerEvent.Paused)) {
@@ -1068,8 +1081,6 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   };
 
   private onSeek = (event: SeekEvent) => {
-    Logger.log('[BitmovinYospacePlayer] - sending YSPlayerEvents.SEEK_START');
-
     if (!this.suppressedEventsController.isSuppressed(this.player.exports.PlayerEvent.Seek)) {
       this.fireEvent(event);
     } else {
@@ -1078,7 +1089,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   };
 
   private onSeeked = (event: SeekEvent) => {
-    Logger.log('[BitmovinYospacePlayer] - sending YSPlayerEvents.SEEK_END');
+    Logger.log('[BitmovinYospacePlayer] - sending YospaceAdManagement.PlayerEvent.SEEK (from Seeked player event)');
     this.session.onPlayerEvent(YospaceAdManagement.PlayerEvent.SEEK, toMilliseconds(this.player.getCurrentTime()));
 
     if (!this.suppressedEventsController.isSuppressed(this.player.exports.PlayerEvent.Seeked)) {
@@ -1089,12 +1100,12 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   };
 
   private onStallStarted = (event: SeekEvent) => {
-    Logger.log('[BitmovinYospacePlayer] - sending YSPlayerEvents.STALL');
+    Logger.log('[BitmovinYospacePlayer] - sending YospaceAdManagement.PlayerEvent.STALL');
     this.session.onPlayerEvent(YospaceAdManagement.PlayerEvent.STALL, toMilliseconds(this.player.getCurrentTime()));
   };
 
   private onStallEnded = (event: SeekEvent) => {
-    Logger.log('[BitmovinYospacePlayer] - sending YSPlayerEvents.CONTINUE');
+    Logger.log('[BitmovinYospacePlayer] - sending YospaceAdManagement.PlayerEvent.CONTINUE');
     this.session.onPlayerEvent(YospaceAdManagement.PlayerEvent.CONTINUE, toMilliseconds(this.player.getCurrentTime()));
   };
 

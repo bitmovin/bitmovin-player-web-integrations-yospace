@@ -93,11 +93,6 @@ declare interface SessionLive {
   // ...
 }
 
-declare interface SessionNLSO {
-  create: any;
-  // ...
-}
-
 declare const YospaceAdManagement: YospaceAdManagement;
 
 interface AnalyticEventObserver {
@@ -154,7 +149,6 @@ declare interface YospaceAdManagement {
   Session: any;
   SessionDVRLive: any;
   SessionLive: SessionLive;
-  SessionNLSO: SessionNLSO;
   SessionProperties: any;
   SessionResult: {
     NOT_INITIALISED: number;
