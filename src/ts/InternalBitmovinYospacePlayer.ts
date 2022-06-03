@@ -1068,8 +1068,6 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   };
 
   private onSeek = (event: SeekEvent) => {
-    Logger.log('[BitmovinYospacePlayer] - sending YSPlayerEvents.SEEK_START');
-
     if (!this.suppressedEventsController.isSuppressed(this.player.exports.PlayerEvent.Seek)) {
       this.fireEvent(event);
     } else {
