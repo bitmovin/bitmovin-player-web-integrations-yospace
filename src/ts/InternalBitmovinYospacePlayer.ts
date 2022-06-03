@@ -807,7 +807,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     // reset all local attributes
     this.unregisterPlayerEvents();
     if (this.session) {
-      Logger.log('[BitmovinYospacePlayer] - sending YSPlayerEvent.END');
+      Logger.log('[BitmovinYospacePlayer] - sending YospaceAdManagement.PlayerEvent.STOP');
       this.session.onPlayerEvent(YospaceAdManagement.PlayerEvent.STOP);
       this.session.shutdown();
       this.session = null;
