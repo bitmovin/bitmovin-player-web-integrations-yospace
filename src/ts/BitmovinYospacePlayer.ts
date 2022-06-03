@@ -605,5 +605,13 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     return this.player.unmute();
   }
 
+  setAspectRatio(aspectratio: string | number): void {
+    return this.player.setAspectRatio(aspectratio);
+  }
+
+  getAspectRatio(): number {
+    return this.player.getAspectRatio();
+  }
+
   readonly drm: DrmAPI;
 }

@@ -112,7 +112,7 @@ export class DateRangeEmitter {
       let emsg = this.emsgEvents.shift();
 
       Logger.log('[BitmovinYospacePlayer] Sending: timestamp=' + event.timestamp + ' currentTime=' + event.time
-        + ' absoluteTime=' + event.absoluteTime + ' emsg: ' + stringify(emsg));
+        + ' emsg: ' + stringify(emsg));
 
       this.emitMetadataEvent(event.timestamp, emsg);
 

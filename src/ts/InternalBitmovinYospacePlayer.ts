@@ -997,6 +997,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
           this.handleYospacePolicyEvent(YospacePolicyErrorCode.SKIP_NOT_ALLOWED);
         }
       }
+      return Promise.resolve();
     },
 
     getModuleInfo: () => {
