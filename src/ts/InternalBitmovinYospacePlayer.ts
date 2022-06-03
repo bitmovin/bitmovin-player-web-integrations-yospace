@@ -521,12 +521,12 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     return Boolean(this.getCurrentAd());
   }
 
-  private getCurrentAdDuration(): number | null {
+  private getCurrentAdDuration(): number {
     if (this.isAdActive()) {
       return this.getAdDuration(this.getCurrentAd());
     }
 
-    return null;
+    return 0;
   }
 
   private getCurrentAd(): YSAdvert | null {
