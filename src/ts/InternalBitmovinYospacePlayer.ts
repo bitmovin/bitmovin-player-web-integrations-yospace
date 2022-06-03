@@ -1057,7 +1057,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   };
 
   private onPause = (event: PlaybackEvent) => {
-    Logger.log('[BitmovinYospacePlayer] - sending YSPlayerEvents.PAUSE');
+    Logger.log('[BitmovinYospacePlayer] - sending YospaceAdManagement.PlayerEvent.PAUSE');
     this.session.onPlayerEvent(YospaceAdManagement.PlayerEvent.PAUSE);
 
     if (!this.suppressedEventsController.isSuppressed(this.player.exports.PlayerEvent.Paused)) {
