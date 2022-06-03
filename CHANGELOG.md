@@ -15,8 +15,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - `NO_LIVEPAUSE` error (code `1008`)
 - `NON_YOSPACE_URL` error (code `1009`)
 ## Added
-- Add clickThroughUrlOpened method to Companion Ads, which should be fired when the ad is interacted with
-- Introduce new error codes
+-`clickThroughUrlOpened` method to Companion Ads, which should be fired when the ad is interacted with
+- `UNKNOWN_FORMAT` error (code `1011`)
 
 # [1.2.25]
 ## Added
