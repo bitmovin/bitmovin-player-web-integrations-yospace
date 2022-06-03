@@ -1094,7 +1094,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   };
 
   private onStallEnded = (event: SeekEvent) => {
-    Logger.log('[BitmovinYospacePlayer] - sending YSPlayerEvents.CONTINUE');
+    Logger.log('[BitmovinYospacePlayer] - sending YospaceAdManagement.PlayerEvent.CONTINUE');
     this.session.onPlayerEvent(YospaceAdManagement.PlayerEvent.CONTINUE, toMilliseconds(this.player.getCurrentTime()));
   };
 
