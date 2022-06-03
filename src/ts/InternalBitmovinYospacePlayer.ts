@@ -1030,7 +1030,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       this.startSent = true;
       this.session.onPlayerEvent(YospaceAdManagement.PlayerEvent.START);
     } else {
-      Logger.log('[BitmovinYospacePlayer] - sending YSPlayerEvent.RESUME');
+      Logger.log('[BitmovinYospacePlayer] - sending YospaceAdManagement.PlayerEvent.RESUME');
       this.session.onPlayerEvent(YospaceAdManagement.PlayerEvent.RESUME);
     }
   };
