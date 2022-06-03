@@ -12,7 +12,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Remove all configuration related to VPAID
 - Remove support for LINEAR_START_OVER
 - Deprecate some error codes
-
+## Removed
+- VPAID support including all related configuration options
+- LINEAR_START_OVER support
+- `NO_LIVEPAUSE` error (code `1008`)
+- `NON_YOSPACE_URL` error (code `1009`)
 ## Added
 - Add clickThroughUrlOpened method to Companion Ads, which should be fired when the ad is interacted with
 - Introduce new error codes
