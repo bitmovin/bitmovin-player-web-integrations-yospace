@@ -28,7 +28,6 @@ var source = {
   // one of:
   // - bitmovin.player.ads.yospace.YospaceAssetType.LINEAR
   // - bitmovin.player.ads.yospace.YospaceAssetType.VOD
-  // - bitmovin.player.ads.yospace.YospaceAssetType.LINEAR_START_OVER
 };
 
 yospacePlayer.load(source);
