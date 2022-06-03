@@ -1078,7 +1078,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   };
 
   private onSeeked = (event: SeekEvent) => {
-    Logger.log('[BitmovinYospacePlayer] - sending YSPlayerEvents.SEEK_END');
+    Logger.log('[BitmovinYospacePlayer] - sending YospaceAdManagement.PlayerEvent.SEEK (from Seeked player event)');
     this.session.onPlayerEvent(YospaceAdManagement.PlayerEvent.SEEK, toMilliseconds(this.player.getCurrentTime()));
 
     if (!this.suppressedEventsController.isSuppressed(this.player.exports.PlayerEvent.Seeked)) {
