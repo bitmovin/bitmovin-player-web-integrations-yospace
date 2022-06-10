@@ -73,7 +73,6 @@ export interface YospaceCompanionAd extends CompanionAd {
   canBeShown: () => boolean;
   shownToUser: () => void;
   hiddenFromUser: () => void;
-  onTrackingEvent: (event: string) => void;
   adSlotId: string | null;
 }
 
