@@ -640,7 +640,6 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
         Logger.log('[BitmovinYospacePlayer] - Triggering click through on companion ad.');
         companionAd.onClickThrough();
       },
-      onTrackingEvent: (event: string) => companionAd.onTrackingEvent(event),
       width: companionAd.getProperty('width')?.value,
       height: companionAd.getProperty('height')?.value,
     }));

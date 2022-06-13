@@ -117,11 +117,6 @@ ugPLRGV4+g==</DigestValue>
 <DigestValue>y7klGGiyGeEctWYgIh7OTc7S4UTrLrZUfEwQCEmWY9L/M1cAtpPN1x1XR7noOIIoFpiVGPgqhMYW
 2d9KfP5QBg==</DigestValue>
 </Reference>
-<Reference URI="js%2Fvast-client.min.js">
-<DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha512"></DigestMethod>
-<DigestValue>or2EsVbL9iufmaElDyLL5eBmcU0y6ESb9m2FYsjSmTSiRsafkokVkNlNWi8BGU/I2Pq8begEp4Xi
-9EC7sX1l6Q==</DigestValue>
-</Reference>
 <Reference URI="js%2Fyo-ad-management.min.js">
 <DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha512"></DigestMethod>
 <DigestValue>udCpkJVNAa4q9H2zsqN8lZlF65Q9cGIlCzcimAQ56ZmPIcUPauaonvti2XWObsg7TSlwYoUlgMdB

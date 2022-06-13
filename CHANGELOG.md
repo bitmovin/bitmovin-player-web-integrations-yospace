@@ -21,7 +21,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - `canBeShown` method to Companion Ads, which indicates if the companion ad is currently active and can be shown
 - `shownToUser` method to Companion Ads, which should be fired when the ad is shown to the user
 - `hiddenFromUser` method to Companion Ads, which should be fired when the ad is hidden from the user
-- `onTrackingEvent` method to Companion Ads // TODO update this documentation after response from Yospace Support
 - `UNKNOWN_FORMAT` error (code `1011`)
 
 # [1.2.25]
