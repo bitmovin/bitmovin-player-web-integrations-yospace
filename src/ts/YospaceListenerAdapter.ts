@@ -10,7 +10,21 @@ export enum BYSListenerEvent {
   ANALYTICS_FIRED = 'analytics_fired',
 }
 
-export type BYSTrackingEventType = 'loaded' | 'start' | 'firstQuartile' | 'midpoint' | 'thirdQuartile' | 'complete' | 'pause' | 'resume' | 'rewind' | 'skip' | 'playerExpand' | 'playerCollapse' | 'ClickTracking' | 'acceptInvitation';
+export type BYSTrackingEventType =
+  | 'loaded'
+  | 'start'
+  | 'firstQuartile'
+  | 'midpoint'
+  | 'thirdQuartile'
+  | 'complete'
+  | 'pause'
+  | 'resume'
+  | 'rewind'
+  | 'skip'
+  | 'playerExpand'
+  | 'playerCollapse'
+  | 'ClickTracking'
+  | 'acceptInvitation';
 
 interface BYSListenerEventBase {
   type: BYSListenerEvent;
@@ -38,7 +52,7 @@ interface BYSListenerCallbackFunction {
  * To simplify the Yospace callbacks handling this Adapter was introduced.
  */
 export class YospaceAdListenerAdapter {
-  private listeners: { [eventType: string]: BYSListenerCallbackFunction[]; } = {};
+  private listeners: { [eventType: string]: BYSListenerCallbackFunction[] } = {};
 
   addListener(event: BYSListenerEvent, callback: BYSListenerCallbackFunction): void {
     if (!this.listeners[event]) {

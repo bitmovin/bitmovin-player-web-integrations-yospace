@@ -1,4 +1,4 @@
-import AnalyticEventObserver from '@yospace/admanagement-sdk'
+import AnalyticEventObserver from '@yospace/admanagement-sdk';
 
 declare interface YSAdBreak {
   getAdverts: any;
@@ -141,7 +141,17 @@ declare interface YospaceAdManagement {
   PlaybackMode: any;
   PlaybackPolicy: any;
   PlaybackPolicyHandler: any;
-  PlayerEvent: { START: 0, STOP: 1, PAUSE: 2, RESUME: 3, STALL: 4, CONTINUE: 5, ADVERT_REWIND: 6, ADVERT_SKIP: 7, SEEK: 8 };
+  PlayerEvent: {
+    START: 0;
+    STOP: 1;
+    PAUSE: 2;
+    RESUME: 3;
+    STALL: 4;
+    CONTINUE: 5;
+    ADVERT_REWIND: 6;
+    ADVERT_SKIP: 7;
+    SEEK: 8;
+  };
   Resource: any;
   ResourceType: any;
   Session: any;

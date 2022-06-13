@@ -62,9 +62,17 @@ import { Bitmovin8Adapter } from 'bitmovin-analytics';
 import { ArrayUtils } from 'bitmovin-player-ui/dist/js/framework/arrayutils';
 import { PlayerVRAPI } from 'bitmovin-player';
 import {
-  BitmovinYospacePlayerAPI, BitmovinYospacePlayerExports, BitmovinYospacePlayerPolicy, YospaceAssetType,
-  YospaceConfiguration, YospaceErrorCode, YospacePlayerEvent, YospacePlayerEventCallback, YospacePlayerType,
-  YospacePolicyErrorCode, YospaceSourceConfig,
+  BitmovinYospacePlayerAPI,
+  BitmovinYospacePlayerExports,
+  BitmovinYospacePlayerPolicy,
+  YospaceAssetType,
+  YospaceConfiguration,
+  YospaceErrorCode,
+  YospacePlayerEvent,
+  YospacePlayerEventCallback,
+  YospacePlayerType,
+  YospacePolicyErrorCode,
+  YospaceSourceConfig,
 } from './BitmovinYospacePlayerAPI';
 import { Logger } from './Logger';
 import { BitmovinYospaceHelper } from './BitmovinYospaceHelper';
@@ -80,7 +88,7 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   private config: PlayerConfig;
   private yospaceConfig: YospaceConfiguration;
   // Collect all eventHandlers to reattach them to the current used player
-  private eventHandlers: { [eventType: string]: YospacePlayerEventCallback[]; } = {};
+  private eventHandlers: { [eventType: string]: YospacePlayerEventCallback[] } = {};
 
   constructor(containerElement: HTMLElement, config: PlayerConfig, yospaceConfig: YospaceConfiguration = {}) {
     this.containerElement = containerElement;
@@ -93,8 +101,10 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 
     // Clear advertising config
     if (config.advertising) {
-      Logger.warn('Client side advertising config is not supported. If you are using the BitmovinPlayer as' +
-        'fallback please use player.ads.schedule');
+      Logger.warn(
+        'Client side advertising config is not supported. If you are using the BitmovinPlayer as' +
+          'fallback please use player.ads.schedule'
+      );
     }
     // add advertising again to load ads module
     config.advertising = {};
@@ -141,10 +151,12 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   }
 
   setup(): Promise<void> {
-    return this.unregisterAllServiceWorker().then().catch().then(() => {
+    return this.unregisterAllServiceWorker()
+      .then()
+      .catch()
+      .then(() => {
         this.createPlayer();
-      },
-    );
+      });
   }
 
   private createPlayer(): void {
@@ -174,7 +186,7 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     this.bitmovinYospacePlayer = new InternalBitmovinYospacePlayer(
       this.containerElement,
       this.bitmovinPlayer,
-      this.yospaceConfig,
+      this.yospaceConfig
     ) as any as BitmovinYospacePlayerAPI;
 
     this.player = this.bitmovinYospacePlayer;
@@ -183,11 +195,9 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   unregisterAllServiceWorker(): Promise<void> {
     if (navigator.serviceWorker && !this.yospaceConfig.disableServiceWorker) {
       return navigator.serviceWorker.getRegistrations().then((registrations) => {
-        return Promise
-          .all(registrations.map(registration => registration.unregister()))
-          .then(() => {
-            // ensure Promise<void> is returned
-          });
+        return Promise.all(registrations.map((registration) => registration.unregister())).then(() => {
+          // ensure Promise<void> is returned
+        });
       });
     } else {
       return Promise.resolve();
@@ -199,29 +209,32 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       const isAssetTypePresent = (): boolean => (source as YospaceSourceConfig).assetType !== undefined;
 
       const switchPlayer = (toType: YospacePlayerType) => {
-        this.player.unload().then(() => {
-          const oldPlayer: BitmovinYospacePlayerAPI = this.player;
-          if (toType === YospacePlayerType.Bitmovin) {
-            this.player = this.bitmovinPlayer as BitmovinYospacePlayerAPI;
-          } else {
-            this.player = this.bitmovinYospacePlayer;
-          }
-
-          this.currentPlayerType = toType;
-
-          for (const eventType of Object.keys(this.eventHandlers)) {
-            for (const eventCallback of this.eventHandlers[eventType]) {
-              oldPlayer.off(eventType as YospacePlayerEvent, eventCallback);
-              this.player.on(eventType as YospacePlayerEvent, eventCallback);
+        this.player
+          .unload()
+          .then(() => {
+            const oldPlayer: BitmovinYospacePlayerAPI = this.player;
+            if (toType === YospacePlayerType.Bitmovin) {
+              this.player = this.bitmovinPlayer as BitmovinYospacePlayerAPI;
+            } else {
+              this.player = this.bitmovinYospacePlayer;
             }
-          }
 
-          new Bitmovin8Adapter(this.player);
+            this.currentPlayerType = toType;
 
-          Logger.log('BitmovinYospacePlayer loading source after switching players- ' + stringify(source));
+            for (const eventType of Object.keys(this.eventHandlers)) {
+              for (const eventCallback of this.eventHandlers[eventType]) {
+                oldPlayer.off(eventType as YospacePlayerEvent, eventCallback);
+                this.player.on(eventType as YospacePlayerEvent, eventCallback);
+              }
+            }
 
-          this.player.load(source, forceTechnology, disableSeeking).then(resolve).catch(reject);
-        }).catch(reject);
+            new Bitmovin8Adapter(this.player);
+
+            Logger.log('BitmovinYospacePlayer loading source after switching players- ' + stringify(source));
+
+            this.player.load(source, forceTechnology, disableSeeking).then(resolve).catch(reject);
+          })
+          .catch(reject);
       };
 
       // Only switch player when necessary
@@ -261,8 +274,10 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   // here to ensure the feature during the live time of the BitmovinYospacePlayer
   setPolicy(policy: BitmovinYospacePlayerPolicy): void {
     if (this.getCurrentPlayerType() === YospacePlayerType.Bitmovin) {
-      Logger.log('[BitmovinYospacePlayer] Policy does not apply for Bitmovin Player but is saved for further ' +
-        'BitmovinYospace Player usage');
+      Logger.log(
+        '[BitmovinYospacePlayer] Policy does not apply for Bitmovin Player but is saved for further ' +
+          'BitmovinYospace Player usage'
+      );
     }
 
     this.bitmovinYospacePlayer.setPolicy(policy);

@@ -9,10 +9,11 @@
     "build": "npm run copyStaticToDist && webpack --config webpack.prod.js",
     "build-tv": "npm run build && npm run copyToTizen && npm run copyToWebOS",
     "start": "npm run copyStaticToDist && webpack serve --open --config webpack.dev.js",
-    "copyStaticToDist": "mkdir -p dist/yospace && cp src/index.html dist/ && cp src/sw.js dist/ && cp yospace/yo-ad-management.min.js dist/yospace/",
+    "copyStaticToDist": "mkdir -p dist/yospace && cp src/index.html dist/ && cp src/sw.js dist/",
     "copyToTizen": "cp ./dist/js/bitmovin-player-yospace.min.js ./tizen/js",
     "copyToWebOS": "cp ./dist/js/bitmovin-player-yospace.min.js ./WebOS/src/js",
-    "lint": "eslint --quiet src/"
+    "lint": "eslint --quiet src/",
+    "format": "prettier --write src/"
   },
   "repository": {
     "type": "git",
@@ -36,6 +37,7 @@
     "bitmovin-player": "^8.86.0",
     "bitmovin-player-ui": "^3.37.0",
     "eslint": "^8.17.0",
+    "prettier": "2.6.2",
     "ts-loader": "^9.3.0",
     "typescript": "^3.9.10",
     "webpack": "^5.73.0",

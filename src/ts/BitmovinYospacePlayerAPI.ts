@@ -1,5 +1,12 @@
 import {
-  AdBreak, CompanionAd, PlayerAPI, PlayerEvent, PlayerEventBase, PlayerEventCallback, PlayerExports, SourceConfig,
+  AdBreak,
+  CompanionAd,
+  PlayerAPI,
+  PlayerEvent,
+  PlayerEventBase,
+  PlayerEventCallback,
+  PlayerExports,
+  SourceConfig,
 } from 'bitmovin-player';
 
 // Enums
