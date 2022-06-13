@@ -47,6 +47,11 @@
         <div class="row">
             <div class="col-12">
                 <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                    <label class="btn btn-outline-secondary">
+                        <input type="radio" name="options" id="option-close" autocomplete="off" checked>Close Player
+                    </label>
+                </div>
+                <div class="btn-group btn-group-toggle" data-toggle="buttons">
                     <label class="btn btn-outline-secondary active">
                         <input type="radio" name="options" id="option-vod" autocomplete="off" checked>Yospace VOD
                     </label>
@@ -141,6 +146,7 @@
 <script type="text/javascript">
   var yospacePlayer;
 
+  var closePlayerButton = $('#option-close').parent();
   var vodButton = $('#option-vod').parent();
   var trueXButton = $('#option-vod-truex').parent();
   var liveButton = $('#option-live').parent();
@@ -202,6 +208,13 @@
     source.hls = source.hls + '&tearsheet=' + overrideEl.value
     return source
   }
+
+  closePlayerButton.on("click", function () {
+    closePlayerButton.button('toggle');
+    deselectCustomLoadButton();
+
+    yospacePlayer.unload();
+  });
 
   vodButton.on('click', function() {
     vodButton.button('toggle');
@@ -562,6 +575,8 @@
 
     yospacePlayer.on('playbackfinished', function(event) {
       console.debug('[BYP] Playback Finished: ', cloneDeepSimple(event));
+
+      yospacePlayer.unload();
     })
 
     yospacePlayer.on('timechanged', function(event) {
