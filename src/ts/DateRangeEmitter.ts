@@ -7,7 +7,7 @@ import stringify from 'fast-safe-stringify';
 export class DateRangeEmitter {
   private player: PlayerAPI;
   private eventHandlers: { [eventType: string]: YospacePlayerEventCallback[]; } = {};
-  private _manager: YSSessionManager;
+  private _session: YSSession;
   private emsgEvents: any[] = [];
   private processedDateRangeEvents: { [key: string]: number };
   private currentTimeBase: number = 0;
@@ -24,16 +24,16 @@ export class DateRangeEmitter {
     this.player.on(this.player.exports.PlayerEvent.AdBreakFinished, this.onAdBreakFinished);
   }
 
-  get manager(): YSSessionManager {
-    return this._manager;
+  get session(): YSSession {
+    return this._session;
   }
 
-  set manager(value: YSSessionManager) {
-    this._manager = value;
+  set session(value: YSSession) {
+    this._session = value;
   }
 
   reset(): void {
-    this._manager = null;
+    this._session = null;
     this.emsgEvents = [];
     this.processedDateRangeEvents = {};
   }
@@ -116,9 +116,9 @@ export class DateRangeEmitter {
 
       this.emitMetadataEvent(event.timestamp, emsg);
 
-      if (this.manager) {
+      if (this.session) {
         emsg.startTime = '';
-        this.manager.reportPlayerEvent(YSPlayerEvents.METADATA, emsg);
+        this.session.onTimedMetadata(emsg);
       }
     }
   };

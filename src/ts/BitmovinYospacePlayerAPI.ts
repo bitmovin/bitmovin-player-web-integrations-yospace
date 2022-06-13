@@ -7,7 +7,6 @@ import {
 export enum YospaceAssetType {
   LINEAR,
   VOD,
-  LINEAR_START_OVER,
 }
 
 export enum YospacePlayerType {
@@ -70,9 +69,10 @@ export interface YospaceAdBreakEvent extends PlayerEventBase {
 export interface YospaceCompanionAd extends CompanionAd {
   id: string;
   resource: CompanionAdResource;
-  creativeTrackingEvents?: string [];
   companionClickThroughURLTemplate?: string;
-  companionClickTrackingURLTemplates?: string [];
+  canBeShown: () => boolean;
+  shownToUser: () => void;
+  hiddenFromUser: () => void;
   adSlotId: string | null;
 }
 
@@ -85,20 +85,15 @@ export enum CompanionAdType {
   StaticResource = 'staticresource',
   HtmlResource = 'htmlresource',
   IFrameResource = 'iframeresource',
+  UnknownResource = 'unknownresource',
 }
 
 export interface YospaceConfiguration {
   debug?: boolean;
   disableServiceWorker?: boolean;
-  disableVpaidRenderer?: boolean;
-  disableAggressiveVpaidPreroll?: boolean;
-  liveVpaidDurationAdjustment?: number;
-  vodVpaidDurationAdjustment?: number;
   disableStrictBreaks?: boolean;
-  breakTolerance?: number;
   useTizen?: boolean;
   useWebos?: boolean;
-  vpaidStaticVastXmlOverride?: string;
 }
 
 export interface BitmovinYospacePlayerExports extends PlayerExports {
@@ -155,9 +150,11 @@ export enum YospaceErrorCode {
   CONNECTION_ERROR = 1005,
   CONNECTION_TIMEOUT = 1006,
   MALFORMED_URL = 1007,
-  NO_LIVEPAUSE = 1008,
-  NON_YOSPACE_URL = 1009,
+  // Deprecated
+  // NO_LIVEPAUSE = 1008,
+  // NON_YOSPACE_URL = 1009,
   HLS_SOURCE_MISSING = 1010,
+  UNKNOWN_FORMAT = 1011,
 }
 
 export enum YospacePolicyErrorCode {
