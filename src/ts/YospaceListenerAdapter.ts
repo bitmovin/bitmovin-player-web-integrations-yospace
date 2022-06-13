@@ -1,7 +1,6 @@
+import { AdBreak, Advert } from '@yospace/admanagement-sdk';
 import { ArrayUtils } from 'bitmovin-player-ui/dist/js/framework/arrayutils';
 import { Logger } from './Logger';
-
-import { YSAdvert, YSAdBreak } from './Yospace';
 
 /** BYS -> BitmovinYospace */
 export enum BYSListenerEvent {
@@ -33,11 +32,11 @@ interface BYSListenerEventBase {
 }
 
 export interface BYSAdEvent extends BYSListenerEventBase {
-  ad: YSAdvert;
+  ad: Advert;
 }
 
 export interface BYSAdBreakEvent extends BYSListenerEventBase {
-  adBreak: YSAdBreak;
+  adBreak: AdBreak;
 }
 
 export interface BYSAnalyticsFiredEvent extends BYSListenerEventBase {
@@ -68,14 +67,14 @@ export class YospaceAdListenerAdapter {
     ArrayUtils.remove(this.listeners[event], callback);
   }
 
-  onAdvertBreakStart(brk: YSAdBreak): void {
+  onAdvertBreakStart(brk: AdBreak): void {
     this.emitEvent({
       type: BYSListenerEvent.AD_BREAK_START,
       adBreak: brk,
     } as BYSAdBreakEvent);
   }
 
-  onAdvertStart(ad: YSAdvert): void {
+  onAdvertStart(ad: Advert): void {
     this.emitEvent({
       type: BYSListenerEvent.ADVERT_START,
       ad: ad,

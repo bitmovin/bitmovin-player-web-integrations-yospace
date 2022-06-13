@@ -1,4 +1,23 @@
-import { YSAdBreak, YSAdvert, YospaceAdManagement, YSSession } from './Yospace';
+import {
+  AdBreak,
+  Advert,
+  AdvertWrapper,
+  BreakType,
+  CONNECTION_ERROR,
+  CONNECTION_TIMEOUT,
+  DEBUG_ALL,
+  MALFORMED_URL,
+  PlayerEvent as YsPlayerEvent,
+  ResourceType,
+  Session,
+  SessionLive,
+  SessionProperties,
+  SessionResult,
+  SessionVOD,
+  TimedMetadata,
+  UNKNOWN_FORMAT,
+  YoLog,
+} from '@yospace/admanagement-sdk';
 
 import {
   AdEvent,
@@ -60,6 +79,7 @@ import { Logger } from './Logger';
 import { DateRangeEmitter } from './DateRangeEmitter';
 import { BitmovinYospaceHelper } from './BitmovinYospaceHelper';
 import stringify from 'fast-safe-stringify';
+import { XmlNode } from '@yospace/admanagement-sdk/types/Parsers/XmlNode';
 
 const toSeconds = (ms: number): number => ms / 1000;
 const toMilliseconds = (s: number): number => s * 1000;
@@ -67,7 +87,7 @@ const toMilliseconds = (s: number): number => s * 1000;
 interface StreamPart {
   start: number;
   end: number;
-  adBreak?: YSAdBreak;
+  adBreak?: AdBreak;
 }
 
 // TODO: remove this when it's available in the Player
@@ -92,7 +112,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   // Yospace fields
   private yospaceConfig: YospaceConfiguration;
   private yospaceSourceConfig: YospaceSourceConfig;
-  private _session: YSSession | null;
+  private _session: Session | null;
   private yospaceListenerAdapter: YospaceAdListenerAdapter;
   private playerPolicy: BitmovinYospacePlayerPolicy;
 
@@ -136,11 +156,11 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     this.wrapPlayer();
   }
 
-  get session(): YSSession | null {
+  get session(): Session | null {
     return this._session;
   }
 
-  set session(value: YSSession | null) {
+  set session(value: Session | null) {
     this._session = value;
     if (this.dateRangeEmitter) {
       this.dateRangeEmitter.session = this._session;
@@ -167,7 +187,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 
       this.yospaceSourceConfig = source;
       const onInitComplete = (event: any) => {
-        const session: YSSession = event.getPayload();
+        const session: Session = event.getPayload();
         const result = session.getSessionResult();
         const code = session.getResultCode();
 
@@ -177,24 +197,24 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
           let detailedErrorMessage: string;
 
           // Detect general error
-          if (result === YospaceAdManagement.SessionResult.NO_ANALYTICS) {
+          if (result === SessionResult.NO_ANALYTICS) {
             errorCode = YospaceErrorCode.NO_ANALYTICS;
-          } else if (result === YospaceAdManagement.SessionResult.NOT_INITIALISED) {
+          } else if (result === SessionResult.NOT_INITIALISED) {
             errorCode = YospaceErrorCode.NOT_INITIALISED;
           }
 
           // Collect error details
           switch (code) {
-            case YospaceAdManagement.CONNECTION_ERROR:
+            case CONNECTION_ERROR:
               detailedErrorCode = YospaceErrorCode.CONNECTION_ERROR;
               break;
-            case YospaceAdManagement.CONNECTION_TIMEOUT:
+            case CONNECTION_TIMEOUT:
               detailedErrorCode = YospaceErrorCode.CONNECTION_TIMEOUT;
               break;
-            case YospaceAdManagement.MALFORMED_URL:
+            case MALFORMED_URL:
               detailedErrorCode = YospaceErrorCode.MALFORMED_URL;
               break;
-            case YospaceAdManagement.UNKNOWN_FORMAT:
+            case UNKNOWN_FORMAT:
               detailedErrorCode = YospaceErrorCode.UNKNOWN_FORMAT;
               break;
             default:
@@ -209,7 +229,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
           });
         };
 
-        if (result === YospaceAdManagement.SessionResult.INITIALISED) {
+        if (result === SessionResult.INITIALISED) {
           this.session = session;
 
           this.calculateAdParts();
@@ -249,27 +269,19 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
         }
       };
 
-      const properties = new YospaceAdManagement.SessionProperties({
-        USE_ID3: source.assetType !== YospaceAssetType.VOD, // Use time based tracking only for VOD
-      });
-
+      const properties = new SessionProperties();
       properties.setUserAgent(navigator.userAgent);
 
-      if (!this.yospaceConfig.disableStrictBreaks && source.assetType === YospaceAssetType.LINEAR) {
-        Logger.log('[BitmovinYospacePlayer] enabling strict_breaks through Yospace SDK');
-        properties.STRICT_BREAKS = true;
-      }
-
       if (this.yospaceConfig.debug) {
-        YospaceAdManagement.YoLog.setDebugFlags(YospaceAdManagement.DEBUG_ALL);
+        YoLog.setDebugFlags(DEBUG_ALL);
       }
 
       switch (source.assetType) {
         case YospaceAssetType.LINEAR:
-          YospaceAdManagement.SessionLive.create(url, properties, onInitComplete);
+          SessionLive.create(url, properties, onInitComplete);
           break;
         case YospaceAssetType.VOD:
-          YospaceAdManagement.SessionVOD.create(url, properties, onInitComplete);
+          SessionVOD.create(url, properties, onInitComplete);
           break;
         default:
           Logger.error('Undefined YospaceSourceConfig.assetType; Could not obtain session;');
@@ -405,7 +417,9 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       return this.player.getDuration();
     }
 
-    return toSeconds(this.session.getContentPositionForPlayhead(toMilliseconds(this.player.getDuration())));
+    return toSeconds(
+      (this.session as SessionVOD).getContentPositionForPlayhead(toMilliseconds(this.player.getDuration()))
+    );
   }
 
   /**
@@ -528,7 +542,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     return 0;
   }
 
-  private getCurrentAd(): YSAdvert | null {
+  private getCurrentAd(): Advert | null {
     if (!this.session) {
       return null;
     }
@@ -536,7 +550,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     return this.session.getCurrentAdvert();
   }
 
-  private getCurrentAdBreak(): YSAdBreak | null {
+  private getCurrentAdBreak(): AdBreak | null {
     if (!this.session) {
       return null;
     }
@@ -544,7 +558,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     return this.session.getCurrentAdBreak();
   }
 
-  getYospaceSession(): YSSession | null {
+  getYospaceSession(): Session | null {
     return this.session;
   }
 
@@ -579,25 +593,25 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     this.handleAdStart(event.ad);
   };
 
-  private handleAdStart = (currentAd: YSAdvert) => {
+  private handleAdStart = (currentAd: Advert) => {
     // We no longer support TrueX, guarding against potential TrueX
     // ads which may still get trafficked.
-    const isTruexAd = currentAd.getProperty('AdSystem')?.value === 'trueX';
+    const isTruexAd = currentAd.getProperty('AdSystem')?.getValue() === 'trueX';
 
     if (isTruexAd) {
       Logger.warn('TrueX is no longer supported, all ads and configuration will be ignored');
     }
 
-    const getCompanionType = (t: CompanionAdType): YospaceAdManagement['ResourceType'] => {
+    const getCompanionType = (t: CompanionAdType): ResourceType => {
       switch (t) {
         case CompanionAdType.HtmlResource:
-          return YospaceAdManagement.ResourceType.HTML;
+          return ResourceType.HTML;
         case CompanionAdType.IFrameResource:
-          return YospaceAdManagement.ResourceType.IFRAME;
+          return ResourceType.IFRAME;
         case CompanionAdType.StaticResource:
-          return YospaceAdManagement.ResourceType.STATIC;
+          return ResourceType.STATIC;
         case CompanionAdType.UnknownResource:
-          return YospaceAdManagement.ResourceType.UNKNOWN;
+          return ResourceType.UNKNOWN;
       }
     };
 
@@ -638,20 +652,11 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       }));
 
     const yospaceCompanionAds: YospaceCompanionAd[] = [
+      ...mapToYospaceCompanionAd(currentAd.getCompanionAdsByType(ResourceType.STATIC), CompanionAdType.StaticResource),
+      ...mapToYospaceCompanionAd(currentAd.getCompanionAdsByType(ResourceType.HTML), CompanionAdType.HtmlResource),
+      ...mapToYospaceCompanionAd(currentAd.getCompanionAdsByType(ResourceType.IFRAME), CompanionAdType.IFrameResource),
       ...mapToYospaceCompanionAd(
-        currentAd.getCompanionAdsByType(YospaceAdManagement.ResourceType.STATIC),
-        CompanionAdType.StaticResource
-      ),
-      ...mapToYospaceCompanionAd(
-        currentAd.getCompanionAdsByType(YospaceAdManagement.ResourceType.HTML),
-        CompanionAdType.HtmlResource
-      ),
-      ...mapToYospaceCompanionAd(
-        currentAd.getCompanionAdsByType(YospaceAdManagement.ResourceType.IFRAME),
-        CompanionAdType.IFrameResource
-      ),
-      ...mapToYospaceCompanionAd(
-        currentAd.getCompanionAdsByType(YospaceAdManagement.ResourceType.UNKNOWN),
+        currentAd.getCompanionAdsByType(ResourceType.UNKNOWN),
         CompanionAdType.UnknownResource
       ),
     ];
@@ -717,7 +722,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     }
   };
 
-  private mapAdBreak(ysAdBreak: YSAdBreak): YospaceAdBreak {
+  private mapAdBreak(ysAdBreak: AdBreak): YospaceAdBreak {
     return {
       id: ysAdBreak.getIdentifier(), // can be null
       // -0.001 offset required to not seek to after ad break using default canSeekTo policy
@@ -739,17 +744,17 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     }
   }
 
-  private getAdBreaksBefore(position: number): YSAdBreak[] {
+  private getAdBreaksBefore(position: number): AdBreak[] {
     return this.adParts
       .filter((part) => part.start < position && position >= part.end)
       .map((element) => element.adBreak);
   }
 
-  private getAdDuration(ad: YSAdvert): number {
+  private getAdDuration(ad: Advert): number {
     return toSeconds(ad.getDuration());
   }
 
-  private getAdStartTime(ad: YSAdvert): number {
+  private getAdStartTime(ad: Advert): number {
     if (this.isLive()) {
       return this.adStartedTimestamp || 0;
     }
@@ -768,7 +773,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
      * to return to the same content position if a VOD stream is
      * stopped before playback ends.
      */
-    return toSeconds(this.session.getContentPositionForPlayhead(toMilliseconds(playbackTime)));
+    return toSeconds((this.session as SessionVOD).getContentPositionForPlayhead(toMilliseconds(playbackTime)));
   }
 
   private toAbsoluteTime(relativeTime: number): number {
@@ -783,7 +788,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
        * the same content position if a VOD stream is stopped
        * before playback ends.
        */
-      return toSeconds(this.session.getPlayheadForContentPosition(toMilliseconds(relativeTime)));
+      return toSeconds((this.session as SessionVOD).getPlayheadForContentPosition(toMilliseconds(relativeTime)));
     } else {
       return relativeTime;
     }
@@ -814,8 +819,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     this.unregisterPlayerEvents();
     if (this.session) {
       Logger.log('[BitmovinYospacePlayer] - sending YospaceAdManagement.PlayerEvent.STOP');
-      this.session.onPlayerEvent();
-      this.session.onPlayerEvent(YospaceAdManagement.PlayerEvent.STOP);
+      this.session.onPlayerEvent(YsPlayerEvent.STOP, toMilliseconds(this.player.getCurrentTime()));
       this.session.shutdown();
       this.session = null;
     }
@@ -865,7 +869,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     this.fireEvent(event);
   }
 
-  private parseId3Tags(event: MetadataEvent): YospaceAdManagement['TimedMetadata'] {
+  private parseId3Tags(event: MetadataEvent): TimedMetadata {
     const charsToStr = (arr: [number]) => {
       return arr
         .filter((char) => char > 31 && char < 127)
@@ -882,7 +886,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       yospaceMetadataObject[frame.key] = charsToStr(frame.data);
     });
 
-    return YospaceAdManagement.TimedMetadata.createFromMetadata(
+    return TimedMetadata.createFromMetadata(
       /* ymid */
       yospaceMetadataObject.YMID,
       /* yseq */
@@ -896,7 +900,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     );
   }
 
-  private mapEmsgToId3Tags(event: MetadataEvent): YospaceAdManagement['TimedMetadata'] {
+  private mapEmsgToId3Tags(event: MetadataEvent): TimedMetadata {
     const metadata = event.metadata as any;
     const yospaceMetadataObject: any = {
       startTime: metadata.presentationTime ? metadata.presentationTime : this.player.getCurrentTime(),
@@ -908,7 +912,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       yospaceMetadataObject[tags[0]] = tags[1];
     });
 
-    return YospaceAdManagement.TimedMetadata.createFromMetadata(
+    return TimedMetadata.createFromMetadata(
       /* ymid */
       yospaceMetadataObject.YMID,
       /* yseq */
@@ -954,9 +958,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
         return [];
       }
 
-      return this.session
-        .getAdBreaksByType(YospaceAdManagement.BreakType.LINEAR)
-        .map((adBreak: YSAdBreak) => this.mapAdBreak(adBreak));
+      return this.session.getAdBreaksByType(BreakType.LINEAR).map((adBreak: AdBreak) => this.mapAdBreak(adBreak));
     },
 
     schedule: (adConfig: AdConfig) => {
@@ -987,7 +989,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
             this.player.seek(seekTarget, 'ad-skip');
           }
 
-          this.session.onPlayerEvent(YospaceAdManagement.PlayerEvent.ADVERT_SKIP);
+          this.session.onPlayerEvent(YsPlayerEvent.ADVERT_SKIP, toMilliseconds(this.player.getCurrentTime()));
 
           this.fireEvent({
             timestamp: Date.now(),
@@ -1039,10 +1041,10 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     if (!this.startSent) {
       Logger.log('[BitmovinYospacePlayer] - sending YospaceAdManagement.PlayerEvent.START');
       this.startSent = true;
-      this.session.onPlayerEvent(YospaceAdManagement.PlayerEvent.START);
+      this.session.onPlayerEvent(YsPlayerEvent.START, toMilliseconds(this.player.getCurrentTime()));
     } else {
       Logger.log('[BitmovinYospacePlayer] - sending YospaceAdManagement.PlayerEvent.RESUME');
-      this.session.onPlayerEvent(YospaceAdManagement.PlayerEvent.RESUME);
+      this.session.onPlayerEvent(YsPlayerEvent.RESUME, toMilliseconds(this.player.getCurrentTime()));
     }
   };
 
@@ -1071,7 +1073,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 
   private onPause = (event: PlaybackEvent) => {
     Logger.log('[BitmovinYospacePlayer] - sending YospaceAdManagement.PlayerEvent.PAUSE');
-    this.session.onPlayerEvent(YospaceAdManagement.PlayerEvent.PAUSE);
+    this.session.onPlayerEvent(YsPlayerEvent.PAUSE, toMilliseconds(this.player.getCurrentTime()));
 
     if (!this.suppressedEventsController.isSuppressed(this.player.exports.PlayerEvent.Paused)) {
       this.fireEvent(event);
@@ -1090,7 +1092,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 
   private onSeeked = (event: SeekEvent) => {
     Logger.log('[BitmovinYospacePlayer] - sending YospaceAdManagement.PlayerEvent.SEEK (from Seeked player event)');
-    this.session.onPlayerEvent(YospaceAdManagement.PlayerEvent.SEEK, toMilliseconds(this.player.getCurrentTime()));
+    this.session.onPlayerEvent(YsPlayerEvent.SEEK, toMilliseconds(this.player.getCurrentTime()));
 
     if (!this.suppressedEventsController.isSuppressed(this.player.exports.PlayerEvent.Seeked)) {
       this.fireEvent(event);
@@ -1101,12 +1103,12 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 
   private onStallStarted = (event: SeekEvent) => {
     Logger.log('[BitmovinYospacePlayer] - sending YospaceAdManagement.PlayerEvent.STALL');
-    this.session.onPlayerEvent(YospaceAdManagement.PlayerEvent.STALL, toMilliseconds(this.player.getCurrentTime()));
+    this.session.onPlayerEvent(YsPlayerEvent.STALL, toMilliseconds(this.player.getCurrentTime()));
   };
 
   private onStallEnded = (event: SeekEvent) => {
     Logger.log('[BitmovinYospacePlayer] - sending YospaceAdManagement.PlayerEvent.CONTINUE');
-    this.session.onPlayerEvent(YospaceAdManagement.PlayerEvent.CONTINUE, toMilliseconds(this.player.getCurrentTime()));
+    this.session.onPlayerEvent(YsPlayerEvent.CONTINUE, toMilliseconds(this.player.getCurrentTime()));
   };
 
   private onMetaData = (event: MetadataEvent) => {
@@ -1117,7 +1119,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       return;
     }
 
-    let yospaceMetadataObject: YospaceAdManagement['TimedMetadata'];
+    let yospaceMetadataObject: TimedMetadata;
     if (type === 'ID3') {
       yospaceMetadataObject = this.parseId3Tags(event);
       Logger.log('[BitmovinYospacePlayer] - sending YSPlayerEvents.METADATA ' + stringify(yospaceMetadataObject));
@@ -1130,7 +1132,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   };
 
   private calculateAdParts() {
-    this.adParts = this.session.getAdBreaksByType(YospaceAdManagement.BreakType.LINEAR).map((adBreak) => ({
+    this.adParts = this.session.getAdBreaksByType(BreakType.LINEAR).map((adBreak) => ({
       start: toSeconds(adBreak.getStart()),
       end: toSeconds(adBreak.getStart()) + toSeconds(adBreak.getDuration()),
       adBreak: adBreak,
@@ -1222,21 +1224,22 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 }
 
 class AdTranslator {
-  static mapYsAdvert(ysAd: YSAdvert): LinearAd {
+  static mapYsAdvert(ysAd: Advert): LinearAd {
     if (!ysAd || ysAd.isNonLinear()) {
       return null;
     }
 
-    const extensions: VastAdExtension = ysAd.getExtensions();
-    const lineage: YospaceAdManagement['AdvertWrapper'] = ysAd.getLineage();
+    const extensions = AdTranslator.YsXmlNodeToBmVastAdExtensions(ysAd.getExtensions());
+
+    const lineage: AdvertWrapper = ysAd.getLineage();
 
     return {
       isLinear: !ysAd.isNonLinear(),
       duration: toSeconds(ysAd.getDuration()),
       id: ysAd.getIdentifier(),
       creativeId: ysAd.getLinearCreative().getCreativeIdentifier(),
-      adTitle: ysAd.getProperty('AdTitle')?.value,
-      advertiser: ysAd.getProperty('Advertiser')?.value,
+      adTitle: ysAd.getProperty('AdTitle')?.getValue(),
+      advertiser: ysAd.getProperty('Advertiser')?.getValue(),
       lineage: lineage ? [lineage] : [],
       // height/width not available for ads that are stitched
       height: 0,
@@ -1253,11 +1256,25 @@ class AdTranslator {
       },
       // ysAd.getExtensions returns a single VastAdExtension
       // with nested VastAdExtensions, or null
-      extensions: extensions ? [extensions] : [],
-      adSystem: ysAd.getProperty('AdSystem')?.value,
+      extensions: extensions,
+      adSystem: ysAd.getProperty('AdSystem')?.getValue(),
       sequence: ysAd.getSequence(),
       isFiller: ysAd.isFiller(),
     } as YospaceLinearAd;
+  }
+
+  // TODO: This function needs more testing and improvements
+  static YsXmlNodeToBmVastAdExtensions(ysVastExtension: XmlNode): VastAdExtension[] {
+    if (!ysVastExtension) return [];
+
+    const extension: VastAdExtension = {
+      value: ysVastExtension.getInnerText(),
+      name: ysVastExtension.getName(),
+      attributes: ysVastExtension.getAttributes() as any, // TODO proper typing
+      children: AdTranslator.YsXmlNodeToBmVastAdExtensions(ysVastExtension.getChildren()),
+    };
+
+    return [extension];
   }
 }
 
@@ -1270,7 +1287,7 @@ class AdEventsFactory {
     };
   }
 
-  static createAdEvent(player: PlayerAPI, type: PlayerEvent, ad: YSAdvert, companionAds?: CompanionAd[]): AdEvent {
+  static createAdEvent(player: PlayerAPI, type: PlayerEvent, ad: Advert, companionAds?: CompanionAd[]): AdEvent {
     return {
       timestamp: Date.now(),
       type: type,

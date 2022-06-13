@@ -1,5 +1,3 @@
-import { YSSession } from './Yospace';
-
 import {
   AdBreakEvent,
   AdEvent,
@@ -14,11 +12,12 @@ import { Logger } from './Logger';
 import { YospacePlayerEventCallback } from './BitmovinYospacePlayerAPI';
 import { YospaceLinearAd } from './InternalBitmovinYospacePlayer';
 import stringify from 'fast-safe-stringify';
+import { Session } from '@yospace/admanagement-sdk';
 
 export class DateRangeEmitter {
   private player: PlayerAPI;
   private eventHandlers: { [eventType: string]: YospacePlayerEventCallback[] } = {};
-  private _session: YSSession;
+  private _session: Session;
   private emsgEvents: any[] = [];
   private processedDateRangeEvents: { [key: string]: number };
   private currentTimeBase = 0;
@@ -35,11 +34,11 @@ export class DateRangeEmitter {
     this.player.on(this.player.exports.PlayerEvent.AdBreakFinished, this.onAdBreakFinished);
   }
 
-  get session(): YSSession {
+  get session(): Session {
     return this._session;
   }
 
-  set session(value: YSSession) {
+  set session(value: Session) {
     this._session = value;
   }
 
