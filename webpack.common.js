@@ -1,4 +1,5 @@
 const path = require('path');
+const webpack = require('webpack');
 
 module.exports = {
   entry: './src/ts/main.ts',
@@ -13,6 +14,10 @@ module.exports = {
   },
   resolve: {
     extensions: ['.tsx', '.ts', '.js'],
+    fallback: {
+      stream: require.resolve('stream-browserify'), // and install `stream-browserify`
+      buffer: false, // require.resolve("buffer/") and install `buffer`
+    },
   },
   output: {
     filename: './bitmovin-player-yospace.js',
@@ -25,4 +30,9 @@ module.exports = {
     },
   },
   target: ['web', 'es5'],
+  plugins: [
+    new webpack.ProvidePlugin({
+      process: 'process/browser',
+    }),
+  ],
 };
