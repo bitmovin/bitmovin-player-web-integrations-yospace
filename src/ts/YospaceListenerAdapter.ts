@@ -1,6 +1,8 @@
 import { ArrayUtils } from 'bitmovin-player-ui/dist/js/framework/arrayutils';
 import { Logger } from './Logger';
 
+import { YSAdvert, YSAdBreak } from './Yospace';
+
 /** BYS -> BitmovinYospace */
 export enum BYSListenerEvent {
   AD_BREAK_START = 'ad_break_start',

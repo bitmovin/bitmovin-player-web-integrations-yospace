@@ -1,3 +1,5 @@
+import { YSSession } from './Yospace';
+
 import {
   AdBreakEvent,
   AdEvent,

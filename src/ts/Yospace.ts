@@ -1,6 +1,6 @@
-import AnalyticEventObserver from '@yospace/admanagement-sdk';
+import { AnalyticEventObserver } from '@yospace/admanagement-sdk';
 
-declare interface YSAdBreak {
+export declare interface YSAdBreak {
   getAdverts: any;
   getDuration: any;
   getExtensions: any;
@@ -16,7 +16,7 @@ declare interface YSAdBreak {
   // ...
 }
 
-declare interface YSAdvert {
+export declare interface YSAdvert {
   addMacroSubstitution: any;
   getAdType: any;
   getAdVerifications: any;
@@ -45,7 +45,7 @@ declare interface YSAdvert {
   // ...
 }
 
-declare interface YSSession {
+export declare interface YSSession {
   // PlaybackEventHandler methods
   onTimedMetadata: any;
   onPlayerEvent: any;
@@ -85,17 +85,17 @@ declare interface YSSession {
   // ...
 }
 
-declare interface SessionVOD {
+export declare interface SessionVOD {
   create: any;
   // ...
 }
 
-declare interface SessionLive {
+export declare interface SessionLive {
   create: any;
   // ...
 }
 
-declare const YospaceAdManagement: YospaceAdManagement;
+export declare const YospaceAdManagement: YospaceAdManagement;
 
 type BreakType = {
   LINEAR: 0;
@@ -103,7 +103,7 @@ type BreakType = {
   DISPLAY: 2;
 };
 
-declare interface YospaceAdManagement {
+export declare interface YospaceAdManagement {
   CAT_AD_BREAK_EVENTS: 1;
   CAT_TIMELINE_EVENTS: 2;
   CONNECTION_ERROR: -1;

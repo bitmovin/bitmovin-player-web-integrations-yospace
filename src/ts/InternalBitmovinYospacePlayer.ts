@@ -1,6 +1,4 @@
-// TODO get rid of our self-created Yospace.d.ts and use the official Yospace typings which are available now
-// eslint-disable-next-line @typescript-eslint/triple-slash-reference
-///<reference path='Yospace.d.ts'/>
+import { YSAdBreak, YSAdvert, YospaceAdManagement, YSSession } from './Yospace';
 
 import {
   AdEvent,
@@ -10,7 +8,6 @@ import {
   BufferType,
   MediaType,
   MetadataEvent,
-  ModuleReadyEvent,
   PlaybackEvent,
   PlayerAPI,
   PlayerBufferAPI,
