@@ -5,13 +5,14 @@
   "main": "./dist/js/bitmovin-player-yospace.js",
   "types": "./dist/js/bitmovin-player-yospace.d.ts",
   "scripts": {
-    "prepublishOnly": "gulp npm-prepare",
+    "prepublishOnly": "npm run lint && npm run build",
     "build": "npm run copyStaticToDist && webpack --config webpack.prod.js",
     "build-tv": "npm run build && npm run copyToTizen && npm run copyToWebOS",
     "start": "npm run copyStaticToDist && webpack serve --open --config webpack.dev.js",
     "copyStaticToDist": "mkdir -p dist/yospace && cp src/index.html dist/ && cp src/sw.js dist/ && cp yospace/yo-ad-management.min.js dist/yospace/",
     "copyToTizen": "cp ./dist/js/bitmovin-player-yospace.min.js ./tizen/js",
-    "copyToWebOS": "cp ./dist/js/bitmovin-player-yospace.min.js ./WebOS/src/js"
+    "copyToWebOS": "cp ./dist/js/bitmovin-player-yospace.min.js ./WebOS/src/js",
+    "lint": "eslint --quiet src/"
   },
   "repository": {
     "type": "git",
@@ -29,9 +30,12 @@
     "@yospace/admanagement-sdk": "^3.4.0"
   },
   "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.27.1",
+    "@typescript-eslint/parser": "^5.27.1",
     "bitmovin-analytics": "^2.27.0",
     "bitmovin-player": "^8.86.0",
     "bitmovin-player-ui": "^3.37.0",
+    "eslint": "^8.17.0",
     "ts-loader": "^9.3.0",
     "typescript": "^3.9.10",
     "webpack": "^5.73.0",
