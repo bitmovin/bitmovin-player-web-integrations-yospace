@@ -56,6 +56,6 @@ export class DefaultBitmovinYospacePlayerPolicy implements BitmovinYospacePlayer
   }
 
   canChangePlaybackSpeed(): boolean {
-    return !Boolean(this.player.ads.getActiveAd());
+    return !(this.player.ads.getActiveAd());
   }
 }

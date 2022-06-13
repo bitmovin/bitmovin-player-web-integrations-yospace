@@ -55,8 +55,8 @@ export class Logger {
   }
 
   private static printDate(): string {
-    var temp = new Date();
-    var dateStr = '[' +
+    const temp = new Date();
+    const dateStr = '[' +
       this.padString(temp.getHours()) + ':' +
       this.padString(temp.getMinutes()) + ':' +
       this.padString(temp.getSeconds()) + ']';

@@ -79,6 +79,7 @@ export class YospaceAdListenerAdapter {
   }
 
   onAnalyticUpdate() {
+    // No op
   }
 
   onTrackingEvent(type: BYSTrackingEventType) {
@@ -93,7 +94,7 @@ export class YospaceAdListenerAdapter {
 
   private emitEvent(event: BYSListenerEventBase) {
     if (this.listeners[event.type]) {
-      for (let callback of this.listeners[event.type]) {
+      for (const callback of this.listeners[event.type]) {
         callback(event);
       }
     }

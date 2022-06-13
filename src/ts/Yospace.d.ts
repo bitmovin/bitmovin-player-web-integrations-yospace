@@ -1,3 +1,5 @@
+import AnalyticEventObserver from '@yospace/admanagement-sdk'
+
 declare interface YSAdBreak {
   getAdverts: any;
   getDuration: any;
@@ -94,10 +96,6 @@ declare interface SessionLive {
 }
 
 declare const YospaceAdManagement: YospaceAdManagement;
-
-interface AnalyticEventObserver {
-  // ...
-}
 
 type BreakType = {
   LINEAR: 0;

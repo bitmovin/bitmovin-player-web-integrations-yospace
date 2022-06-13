@@ -186,6 +186,7 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
         return Promise
           .all(registrations.map(registration => registration.unregister()))
           .then(() => {
+            // ensure Promise<void> is returned
           });
       });
     } else {
@@ -195,9 +196,7 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 
   load(source: SourceConfig | YospaceSourceConfig, forceTechnology?: string, disableSeeking?: boolean): Promise<void> {
     return new Promise<void>((resolve, reject) => {
-      const isAssetTypePresent = (): boolean => {
-        return source.hasOwnProperty('assetType') && (source as YospaceSourceConfig).assetType !== undefined;
-      };
+      const isAssetTypePresent = (): boolean => (source as YospaceSourceConfig).assetType !== undefined;
 
       const switchPlayer = (toType: YospacePlayerType) => {
         this.player.unload().then(() => {
@@ -210,8 +209,8 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 
           this.currentPlayerType = toType;
 
-          for (let eventType of Object.keys(this.eventHandlers)) {
-            for (let eventCallback of this.eventHandlers[eventType]) {
+          for (const eventType of Object.keys(this.eventHandlers)) {
+            for (const eventCallback of this.eventHandlers[eventType]) {
               oldPlayer.off(eventType as YospacePlayerEvent, eventCallback);
               this.player.on(eventType as YospacePlayerEvent, eventCallback);
             }

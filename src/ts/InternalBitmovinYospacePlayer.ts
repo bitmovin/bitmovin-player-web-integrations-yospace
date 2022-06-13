@@ -1,3 +1,5 @@
+// TODO get rid of our self-created Yospace.d.ts and use the official Yospace typings which are available now
+// eslint-disable-next-line @typescript-eslint/triple-slash-reference
 ///<reference path='Yospace.d.ts'/>
 
 import {
@@ -83,6 +85,7 @@ export interface YospaceLinearAd extends LinearAd {
 }
 
 // It is expected that this does not implement all members of the PlayerAPI cause they will be added dynamically.
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   // Bitmovin Player
@@ -110,7 +113,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   private isPlaybackFinished = false;
 
   // save playback speed to restore after AdBreak
-  private playbackSpeed: number = 1;
+  private playbackSpeed = 1;
 
   // convert EXT-X-DATERANGE tags to EMSG events
   private dateRangeEmitter: DateRangeEmitter;
@@ -120,7 +123,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 
   private startSent: boolean;
 
-  private lastTimeChangedTime: number = 0;
+  private lastTimeChangedTime = 0;
 
   constructor(containerElement: HTMLElement, player: PlayerAPI, yospaceConfig: YospaceConfiguration = {}) {
     this.yospaceConfig = yospaceConfig;
@@ -214,7 +217,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 
           this.calculateAdParts();
           // clone source to not modify passed object
-          let clonedSource = {
+          const clonedSource = {
             ...source,
             hls: this.session.getPlaybackUrl(), // use received url from yospace
           };
@@ -820,6 +823,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     this.unregisterPlayerEvents();
     if (this.session) {
       Logger.log('[BitmovinYospacePlayer] - sending YospaceAdManagement.PlayerEvent.STOP');
+      this.session.onPlayerEvent()
       this.session.onPlayerEvent(YospaceAdManagement.PlayerEvent.STOP);
       this.session.shutdown();
       this.session = null;
@@ -906,7 +910,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 
     const messageData: string = metadata.messageData;
     messageData.split(',').forEach((metadata: string) => {
-      let tags = metadata.split('=');
+      const tags = metadata.split('=');
       yospaceMetadataObject[tags[0]] = tags[1];
     });
 
@@ -1007,7 +1011,6 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   };
 
   private registerPlayerEvents(): void {
-    this.player.on(this.player.exports.PlayerEvent.ModuleReady, this.onModuleReady);
     this.player.on(this.player.exports.PlayerEvent.Playing, this.onPlaying);
     this.player.on(this.player.exports.PlayerEvent.TimeChanged, this.onTimeChanged);
     this.player.on(this.player.exports.PlayerEvent.Paused, this.onPause);
@@ -1022,7 +1025,6 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   }
 
   private unregisterPlayerEvents(): void {
-    this.player.off(this.player.exports.PlayerEvent.ModuleReady, this.onModuleReady);
     this.player.off(this.player.exports.PlayerEvent.Playing, this.onPlaying);
     this.player.off(this.player.exports.PlayerEvent.TimeChanged, this.onTimeChanged);
     this.player.off(this.player.exports.PlayerEvent.Paused, this.onPause);
@@ -1034,8 +1036,6 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     // To support ads in live streams we need to track metadata events
     this.player.off(this.player.exports.PlayerEvent.Metadata, this.onMetaData);
   }
-
-  private onModuleReady = (event: ModuleReadyEvent) => {};
 
   private onPlaying = () => {
     if (!this.startSent) {
@@ -1298,7 +1298,7 @@ class EventSuppressController {
   private suppressedEvents: PlayerEvent[] = [];
 
   add(...items: PlayerEvent[]) {
-    for (let item of items) {
+    for (const item of items) {
       if (!this.isSuppressed(item)) {
         this.suppressedEvents.push(item);
       }
@@ -1306,7 +1306,7 @@ class EventSuppressController {
   }
 
   remove(...items: PlayerEvent[]) {
-    for (let item of items) {
+    for (const item of items) {
       ArrayUtils.remove(this.suppressedEvents, item);
     }
   }
