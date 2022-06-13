@@ -1,10 +1,10 @@
 {
-    "vendor": "Bitmovin",
-    "icon": "src/images/bitmovin-icon-small.png",
-    "main": "index.html",
-    "id": "com.bitmovin.bitmovinyospaceplayer",
-    "title": "Application",
-    "type": "web",
-    "version": "0.0.1",
-    "uiRevision":2
+  "vendor": "Bitmovin",
+  "icon": "src/images/bitmovin-icon-small.png",
+  "main": "index.html",
+  "id": "com.bitmovin.bitmovinyospaceplayer",
+  "title": "Application",
+  "type": "web",
+  "version": "0.0.1",
+  "uiRevision": 2
 }

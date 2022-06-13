@@ -2,17 +2,19 @@ var yospacePlayer;
 
 setupControllerEvents();
 
-var truexAdFree = false // disable Truex
+var truexAdFree = false; // disable Truex
 
 var conf = {
   key: 'edc2b14e-a636-49d7-a011-0c854fab98f3',
   playback: {
     muted: false,
     autoplay: true,
-    preferredTech: [{
-      player: 'html5',
-      streaming: 'dash'
-    }]
+    preferredTech: [
+      {
+        player: 'html5',
+        streaming: 'dash',
+      },
+    ],
   },
   logs: {
     level: 'none',
@@ -23,8 +25,8 @@ var conf = {
     resume_live_content_at_previous_position_after_ad_break: true,
     file_protocol: true,
     app_id: 'com.bitmovin.bitmovinyospaceplayer',
-    BACKWARD_BUFFER_PURGE_INTERVAL: 10
-  }
+    BACKWARD_BUFFER_PURGE_INTERVAL: 10,
+  },
 };
 
 // Yospace configuration
@@ -68,18 +70,18 @@ var webosDrmAgent = getDrmAgent(keySystem);
 // drmAgents onsuccess callback before we try to load DRM source.
 if (webosDrmAgent) {
   isDrmLoaded(webosDrmAgent)
-      .then(function () {
-        yospacePlayer.setup().then(function() {
-          yospacePlayer.setPolicy(sampleYospacePlayerPolicy);
-          yospacePlayer.load(sources.vodSource);
-        })
-      })
-      .catch(function (e) {
-        console.log('Error while loading drm Agent', e);
+    .then(function () {
+      yospacePlayer.setup().then(function () {
+        yospacePlayer.setPolicy(sampleYospacePlayerPolicy);
+        yospacePlayer.load(sources.vodSource);
       });
+    })
+    .catch(function (e) {
+      console.log('Error while loading drm Agent', e);
+    });
 }
 
-function setupControllerEvents () {
+function setupControllerEvents() {
   document.addEventListener('keydown', function (inEvent) {
     var keycode;
 
@@ -118,7 +120,7 @@ function setupControllerEvents () {
   });
 }
 
-function tooglePlayPause () {
+function tooglePlayPause() {
   if (player.isPaused()) {
     player.play();
   } else {
@@ -126,11 +128,11 @@ function tooglePlayPause () {
   }
 }
 
-function getDrmAgent (keySystem) {
+function getDrmAgent(keySystem) {
   return webOSDev && keySystem && webOSDev.drmAgent(keySystem);
 }
 
-function loadDrm (drmAgent) {
+function loadDrm(drmAgent) {
   return new Promise(function (resolve, reject) {
     try {
       drmAgent.load({
@@ -139,15 +141,15 @@ function loadDrm (drmAgent) {
         },
         onFailure: function (e) {
           reject(e);
-        }
-      })
+        },
+      });
     } catch (e) {
       reject('Error while loading DRM manager', e);
     }
-  })
+  });
 }
 
-function isDrmLoaded (drmAgent) {
+function isDrmLoaded(drmAgent) {
   return new Promise(function (resolve, reject) {
     if (!drmAgent) {
       return reject('No drmAgent');
@@ -164,12 +166,12 @@ function isDrmLoaded (drmAgent) {
             })
             .catch(function (err) {
               reject(err);
-            })
+            });
         }
       },
       onFailure: function (err) {
         reject(err);
-      }
-    })
-  })
+      },
+    });
+  });
 }

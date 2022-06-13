@@ -5,12 +5,14 @@ This integration completely encapsulates the usage of Yospace. After creating th
 ## Usage
 
 ### Basic Setup
+
 1. Build the script by running `gulp build-prod`
 2. Include `bitmovinplayer-yospace.min.js` **after** `yo-ad-management.min.js` in your HTML document
 3. Create an instance of `BitmovinYospacePlayer`
+
 ```js
 var playerConfig = {
-  key: 'YOUR-PLAYER-KEY'
+  key: 'YOUR-PLAYER-KEY',
 };
 
 var playerContainer = document.getElementById('player');
@@ -24,7 +26,7 @@ var source = {
   hls: 'your yospace url',
 
   // The type of the asset
-  assetType: bitmovin.player.ads.yospace.YospaceAssetType.LINEAR
+  assetType: bitmovin.player.ads.yospace.YospaceAssetType.LINEAR,
   // one of:
   // - bitmovin.player.ads.yospace.YospaceAssetType.LINEAR
   // - bitmovin.player.ads.yospace.YospaceAssetType.VOD
@@ -50,7 +52,9 @@ We also provide a default policy.
 See [BitmovinYospacePlayerPolicy](./src/ts/BitmovinYospacePlayerPolicy.ts) for more details.
 
 #### Config
+
 You can pass a third optional parameter to the player constructor:
+
 ```js
 var yospaceConfig = {
   debug: true
@@ -61,8 +65,11 @@ var yospacePlayer = new bitmovin.player.ads.yospace.BitmovinYospacePlayer(player
 ```
 
 ### Tizen
+
 #### Tizen Config
+
 - Include the following Tweaks to the PlayerConfig:
+
 ```
 tweaks: {
     ...
@@ -70,9 +77,11 @@ tweaks: {
     app_id : "Ff4zhu5kqV.TizenBitmovinPlayerAppMode" // this Tizen App Id should also be allow-listed in Player License and optionally, Analaytics License
 }
 ```
+
 - Make sure the app_id is allow-listed in your Player's License
 - In the `YospaceConfig` set the param `YospaceConfig.disableServiceWorker` to `true`
 - In the `YospaceConfig` set the param `YospaceConfig.useTizen` to `true`
+
 ```
 // Yospace configuration
 var yospaceConfig = {
@@ -83,6 +92,7 @@ var yospaceConfig = {
 ```
 
 #### Tizen Demo
+
 - Run `npm run build-tv`
 - Import the Tizen folder(as General -> Existing Project) into your Tizen Studio and run as a Tizen Web Application
 

@@ -10,7 +10,5 @@
     "webOSDev": "writable",
     "Promise": "readonly"
   },
-  "plugins": [
-    "html"
-  ]
+  "plugins": ["html"]
 }

@@ -1,4 +1,5 @@
 # bitmovin-player-webos-demo
+
 This repository contains a sample app that used the Bitmovin HTML5 Player (version 8) on LG webOS
 
 ### Using the Sample App with webOS IDE
@@ -13,15 +14,16 @@ This repository contains a sample app that used the Bitmovin HTML5 Player (versi
 
 1. Install dependencies with `npm install`
 2. Activate developer mode on your TV device and use passphrase to run `npm run connect <ip|host> <passphrase>`
-4. Input your player key into `src/main.js`
-5. Build the `ipk` package running `npm run build`
-6. Install the app to your device `DEVICE=<ip|host> npm run push`
-7. You can debug the app with remote debugger with `DEVICE=<ip|host> npm run debug`
+3. Input your player key into `src/main.js`
+4. Build the `ipk` package running `npm run build`
+5. Install the app to your device `DEVICE=<ip|host> npm run push`
+6. You can debug the app with remote debugger with `DEVICE=<ip|host> npm run debug`
 
-* note: If you are having problem with permissions for ares CLI try `chmod +x node_modules/ares-webos-sdk/bin/*`
-* tip: If continuous running of `DEVICE=<ip|host> npm run debug` does not work you first need to kill the app by running `DEVICE=<ip|host> npm run stop` and then run debug again.
+- note: If you are having problem with permissions for ares CLI try `chmod +x node_modules/ares-webos-sdk/bin/*`
+- tip: If continuous running of `DEVICE=<ip|host> npm run debug` does not work you first need to kill the app by running `DEVICE=<ip|host> npm run stop` and then run debug again.
 
 ### Notes for developing your own app
+
 Make sure to enable `file_protocol` and set your `app_id` in the `tweaks` section of your config
 
 ```
