@@ -30,6 +30,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - `NON_YOSPACE_URL` error (code `1009`)
 - `companionClickTrackingURLTemplates` array from Companion Ads
 - `creativeTrackingEvents` array from Companion Ads
+- `disableStrictBreaks` from `YospaceConfiguration`
 
 # [1.2.25]
 
