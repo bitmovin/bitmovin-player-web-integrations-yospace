@@ -7,29 +7,25 @@ export enum BYSListenerEvent {
   ADVERT_START = 'advert_start',
   ADVERT_END = 'advert_end',
   AD_BREAK_END = 'ad_break_end',
-  UPDATE_TIMELINE = 'update_timeline',
   ANALYTICS_FIRED = 'analytics_fired',
 }
+
+export type BYSTrackingEventType = 'loaded' | 'start' | 'firstQuartile' | 'midpoint' | 'thirdQuartile' | 'complete' | 'pause' | 'resume' | 'rewind' | 'skip' | 'playerExpand' | 'playerCollapse' | 'ClickTracking' | 'acceptInvitation';
 
 interface BYSListenerEventBase {
   type: BYSListenerEvent;
 }
 
 export interface BYSAdEvent extends BYSListenerEventBase {
-  mediaId: string;
+  ad: YSAdvert;
 }
 
 export interface BYSAdBreakEvent extends BYSListenerEventBase {
   adBreak: YSAdBreak;
 }
 
-export interface BYSUpdateTimelineEvent extends BYSListenerEventBase {
-  timeline: YSTimeline;
-}
-
 export interface BYSAnalyticsFiredEvent extends BYSListenerEventBase {
-  call_id: any;
-  call_data: any;
+  call_id: BYSTrackingEventType;
 }
 
 interface BYSListenerCallbackFunction {
@@ -56,49 +52,43 @@ export class YospaceAdListenerAdapter {
     ArrayUtils.remove(this.listeners[event], callback);
   }
 
-  AdBreakStart(brk: YSAdBreak): void {
+  onAdvertBreakStart(brk: YSAdBreak): void {
     this.emitEvent({
       type: BYSListenerEvent.AD_BREAK_START,
       adBreak: brk,
     } as BYSAdBreakEvent);
   }
 
-  AdvertStart(mediaId: string): void {
+  onAdvertStart(ad: YSAdvert): void {
     this.emitEvent({
       type: BYSListenerEvent.ADVERT_START,
-      mediaId: mediaId,
+      ad: ad,
     } as BYSAdEvent);
   }
 
-  AdvertEnd(mediaId: string): void {
+  onAdvertEnd(): void {
     this.emitEvent({
       type: BYSListenerEvent.ADVERT_END,
-      mediaId: mediaId,
     } as BYSAdEvent);
   }
 
-  AdBreakEnd(brk: YSAdBreak): void {
+  onAdvertBreakEnd(): void {
     this.emitEvent({
       type: BYSListenerEvent.AD_BREAK_END,
-      adBreak: brk,
     } as BYSAdBreakEvent);
   }
 
-  UpdateTimeline(timeline: YSTimeline): void {
-    Logger.log('[listener] UpdateTimeline', timeline);
-    this.emitEvent({
-      type: BYSListenerEvent.UPDATE_TIMELINE,
-      timeline: timeline,
-    } as BYSUpdateTimelineEvent);
+  onAnalyticUpdate() {
   }
 
-  AnalyticsFired(call_id: any, call_data: any): void {
-    Logger.log('[listener] AnalyticsFired', call_id, call_data);
-    this.emitEvent({
+  onTrackingEvent(type: BYSTrackingEventType) {
+    Logger.log('[listener] AnalyticsFired', type);
+    const event: BYSAnalyticsFiredEvent = {
       type: BYSListenerEvent.ANALYTICS_FIRED,
-      call_id: call_id,
-      call_data: call_data,
-    } as BYSAnalyticsFiredEvent);
+      call_id: type,
+    };
+
+    this.emitEvent(event);
   }
 
   private emitEvent(event: BYSListenerEventBase) {

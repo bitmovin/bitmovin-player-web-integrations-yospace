@@ -4,6 +4,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+# [2.0.0]
+
+## Changed
+- Yospace SDK to v3
+- `getYospaceManager` to `getYospaceSession`
+## Removed
+- VPAID support including all related configuration options
+- LINEAR_START_OVER support
+- `NO_LIVEPAUSE` error (code `1008`)
+- `NON_YOSPACE_URL` error (code `1009`)
+- `companionClickTrackingURLTemplates` array from Companion Ads
+- `creativeTrackingEvents` array from Companion Ads
+## Added
+- `clickThroughUrlOpened` method to Companion Ads, which should be fired when the ad is interacted with
+- `canBeShown` method to Companion Ads, which indicates if the companion ad is currently active and can be shown
+- `shownToUser` method to Companion Ads, which should be fired when the ad is shown to the user
+- `hiddenFromUser` method to Companion Ads, which should be fired when the ad is hidden from the user
+- `UNKNOWN_FORMAT` error (code `1011`)
+
+# [1.2.25]
+## Added
+- YospaceConfig parameter `vodVpaidDurationAdjustment` for corrective VPAID timings on VOD
+
+## Fixed
+- Sequential VPAIDs sometimes getting skipped on VOD assets
+
 # [1.2.24]
 ## Changed
 - Bitmovin player to version [8.66.0](https://bitmovin.com/docs/player/releases/web/web-8-66-0)
