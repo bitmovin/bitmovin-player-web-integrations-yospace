@@ -3,7 +3,7 @@
   "version": "1.2.25",
   "description": "Yospace integration for the Bitmovin Player",
   "main": "./dist/js/bitmovin-player-yospace.js",
-  "types": "./dist/js/bitmovin-player-yospace.d.ts",
+  "types": "./dist/js/main.d.ts",
   "scripts": {
     "prepublishOnly": "npm run lint && npm run build",
     "build": "npm run copyStaticToDist && webpack --config webpack.prod.js",
