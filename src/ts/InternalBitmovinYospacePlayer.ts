@@ -74,6 +74,7 @@ import {
   LinearAd,
   PlayerAdvertisingAPI,
   VastAdExtension,
+  VastAdExtensionAttributes,
 } from 'bitmovin-player/modules/bitmovinplayer-advertising-core';
 import { Logger } from './Logger';
 import { DateRangeEmitter } from './DateRangeEmitter';
@@ -1229,7 +1230,8 @@ class AdTranslator {
       return null;
     }
 
-    const extensions = AdTranslator.YsXmlNodeToBmVastAdExtensions(ysAd.getExtensions());
+    const ysVastExtensions = ysAd.getExtensions();
+    const extensions = ysVastExtensions ? [AdTranslator.YsXmlNodeToBmVastAdExtensions(ysVastExtensions)] : [];
 
     const lineage: AdvertWrapper = ysAd.getLineage();
 
@@ -1263,18 +1265,25 @@ class AdTranslator {
     } as YospaceLinearAd;
   }
 
-  // TODO: This function needs more testing and improvements
-  static YsXmlNodeToBmVastAdExtensions(ysVastExtension: XmlNode): VastAdExtension[] {
-    if (!ysVastExtension) return [];
+  static YsXmlNodeToBmVastAdExtensions(ysVastExtension: XmlNode): VastAdExtension {
+    const value = ysVastExtension.getInnerText();
+    const name = ysVastExtension.getName();
 
-    const extension: VastAdExtension = {
-      value: ysVastExtension.getInnerText(),
-      name: ysVastExtension.getName(),
-      attributes: ysVastExtension.getAttributes() as any, // TODO proper typing
-      children: AdTranslator.YsXmlNodeToBmVastAdExtensions(ysVastExtension.getChildren()),
+    const attributes: VastAdExtensionAttributes = {};
+    ysVastExtension.getAttributes().forEach((value, key) => (attributes[String(key)] = String(value)));
+
+    // XmlNode.getChildren returns `XmlNode[]` but according to the type definitions it returns `XmlNode`.
+    // Casting to `unknown` and then to `XmlNode[]` is a workaround to use it without casting to `any`.
+    const ysExtChildren = ysVastExtension.getChildren() as unknown as XmlNode[];
+    const children: VastAdExtension[] = [];
+    ysExtChildren.forEach((child) => children.push(AdTranslator.YsXmlNodeToBmVastAdExtensions(child)));
+
+    return {
+      value,
+      name,
+      attributes,
+      children,
     };
-
-    return [extension];
   }
 }
 
