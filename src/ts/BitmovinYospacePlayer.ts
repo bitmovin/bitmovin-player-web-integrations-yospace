@@ -148,15 +148,8 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     if (yospaceConfig.useWebos) {
       Player.addModule(WebosModule);
     }
-  }
 
-  setup(): Promise<void> {
-    return this.unregisterAllServiceWorker()
-      .then()
-      .catch()
-      .then(() => {
-        this.createPlayer();
-      });
+    this.createPlayer();
   }
 
   private createPlayer(): void {
@@ -190,18 +183,6 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     ) as any as BitmovinYospacePlayerAPI;
 
     this.player = this.bitmovinYospacePlayer;
-  }
-
-  unregisterAllServiceWorker(): Promise<void> {
-    if (navigator.serviceWorker && !this.yospaceConfig.disableServiceWorker) {
-      return navigator.serviceWorker.getRegistrations().then((registrations) => {
-        return Promise.all(registrations.map((registration) => registration.unregister())).then(() => {
-          // ensure Promise<void> is returned
-        });
-      });
-    } else {
-      return Promise.resolve();
-    }
   }
 
   load(source: SourceConfig | YospaceSourceConfig, forceTechnology?: string, disableSeeking?: boolean): Promise<void> {

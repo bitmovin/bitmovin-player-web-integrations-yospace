@@ -427,11 +427,11 @@
         }
       };
 
-      var playerContainer = document.getElementById('player');
-      yospacePlayer = new bitmovin.player.ads.yospace.BitmovinYospacePlayer(playerContainer, conf, yospaceConfig);
-
       setupTable();
-      yospacePlayer.setup().then(() => {
+      Promise.resolve().then(() => {
+        var playerContainer = document.getElementById('player');
+        yospacePlayer = new bitmovin.player.ads.yospace.BitmovinYospacePlayer(playerContainer, conf, yospaceConfig);
+
         bitmovin.playerui.UIFactory.buildDefaultUI(yospacePlayer);
 
         yospacePlayer.on('ready', function (event) {

@@ -31,6 +31,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - `companionClickTrackingURLTemplates` array from Companion Ads
 - `creativeTrackingEvents` array from Companion Ads
 - `disableStrictBreaks` from `YospaceConfiguration`
+- `setup` method
+- unregistering all ServiceWorkers in the setup flow
 
 # [1.2.25]
 
