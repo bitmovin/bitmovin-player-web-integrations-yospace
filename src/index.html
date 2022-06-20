@@ -184,6 +184,20 @@
       var customStreamButton = $('#load-custom-steam');
       var customStreamTypeSelect = $('#stream-type-select');
 
+      function unregisterAllServiceWorker() {
+        if (navigator.serviceWorker) {
+          return navigator.serviceWorker.getRegistrations().then((registrations) => {
+            return Promise.all(registrations.map((registration) => registration.unregister())).then(() => {
+              // ensure Promise<void> is returned
+            });
+          });
+        } else {
+          return Promise.resolve();
+        }
+      }
+
+      var unregisterServiceWorkersPromise = unregisterAllServiceWorker();
+
       $.urlParam = function (name) {
         var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
         if (results == null) {
@@ -428,7 +442,7 @@
       };
 
       setupTable();
-      Promise.resolve().then(() => {
+      unregisterServiceWorkersPromise.then(() => {
         var playerContainer = document.getElementById('player');
         yospacePlayer = new bitmovin.player.ads.yospace.BitmovinYospacePlayer(playerContainer, conf, yospaceConfig);
 
