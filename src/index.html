@@ -494,9 +494,22 @@
         }
 
         var playerContainer = document.getElementById('player');
-        yospacePlayer = new bitmovin.player.ads.yospace.BitmovinYospacePlayer(playerContainer, conf, yospaceConfig);
+        yospacePlayer = new bitmovin.player.ads.yospace.BitmovinYospacePlayer(
+          bitmovin.player.core.Player,
+          playerContainer,
+          conf,
+          yospaceConfig
+        );
 
-        bitmovin.playerui.UIFactory.buildDefaultUI(yospacePlayer);
+        var uiManager = new bitmovin.playerui.UIFactory.buildDefaultUI(yospacePlayer);
+
+        yospacePlayer.on('sourceloaded', function (event) {
+          console.log('[BYP] sourceloaded ', cloneDeepSimple(event));
+
+          yospacePlayer.ads.list().forEach(function (adBreak) {
+            uiManager.addTimelineMarker({ time: adBreak.scheduleTime, title: 'Ad Break' });
+          });
+        });
 
         yospacePlayer.on('ready', function (event) {
           console.log('[BYP] ready ', cloneDeepSimple(event));
