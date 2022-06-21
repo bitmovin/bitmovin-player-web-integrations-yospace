@@ -34,13 +34,13 @@
     "stream-browserify": "^3.0.0"
   },
   "peerDependencies": {
-    "@yospace/admanagement-sdk": "^3.4.0"
+    "@yospace/admanagement-sdk": "^3.4.0",
+    "bitmovin-player": "^8.86.0"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^5.27.1",
     "@typescript-eslint/parser": "^5.27.1",
     "bitmovin-analytics": "^2.27.0",
-    "bitmovin-player": "^8.86.0",
     "bitmovin-player-ui": "^3.37.0",
     "eslint": "^8.17.0",
     "husky": "^8.0.1",
