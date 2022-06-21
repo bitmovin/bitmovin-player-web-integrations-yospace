@@ -18,6 +18,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## Changed
 
 - Yospace SDK to v3
+- Using NPM packages
+- `BitmovinYospacePlayer` constructor to receive the Bitmovin Player Static API
 - `getYospaceManager` to `getYospaceSession`
 - Build chain to use webpack, eslint and prettier
 - Yospace SDK to be imported via npm
