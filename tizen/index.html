@@ -1,230 +1,232 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+  <head>
     <title>BitmovinYospacePlayer Demo</title>
-    <meta charset="UTF-8"/>
-    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400" rel="stylesheet">
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400" rel="stylesheet" />
 
     <!-- Bootstrap 3.3.7 -->
-    <link rel="stylesheet" href="css/bootstrap.min.css" crossorigin="anonymous">
-    <link rel="stylesheet" href="css/bitmovin-demo.css">
+    <link rel="stylesheet" href="css/bootstrap.min.css" crossorigin="anonymous" />
+    <link rel="stylesheet" href="css/bitmovin-demo.css" />
     <!--<link rel='stylesheet' href='https://cdn.bitmovin.com/player/web/8/bitmovinplayer-ui.css'>-->
 
-
-    <script type='text/javascript' src='https://cdn.bitmovin.com/player/web/8/bitmovinplayer-ui.js'></script>
-    <link rel='stylesheet' href='https://cdn.bitmovin.com/player/web/8/bitmovinplayer-ui.css'>
+    <script type="text/javascript" src="https://cdn.bitmovin.com/player/web/8/bitmovinplayer-ui.js"></script>
+    <link rel="stylesheet" href="https://cdn.bitmovin.com/player/web/8/bitmovinplayer-ui.css" />
 
     <script
-            src='https://code.jquery.com/jquery-3.4.1.min.js'
-            integrity='sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo='
-            crossorigin='anonymous'></script>
-    <script src='https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js'></script>
+      src="https://code.jquery.com/jquery-3.4.1.min.js"
+      integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
+      crossorigin="anonymous"
+    ></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
     <!--<script src="js/core-js.min.js"></script>-->
     <!--https://mcarriga.s3.us-east-2.amazonaws.com/tub.min.js -->
     <script type="text/javascript" src="js/bitmovin-player-yospace.min.js"></script>
     <script type="text/javascript" src="js/yo-ad-management.min.js"></script>
     <script type="text/javascript" src="js/sources.js"></script>
-</head>
-<body>
-<div id="wrapper">
-
-    <div id="banner">
-        <div class="logo"><a href="https://bitmovin.com"><img src="images/bitmovin-logo.png"></a></div>
+  </head>
+  <body>
+    <div id="wrapper">
+      <div id="banner">
+        <div class="logo">
+          <a href="https://bitmovin.com"><img src="images/bitmovin-logo.png" /></a>
+        </div>
         <div class="title"><h1 class="bitmovin-headline">BitmovinYospacePlayer Demo</h1></div>
         <div class="clearfix"></div>
-    </div>
+      </div>
 
-    <div class="container-fluid">
+      <div class="container-fluid">
         <div class="content">
-            <div class="row bitmovin-description">
-                <div class="col-lg-12 text-center" id="source-names">
-
-                </div>
+          <div class="row bitmovin-description">
+            <div class="col-lg-12 text-center" id="source-names"></div>
+          </div>
+          <div class="row">
+            <div class="col-md-offset-1 col-md-10 col-lg-offset-2 col-lg-8">
+              <div id="player"></div>
             </div>
-            <div class="row">
-                <div class="col-md-offset-1 col-md-10 col-lg-offset-2 col-lg-8">
-                    <div id="player"></div>
-                </div>
+          </div>
+          <div class="row">
+            <div class="col-lg-12 text-center">
+              <p>
+                For more information about the bitmovin player, please have a look at our online
+                <a href="https://developer.bitmovin.com" target="_blank">Developer Section</a>.
+              </p>
             </div>
-            <div class="row">
-                <div class="col-lg-12 text-center">
-                    <p>For more information about the bitmovin player, please have a look at our online <a href="https://developer.bitmovin.com" target="_blank">Developer Section</a>.</p>
-                </div>
-            </div>
+          </div>
         </div>
+      </div>
     </div>
-</div>
-<script type="text/javascript">
-var yospacePlayer;
+    <script type="text/javascript">
+      var yospacePlayer;
 
-setupControllerEvents();
+      setupControllerEvents();
 
-var truexAdFree = false // disable Truex
+      var truexAdFree = false; // disable Truex
 
-var conf = {
-    key: 'edc2b14e-a636-49d7-a011-0c854fab98f3',
-    playback: {
-        muted: false,
-        autoplay: true,
-    },
-    logs: {
-        level: 'none',
-    },
-    //ui: false,
-    tweaks: {
-        enable_seek_for_live: true,
-        resume_live_content_at_previous_position_after_ad_break: true,
-        file_protocol : true, // Required if app is being loaded from file system
-        app_id : "Ff4zhu5kqV.TizenBitmovinPlayerAppMode" // this Tizen App Id should also be whitelisted in Player License and optionallt, Analaytics License
-    }
-};
+      var conf = {
+        key: 'edc2b14e-a636-49d7-a011-0c854fab98f3',
+        playback: {
+          muted: false,
+          autoplay: true,
+        },
+        logs: {
+          level: 'none',
+        },
+        //ui: false,
+        tweaks: {
+          enable_seek_for_live: true,
+          resume_live_content_at_previous_position_after_ad_break: true,
+          file_protocol: true, // Required if app is being loaded from file system
+          app_id: 'Ff4zhu5kqV.TizenBitmovinPlayerAppMode', // this Tizen App Id should also be whitelisted in Player License and optionallt, Analaytics License
+        },
+      };
 
-// Yospace configuration
-var yospaceConfig = {
-    debug: false,
-    disableVpaidRenderer: false,
-    liveVpaidDurationAdjustment: 2,
-    disableStrictBreaks: false,
-    disableServiceWorker: true, //Disable Service Worker for Tizen Web App use
-    useTizen: true,
-};
+      // Yospace configuration
+      var yospaceConfig = {
+        debug: false,
+        disableVpaidRenderer: false,
+        liveVpaidDurationAdjustment: 2,
+        disableStrictBreaks: false,
+        disableServiceWorker: true, //Disable Service Worker for Tizen Web App use
+        useTizen: true,
+      };
 
-var sampleYospacePlayerPolicy = {
-    canMute: () => {
-        return true;
-    },
-    canSeek: () => {
-        return true;
-    },
-    canSeekTo: (seekTarget) => {
-        return seekTarget;
-    },
-    canSkip: () => {
-        return true;
-    },
-    canPause: () => {
-        return true;
-    },
-    canChangePlaybackSpeed: () => {
-        return true;
-    },
-};
+      var sampleYospacePlayerPolicy = {
+        canMute: () => {
+          return true;
+        },
+        canSeek: () => {
+          return true;
+        },
+        canSeekTo: (seekTarget) => {
+          return seekTarget;
+        },
+        canSkip: () => {
+          return true;
+        },
+        canPause: () => {
+          return true;
+        },
+        canChangePlaybackSpeed: () => {
+          return true;
+        },
+      };
 
-var playerContainer = document.getElementById('player');
-yospacePlayer = new bitmovin.player.ads.yospace.BitmovinYospacePlayer(playerContainer, conf, yospaceConfig);
+      var playerContainer = document.getElementById('player');
+      yospacePlayer = new bitmovin.player.ads.yospace.BitmovinYospacePlayer(playerContainer, conf, yospaceConfig);
 
-yospacePlayer.setup().then(function() {
-    bitmovin.playerui.UIFactory.buildDefaultUI(yospacePlayer);
+      yospacePlayer.setup().then(function () {
+        bitmovin.playerui.UIFactory.buildDefaultUI(yospacePlayer);
 
-    yospacePlayer.on('playbackfinished', function(event) {
-        console.info(event.time + ' - [YoSpacePlayer] playbackFinished: ' + JSON.stringify(event));
-    });
+        yospacePlayer.on('playbackfinished', function (event) {
+          console.info(event.time + ' - [YoSpacePlayer] playbackFinished: ' + JSON.stringify(event));
+        });
 
-    yospacePlayer.on('ready', function(event) {
-        console.info(event.time + ' - [YoSpacePlayer] ready: ' + JSON.stringify(event));
-    });
+        yospacePlayer.on('ready', function (event) {
+          console.info(event.time + ' - [YoSpacePlayer] ready: ' + JSON.stringify(event));
+        });
 
-    yospacePlayer.on('error', function(event) {
-        console.error(event.time + ' - [YoSpacePlayer] Error: ' + JSON.stringify(event));
-    });
+        yospacePlayer.on('error', function (event) {
+          console.error(event.time + ' - [YoSpacePlayer] Error: ' + JSON.stringify(event));
+        });
 
-    yospacePlayer.on('warning', function(event) {
-        console.warn(event.time + ' - [YoSpacePlayer] Warning: ' + JSON.stringify(event));
-    });
+        yospacePlayer.on('warning', function (event) {
+          console.warn(event.time + ' - [YoSpacePlayer] Warning: ' + JSON.stringify(event));
+        });
 
-    yospacePlayer.on('play', function(event) {
-        console.info(event.time + ' - [YoSpacePlayer] play: ' + JSON.stringify(event));
-    });
+        yospacePlayer.on('play', function (event) {
+          console.info(event.time + ' - [YoSpacePlayer] play: ' + JSON.stringify(event));
+        });
 
-    yospacePlayer.on('timechanged', function(event) {
-        //console.trace(event.time + ' - [YoSpacePlayer] timechanged: ' + JSON.stringify(event));
-    });
+        yospacePlayer.on('timechanged', function (event) {
+          //console.trace(event.time + ' - [YoSpacePlayer] timechanged: ' + JSON.stringify(event));
+        });
 
-    yospacePlayer.on('adbreakstarted', function(event) {
-        console.info(event.time + ' - [YoSpacePlayer] AdBreakStarted: ' + JSON.stringify(event));
-    });
+        yospacePlayer.on('adbreakstarted', function (event) {
+          console.info(event.time + ' - [YoSpacePlayer] AdBreakStarted: ' + JSON.stringify(event));
+        });
 
-    yospacePlayer.on('adbreakfinished', function(event) {
-        console.info(event.time + ' - [YoSpacePlayer] AdBreakFinished: ' + JSON.stringify(event));
-    });
+        yospacePlayer.on('adbreakfinished', function (event) {
+          console.info(event.time + ' - [YoSpacePlayer] AdBreakFinished: ' + JSON.stringify(event));
+        });
 
-    yospacePlayer.on('adstarted', function(event) {
-        console.info(event.time + ' - [YoSpacePlayer] AdStarted: ' + JSON.stringify(event));
-    });
+        yospacePlayer.on('adstarted', function (event) {
+          console.info(event.time + ' - [YoSpacePlayer] AdStarted: ' + JSON.stringify(event));
+        });
 
-    yospacePlayer.on('adfinished', function(event) {
-        console.info(event.time + ' - [YoSpacePlayer] AdFinished: ' + JSON.stringify(event));
-    });
+        yospacePlayer.on('adfinished', function (event) {
+          console.info(event.time + ' - [YoSpacePlayer] AdFinished: ' + JSON.stringify(event));
+        });
 
-    yospacePlayer.on('adquartile', function(event) {
-        console.info(event.time + ' - [YoSpacePlayer] AdQuartileEvent: ' + JSON.stringify(event));
-    });
+        yospacePlayer.on('adquartile', function (event) {
+          console.info(event.time + ' - [YoSpacePlayer] AdQuartileEvent: ' + JSON.stringify(event));
+        });
 
-    yospacePlayer.on('admanifestloaded', function(event) {
-        console.info(event.time + ' - [YoSpacePlayer] AdManifestLoaded: ' + JSON.stringify(event));
-    });
+        yospacePlayer.on('admanifestloaded', function (event) {
+          console.info(event.time + ' - [YoSpacePlayer] AdManifestLoaded: ' + JSON.stringify(event));
+        });
 
-    yospacePlayer.on('subtitleadded', function(event) {
-        console.info(event.time + ' - [YoSpacePlayer] SubtitleAdded: ' + JSON.stringify(event));
-        if (yospacePlayer.subtitles.list().length > 0) {
-            yospacePlayer.subtitles.enable(yospacePlayer.subtitles.list()[0].id)
-        }
-    });
+        yospacePlayer.on('subtitleadded', function (event) {
+          console.info(event.time + ' - [YoSpacePlayer] SubtitleAdded: ' + JSON.stringify(event));
+          if (yospacePlayer.subtitles.list().length > 0) {
+            yospacePlayer.subtitles.enable(yospacePlayer.subtitles.list()[0].id);
+          }
+        });
 
-    yospacePlayer.on('playing', function (event) {
-        console.info(event.time + ' - [YoSpacePlayer] playing: ' + JSON.stringify(event));
-        if (yospacePlayer.subtitles.list().length > 0) {
-            yospacePlayer.subtitles.enable(yospacePlayer.subtitles.list()[0].id)
-        }
-    });
+        yospacePlayer.on('playing', function (event) {
+          console.info(event.time + ' - [YoSpacePlayer] playing: ' + JSON.stringify(event));
+          if (yospacePlayer.subtitles.list().length > 0) {
+            yospacePlayer.subtitles.enable(yospacePlayer.subtitles.list()[0].id);
+          }
+        });
 
-    yospacePlayer.on('metadataparsed', function (event) {
-        console.debug(event.time + ' - [YoSpacePlayer] metadataParsed: ' + JSON.stringify(event));
-    });
+        yospacePlayer.on('metadataparsed', function (event) {
+          console.debug(event.time + ' - [YoSpacePlayer] metadataParsed: ' + JSON.stringify(event));
+        });
 
-    yospacePlayer.on('metadata', function (event) {
-        console.debug(event.time + ' - [YoSpacePlayer] metadata: ' + JSON.stringify(event));
-    });
+        yospacePlayer.on('metadata', function (event) {
+          console.debug(event.time + ' - [YoSpacePlayer] metadata: ' + JSON.stringify(event));
+        });
 
-    yospacePlayer.setPolicy(sampleYospacePlayerPolicy);
-    yospacePlayer.load(sources.vodSource);
-})
+        yospacePlayer.setPolicy(sampleYospacePlayerPolicy);
+        yospacePlayer.load(sources.vodSource);
+      });
 
-function setupControllerEvents() {
-    tizen.tvinputdevice.registerKey('MediaPlayPause');
-    tizen.tvinputdevice.registerKey('ColorF0Red');
+      function setupControllerEvents() {
+        tizen.tvinputdevice.registerKey('MediaPlayPause');
+        tizen.tvinputdevice.registerKey('ColorF0Red');
 
-    // add eventListener for keydown
-    document.addEventListener('keydown', function(e) {
-        switch (e.keyCode) {
+        // add eventListener for keydown
+        document.addEventListener('keydown', function (e) {
+          switch (e.keyCode) {
             case tizen.tvinputdevice.getKey('MediaPlayPause').code:
-                if (player.isPlaying()) {
-                    player.pause();
-                } else {
-                    player.play();
-                }
-                break;
+              if (player.isPlaying()) {
+                player.pause();
+              } else {
+                player.play();
+              }
+              break;
             case 37: // LEFT arrow
-                break;
+              break;
             case 38: // UP arrow
-                break;
+              break;
             case 39: // RIGHT arrow
-                break;
+              break;
             case 40: // DOWN arrow
-                break;
+              break;
             case 13: // OK button
-                break;
+              break;
             case 10009: // RETURN button
-                tizen.application.getCurrentApplication().exit();
-                break;
+              tizen.application.getCurrentApplication().exit();
+              break;
             default:
-                console.log('Key code : ' + e.keyCode);
-                break;
-        }
-    });
-}
-</script>
-</body>
+              console.log('Key code : ' + e.keyCode);
+              break;
+          }
+        });
+      }
+    </script>
+  </body>
 </html>

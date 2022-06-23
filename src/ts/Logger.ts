@@ -55,15 +55,19 @@ export class Logger {
   }
 
   private static printDate(): string {
-    var temp = new Date();
-    var dateStr = '[' +
-      this.padString(temp.getHours()) + ':' +
-      this.padString(temp.getMinutes()) + ':' +
-      this.padString(temp.getSeconds()) + ']';
+    const temp = new Date();
+    const dateStr =
+      '[' +
+      this.padString(temp.getHours()) +
+      ':' +
+      this.padString(temp.getMinutes()) +
+      ':' +
+      this.padString(temp.getSeconds()) +
+      ']';
     return dateStr;
   }
 
   private static padString(i: number): string {
-    return (i < 10) ? '0' + i : '' + i;
+    return i < 10 ? '0' + i : '' + i;
   }
 }

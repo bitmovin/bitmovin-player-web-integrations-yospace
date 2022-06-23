@@ -3,14 +3,21 @@
   "version": "1.2.25",
   "description": "Yospace integration for the Bitmovin Player",
   "main": "./dist/js/bitmovin-player-yospace.js",
-  "types": "./dist/js/bitmovin-player-yospace.d.ts",
+  "types": "./dist/js/main.d.ts",
   "scripts": {
-    "prepublishOnly": "gulp npm-prepare",
-    "build": "gulp build-prod",
-    "build-tv": "gulp build-prod && npm run copyToTizen && npm run copyToWebOS",
-    "start": "gulp serve",
+    "prepublishOnly": "npm run lint && npm run build",
+    "build": "npm run copyStaticToDist && webpack --config webpack.prod.js",
+    "build-tv": "npm run build && npm run copyToTizen && npm run copyToWebOS",
+    "start": "npm run copyStaticToDist && webpack serve --open --config webpack.dev.js",
+    "copyStaticToDist": "mkdir -p dist && cp src/index.html dist/ && cp src/sw.js dist/",
     "copyToTizen": "cp ./dist/js/bitmovin-player-yospace.min.js ./tizen/js",
-    "copyToWebOS": "cp ./dist/js/bitmovin-player-yospace.min.js ./WebOS/src/js"
+    "copyToWebOS": "cp ./dist/js/bitmovin-player-yospace.min.js ./WebOS/src/js",
+    "lint": "eslint --quiet src/",
+    "format": "prettier --write src/",
+    "prepare": "husky install"
+  },
+  "lint-staged": {
+    "**/*": "prettier --write --ignore-unknown"
   },
   "repository": {
     "type": "git",
@@ -18,33 +25,33 @@
   },
   "author": "Bitmovin",
   "license": "MIT",
-  "dependencies": {
-    "fast-safe-stringify": "^2.0.7"
-  },
   "engines": {
-    "node": "11.14.0"
+    "node": "16.15.1"
+  },
+  "dependencies": {
+    "fast-safe-stringify": "^2.0.7",
+    "process": "^0.11.10",
+    "stream-browserify": "^3.0.0"
+  },
+  "peerDependencies": {
+    "@yospace/admanagement-sdk": "^3.4.0",
+    "bitmovin-player": "^8.86.0"
   },
   "devDependencies": {
-    "bitmovin-analytics": "^2.19.1",
-    "bitmovin-player": "8.66.0",
-    "bitmovin-player-ui": "^3.6.0",
-    "browser-sync": "^2.18.8",
-    "browserify": "^14.1.0",
-    "del": "^2.2.2",
-    "gulp": "^3.9.1",
-    "gulp-file": "^0.4.0",
-    "gulp-rename": "^1.4.0",
-    "gulp-sourcemaps": "^2.4.1",
-    "gulp-tslint": "^8.1.3",
-    "gulp-typescript": "^3.1.5",
-    "gulp-uglify": "^2.0.1",
-    "merge2": "^1.0.3",
-    "run-sequence": "^1.2.2",
-    "tsify": "^3.0.1",
-    "tslint": "^5.12.0",
-    "typescript": "^3.2.2",
-    "vinyl-buffer": "^1.0.0",
-    "vinyl-source-stream": "^1.1.0",
-    "watchify": "^3.9.0"
+    "@typescript-eslint/eslint-plugin": "^5.27.1",
+    "@typescript-eslint/parser": "^5.27.1",
+    "bitmovin-analytics": "^2.27.0",
+    "bitmovin-player-ui": "^3.37.0",
+    "eslint": "^8.17.0",
+    "husky": "^8.0.1",
+    "lint-staged": "^13.0.1",
+    "prettier": "2.6.2",
+    "ts-loader": "^9.3.0",
+    "typescript": "^3.9.10",
+    "webpack": "^5.73.0",
+    "webpack-cli": "^4.9.2",
+    "webpack-dev-middleware": "^5.3.3",
+    "webpack-dev-server": "^4.9.1",
+    "webpack-merge": "^5.8.0"
   }
 }

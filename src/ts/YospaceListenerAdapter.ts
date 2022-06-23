@@ -1,3 +1,4 @@
+import { AdBreak, Advert } from '@yospace/admanagement-sdk';
 import { ArrayUtils } from 'bitmovin-player-ui/dist/js/framework/arrayutils';
 import { Logger } from './Logger';
 
@@ -10,18 +11,32 @@ export enum BYSListenerEvent {
   ANALYTICS_FIRED = 'analytics_fired',
 }
 
-export type BYSTrackingEventType = 'loaded' | 'start' | 'firstQuartile' | 'midpoint' | 'thirdQuartile' | 'complete' | 'pause' | 'resume' | 'rewind' | 'skip' | 'playerExpand' | 'playerCollapse' | 'ClickTracking' | 'acceptInvitation';
+export type BYSTrackingEventType =
+  | 'loaded'
+  | 'start'
+  | 'firstQuartile'
+  | 'midpoint'
+  | 'thirdQuartile'
+  | 'complete'
+  | 'pause'
+  | 'resume'
+  | 'rewind'
+  | 'skip'
+  | 'playerExpand'
+  | 'playerCollapse'
+  | 'ClickTracking'
+  | 'acceptInvitation';
 
 interface BYSListenerEventBase {
   type: BYSListenerEvent;
 }
 
 export interface BYSAdEvent extends BYSListenerEventBase {
-  ad: YSAdvert;
+  ad: Advert;
 }
 
 export interface BYSAdBreakEvent extends BYSListenerEventBase {
-  adBreak: YSAdBreak;
+  adBreak: AdBreak;
 }
 
 export interface BYSAnalyticsFiredEvent extends BYSListenerEventBase {
@@ -38,7 +53,7 @@ interface BYSListenerCallbackFunction {
  * To simplify the Yospace callbacks handling this Adapter was introduced.
  */
 export class YospaceAdListenerAdapter {
-  private listeners: { [eventType: string]: BYSListenerCallbackFunction[]; } = {};
+  private listeners: { [eventType: string]: BYSListenerCallbackFunction[] } = {};
 
   addListener(event: BYSListenerEvent, callback: BYSListenerCallbackFunction): void {
     if (!this.listeners[event]) {
@@ -52,14 +67,14 @@ export class YospaceAdListenerAdapter {
     ArrayUtils.remove(this.listeners[event], callback);
   }
 
-  onAdvertBreakStart(brk: YSAdBreak): void {
+  onAdvertBreakStart(brk: AdBreak): void {
     this.emitEvent({
       type: BYSListenerEvent.AD_BREAK_START,
       adBreak: brk,
     } as BYSAdBreakEvent);
   }
 
-  onAdvertStart(ad: YSAdvert): void {
+  onAdvertStart(ad: Advert): void {
     this.emitEvent({
       type: BYSListenerEvent.ADVERT_START,
       ad: ad,
@@ -79,6 +94,7 @@ export class YospaceAdListenerAdapter {
   }
 
   onAnalyticUpdate() {
+    // No op
   }
 
   onTrackingEvent(type: BYSTrackingEventType) {
@@ -93,7 +109,7 @@ export class YospaceAdListenerAdapter {
 
   private emitEvent(event: BYSListenerEventBase) {
     if (this.listeners[event.type]) {
-      for (let callback of this.listeners[event.type]) {
+      for (const callback of this.listeners[event.type]) {
         callback(event);
       }
     }
