@@ -67,7 +67,7 @@ const yospaceConfig: YospaceConfiguration = {
   debug: true,
 };
 // ...
-const bitmovinYospacePlayer = new BitmovinYospacePlayer(playerContainer, conf, yospaceConfig);
+const bitmovinYospacePlayer = new BitmovinYospacePlayer(Player, playerContainer, conf, yospaceConfig);
 ```
 
 ### Tizen
