@@ -1012,7 +1012,9 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     },
 
     getModuleInfo: () => {
-      const moduleInfo = this.player.ads.getModuleInfo();
+      // If no advertising module is provided besides the core (i.e. `ima` or `bitmovin`), everything still works but
+      // getting the module info for analytics fails. Adding a fallback for this case.
+      const moduleInfo = this.player.ads?.getModuleInfo() || { name: 'advertising', version: this.player.version };
       moduleInfo.name += '-yospace-integration';
       return moduleInfo;
     },
