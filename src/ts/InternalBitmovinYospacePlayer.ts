@@ -1059,12 +1059,12 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   };
 
   private onTimeChanged = (event: TimeChangedEvent) => {
-    this.lastTimeChangedTime = event.time;
-
     // There is an outstanding bug on Safari mobile where upon exiting an ad break,
     // our TimeChanged event "rewinds" ~12 ms. This is a temporary fix.
     // If we report this "rewind" to Yospace, it results in duplicate ad events.
     const timeDifference = event.time - this.lastTimeChangedTime;
+    this.lastTimeChangedTime = event.time;
+
     if (timeDifference >= 0 || timeDifference < -0.25) {
       this.session.onPlayheadUpdate(toMilliseconds(event.time));
     } else {
