@@ -565,7 +565,14 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 
   private fireEvent<E extends PlayerEventBase | YospaceEventBase>(event: E): void {
     if (this.eventHandlers[event.type]) {
-      this.eventHandlers[event.type].forEach((callback: YospacePlayerEventCallback) => callback(event));
+      this.eventHandlers[event.type].forEach(
+        // Trigger events to the customer application asynchronously using setTimeout(fn, 0). The Yospace SDK manages
+        // the session state using time updates and other events, and if some event handlers (especially AdFinished)
+        // takes too long to execute, the Yospace SDK might get into a wrong state, reporting advertEnd twice etc. This
+        // can be avoided by enforcing the callback to be run as a separate point in the JS event loop.
+        (callback: YospacePlayerEventCallback) => setTimeout(() => callback(event), 0),
+        this
+      );
     }
   }
 
