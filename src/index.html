@@ -680,8 +680,10 @@
               }
             }
 
-            $('#adBreakLabel').text('AdBreak: ' + duration + ' remaining');
-            $('#adLabel').text('Ad: ' + adCounter + ' of ' + adBreak.ads.length + '  ' + adDuration + ' remaining');
+            $('#adBreakLabel').text('AdBreak: ' + Number(duration).toFixed(2) + 's remaining');
+            $('#adLabel').text(
+              'Ad ' + adCounter + ' of ' + adBreak.ads.length + ': ' + Number(adDuration).toFixed(2) + 's remaining'
+            );
           } else {
             $('#adBreakLabel').text('AdBreak: false');
             $('#adLabel').text('Ad: false');
