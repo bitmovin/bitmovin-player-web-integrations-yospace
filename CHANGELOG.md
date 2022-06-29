@@ -23,6 +23,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - `getYospaceManager` to `getYospaceSession`
 - Build chain to use webpack, eslint and prettier
 - Yospace SDK to be imported via npm
+- Events of the `BitmovinYospacePlayer` are now triggered asynchronously
 
 ## Removed
 
