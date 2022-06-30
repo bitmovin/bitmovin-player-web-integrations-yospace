@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - `hiddenFromUser` method to Companion Ads, which should be fired when the ad is hidden from the user
 - `UNKNOWN_FORMAT` error (code `1011`)
 - `YospaceConfiguration.debugYospaceSdk` to enable debug logs of the Yospace SDK without enabling logs for the `BitmovinYospacePlayer` (helpful for Yospace validation)
+- Support for tracking muted/unmuted changes
 
 ## Changed
 

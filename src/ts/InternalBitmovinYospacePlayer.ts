@@ -36,6 +36,7 @@ import {
   SeekEvent,
   TimeChangedEvent,
   TimeRange,
+  UserInteractionEvent,
 } from 'bitmovin-player/modules/bitmovinplayer-core';
 
 import {
@@ -1037,6 +1038,9 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     this.player.on(this.player.exports.PlayerEvent.StallStarted, this.onStallStarted);
     this.player.on(this.player.exports.PlayerEvent.StallEnded, this.onStallEnded);
 
+    this.player.on(this.player.exports.PlayerEvent.Muted, this.onMuted);
+    this.player.on(this.player.exports.PlayerEvent.Unmuted, this.onUnmuted);
+
     // To support ads in live streams we need to track metadata events
     this.player.on(this.player.exports.PlayerEvent.Metadata, this.onMetaData);
   }
@@ -1049,6 +1053,9 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     this.player.off(this.player.exports.PlayerEvent.Seeked, this.onSeeked);
     this.player.off(this.player.exports.PlayerEvent.StallStarted, this.onStallStarted);
     this.player.off(this.player.exports.PlayerEvent.StallEnded, this.onStallEnded);
+
+    this.player.on(this.player.exports.PlayerEvent.Muted, this.onMuted);
+    this.player.on(this.player.exports.PlayerEvent.Unmuted, this.onUnmuted);
 
     // To support ads in live streams we need to track metadata events
     this.player.off(this.player.exports.PlayerEvent.Metadata, this.onMetaData);
@@ -1126,6 +1133,16 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   private onStallEnded = (event: SeekEvent) => {
     Logger.log('[BitmovinYospacePlayer] - sending YospaceAdManagement.PlayerEvent.CONTINUE');
     this.session.onPlayerEvent(YsPlayerEvent.CONTINUE, toMilliseconds(this.player.getCurrentTime()));
+  };
+
+  private onMuted = (event: UserInteractionEvent) => {
+    Logger.log('[BitmovinYospacePlayer] - sending YospaceAdManagement.onVolumenChange(muted=true)');
+    this.session.onVolumeChange(true);
+  };
+
+  private onUnmuted = (event: UserInteractionEvent) => {
+    Logger.log('[BitmovinYospacePlayer] - sending YospaceAdManagement.onVolumenChange(muted=false)');
+    this.session.onVolumeChange(false);
   };
 
   private onMetaData = (event: MetadataEvent) => {
