@@ -273,7 +273,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       const properties = new SessionProperties();
       properties.setUserAgent(navigator.userAgent);
 
-      if (this.yospaceConfig.debug) {
+      if (this.yospaceConfig.debug || this.yospaceConfig.debugYospaceSdk) {
         YoLog.setDebugFlags(DEBUG_ALL);
       }
 
