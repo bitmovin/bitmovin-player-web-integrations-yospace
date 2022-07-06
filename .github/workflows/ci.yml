@@ -23,6 +23,14 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Checkout
         uses: actions/checkout@v3
+        
+      # The Yospace private npm registry seems to not support NPM token so we sadly need to use password and email
+      - name: Log in to Yospace private NPM registry
+        run: |
+          cp .npmrc ~/.npmrc
+          echo "//yospacerepo.jfrog.io/artifactory/api/npm/javascript-sdk/:_password=${{ secrets.NPM_YOSPACE_PASS }}" >> ~/.npmrc
+          echo "//yospacerepo.jfrog.io/artifactory/api/npm/javascript-sdk/:username=${{ secrets.NPM_YOSPACE_USER }}" >> ~/.npmrc
+          echo "//yospacerepo.jfrog.io/artifactory/api/npm/javascript-sdk/:email=${{ secrets.NPM_YOSPACE_EMAIL }}" >> ~/.npmrc
 
       - name: Set up node.js
         uses: actions/setup-node@v3.3.0
