@@ -1,12 +1,13 @@
 {
-  "files": [
-    "src/ts/main.ts"
-  ],
+  "files": ["src/ts/main.ts"],
   "compilerOptions": {
     "noImplicitAny": true,
+    "module": "es6",
+    "moduleResolution": "node",
     "target": "es5",
     "declaration": true,
     "outDir": "dist/js",
+    "sourceMap": true,
     "lib": ["es2016", "es2015.promise", "dom"]
   }
 }

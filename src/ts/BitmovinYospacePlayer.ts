@@ -7,7 +7,6 @@ import {
   LogLevel,
   LowLatencyAPI,
   MetadataType,
-  Player,
   PlayerAPI,
   PlayerBufferAPI,
   PlayerConfig,
@@ -19,6 +18,7 @@ import {
   SegmentMap,
   Snapshot,
   SourceConfig,
+  StaticPlayerAPI,
   StreamType,
   SupportedTechnologyMode,
   Technology,
@@ -30,41 +30,24 @@ import {
 } from 'bitmovin-player/modules/bitmovinplayer-core';
 import { InternalBitmovinYospacePlayer } from './InternalBitmovinYospacePlayer';
 
-import PolyfillModule from 'bitmovin-player/modules/bitmovinplayer-polyfill';
-import XMLModule from 'bitmovin-player/modules/bitmovinplayer-xml';
-import StyleModule from 'bitmovin-player/modules/bitmovinplayer-style';
-import AdvertisingCoreModule, { PlayerAdvertisingAPI } from 'bitmovin-player/modules/bitmovinplayer-advertising-core';
-import AdvertisingBitmovinModule from 'bitmovin-player/modules/bitmovinplayer-advertising-bitmovin';
-import MSERendererModule from 'bitmovin-player/modules/bitmovinplayer-mserenderer';
-import EngineBitmovinModule from 'bitmovin-player/modules/bitmovinplayer-engine-bitmovin';
-import HLSModule from 'bitmovin-player/modules/bitmovinplayer-hls';
-import DASHModule from 'bitmovin-player/modules/bitmovinplayer-dash';
-import ABRModule from 'bitmovin-player/modules/bitmovinplayer-abr';
-import ContainerMP4Module from 'bitmovin-player/modules/bitmovinplayer-container-mp4';
-import ContainerTSModule from 'bitmovin-player/modules/bitmovinplayer-container-ts';
-import SubtitlesModule, { PlayerSubtitlesAPI } from 'bitmovin-player/modules/bitmovinplayer-subtitles';
-import SubtitlesCEA608Module from 'bitmovin-player/modules/bitmovinplayer-subtitles-cea608';
-import SubtitlesNativeModule from 'bitmovin-player/modules/bitmovinplayer-subtitles-native';
-import SubtitlesVTTModule from 'bitmovin-player/modules/bitmovinplayer-subtitles-vtt';
-import SubtitlesTTMLModule from 'bitmovin-player/modules/bitmovinplayer-subtitles-ttml';
-import ThumbnailModule from 'bitmovin-player/modules/bitmovinplayer-thumbnail';
-import CryptoModule from 'bitmovin-player/modules/bitmovinplayer-crypto';
-import PatchModule from 'bitmovin-player/modules/bitmovinplayer-patch';
-import EngineNativeModule from 'bitmovin-player/modules/bitmovinplayer-engine-native';
-import DRMModule from 'bitmovin-player/modules/bitmovinplayer-drm';
-import RemoteControlModule from 'bitmovin-player/modules/bitmovinplayer-remotecontrol';
-import ServiceWorkerClientModule from 'bitmovin-player/modules/bitmovinplayer-serviceworker-client';
-import TizenModule from 'bitmovin-player/modules/bitmovinplayer-tizen';
-import WebosModule from 'bitmovin-player/modules/bitmovinplayer-webos';
-
 import { Bitmovin8Adapter } from 'bitmovin-analytics';
 
 import { ArrayUtils } from 'bitmovin-player-ui/dist/js/framework/arrayutils';
-import { PlayerVRAPI } from 'bitmovin-player';
+import { PlayerAdvertisingAPI } from 'bitmovin-player/modules/bitmovinplayer-advertising-core';
+import { PlayerVRAPI } from 'bitmovin-player/modules/bitmovinplayer-vr';
+import { PlayerSubtitlesAPI } from 'bitmovin-player/modules/bitmovinplayer-subtitles';
 import {
-  BitmovinYospacePlayerAPI, BitmovinYospacePlayerExports, BitmovinYospacePlayerPolicy, YospaceAssetType,
-  YospaceConfiguration, YospaceErrorCode, YospacePlayerEvent, YospacePlayerEventCallback, YospacePlayerType,
-  YospacePolicyErrorCode, YospaceSourceConfig,
+  BitmovinYospacePlayerAPI,
+  BitmovinYospacePlayerExports,
+  BitmovinYospacePlayerPolicy,
+  YospaceAssetType,
+  YospaceConfiguration,
+  YospaceErrorCode,
+  YospacePlayerEvent,
+  YospacePlayerEventCallback,
+  YospacePlayerType,
+  YospacePolicyErrorCode,
+  YospaceSourceConfig,
 } from './BitmovinYospacePlayerAPI';
 import { Logger } from './Logger';
 import { BitmovinYospaceHelper } from './BitmovinYospaceHelper';
@@ -76,13 +59,20 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   private bitmovinPlayer: PlayerAPI;
   private currentPlayerType: YospacePlayerType = YospacePlayerType.BitmovinYospace;
 
+  private BitmovinPlayerStaticApi: StaticPlayerAPI;
   private containerElement: HTMLElement;
   private config: PlayerConfig;
   private yospaceConfig: YospaceConfiguration;
   // Collect all eventHandlers to reattach them to the current used player
-  private eventHandlers: { [eventType: string]: YospacePlayerEventCallback[]; } = {};
+  private eventHandlers: { [eventType: string]: YospacePlayerEventCallback[] } = {};
 
-  constructor(containerElement: HTMLElement, config: PlayerConfig, yospaceConfig: YospaceConfiguration = {}) {
+  constructor(
+    BitmovinPlayerStaticApi: StaticPlayerAPI,
+    containerElement: HTMLElement,
+    config: PlayerConfig,
+    yospaceConfig: YospaceConfiguration = {}
+  ) {
+    this.BitmovinPlayerStaticApi = BitmovinPlayerStaticApi;
     this.containerElement = containerElement;
     this.config = config;
     this.yospaceConfig = yospaceConfig;
@@ -93,8 +83,10 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 
     // Clear advertising config
     if (config.advertising) {
-      Logger.warn('Client side advertising config is not supported. If you are using the BitmovinPlayer as' +
-        'fallback please use player.ads.schedule');
+      Logger.warn(
+        'Client side advertising config is not supported. If you are using the BitmovinPlayer as' +
+          'fallback please use player.ads.schedule'
+      );
     }
     // add advertising again to load ads module
     config.advertising = {};
@@ -106,45 +98,20 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 
     Logger.log('[BitmovinYospacePlayer] creating BitmovinPlayer with configuration ' + stringify(this.config));
 
-    // initialize bitmovin player
-    Player.addModule(PolyfillModule);
-    Player.addModule(XMLModule);
-    Player.addModule(StyleModule);
-    Player.addModule(AdvertisingCoreModule);
-    Player.addModule(AdvertisingBitmovinModule);
-    Player.addModule(MSERendererModule);
-    Player.addModule(EngineNativeModule);
-    Player.addModule(EngineBitmovinModule);
-    Player.addModule(HLSModule);
-    Player.addModule(DASHModule);
-    Player.addModule(ABRModule);
-    Player.addModule(ContainerMP4Module);
-    Player.addModule(ContainerTSModule);
-    Player.addModule(SubtitlesModule);
-    Player.addModule(SubtitlesCEA608Module);
-    Player.addModule(SubtitlesNativeModule);
-    Player.addModule(SubtitlesVTTModule);
-    Player.addModule(SubtitlesTTMLModule);
-    Player.addModule(ThumbnailModule);
-    Player.addModule(CryptoModule);
-    Player.addModule(PatchModule);
-    Player.addModule(DRMModule);
-    Player.addModule(RemoteControlModule);
-    Player.addModule(ServiceWorkerClientModule);
+    this.createPlayer();
 
-    if (yospaceConfig.useTizen) {
-      Player.addModule(TizenModule);
+    if (
+      yospaceConfig.useTizen &&
+      !this.BitmovinPlayerStaticApi.getModules().includes(this.player.exports.ModuleName.Tizen)
+    ) {
+      Logger.warn('Built for WebOS usage but no BitmovinPlayer WebOS module found.');
     }
-    if (yospaceConfig.useWebos) {
-      Player.addModule(WebosModule);
+    if (
+      yospaceConfig.useWebos &&
+      !this.BitmovinPlayerStaticApi.getModules().includes(this.player.exports.ModuleName.Webos)
+    ) {
+      Logger.warn('Built for WebOS usage but no BitmovinPlayer WebOS module found.');
     }
-  }
-
-  setup(): Promise<void> {
-    return this.unregisterAllServiceWorker().then().catch().then(() => {
-        this.createPlayer();
-      },
-    );
   }
 
   private createPlayer(): void {
@@ -169,60 +136,48 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 
       Logger.log('Loading the ServiceWorkerModule');
     }
-    this.bitmovinPlayer = new Player(this.containerElement, this.config);
+    this.bitmovinPlayer = new this.BitmovinPlayerStaticApi(this.containerElement, this.config);
 
     this.bitmovinYospacePlayer = new InternalBitmovinYospacePlayer(
       this.containerElement,
       this.bitmovinPlayer,
-      this.yospaceConfig,
+      this.yospaceConfig
     ) as any as BitmovinYospacePlayerAPI;
 
     this.player = this.bitmovinYospacePlayer;
   }
 
-  unregisterAllServiceWorker(): Promise<void> {
-    if (navigator.serviceWorker && !this.yospaceConfig.disableServiceWorker) {
-      return navigator.serviceWorker.getRegistrations().then((registrations) => {
-        return Promise
-          .all(registrations.map(registration => registration.unregister()))
-          .then(() => {
-          });
-      });
-    } else {
-      return Promise.resolve();
-    }
-  }
-
   load(source: SourceConfig | YospaceSourceConfig, forceTechnology?: string, disableSeeking?: boolean): Promise<void> {
     return new Promise<void>((resolve, reject) => {
-      const isAssetTypePresent = (): boolean => {
-        return source.hasOwnProperty('assetType') && (source as YospaceSourceConfig).assetType !== undefined;
-      };
+      const isAssetTypePresent = (): boolean => (source as YospaceSourceConfig).assetType !== undefined;
 
       const switchPlayer = (toType: YospacePlayerType) => {
-        this.player.unload().then(() => {
-          const oldPlayer: BitmovinYospacePlayerAPI = this.player;
-          if (toType === YospacePlayerType.Bitmovin) {
-            this.player = this.bitmovinPlayer as BitmovinYospacePlayerAPI;
-          } else {
-            this.player = this.bitmovinYospacePlayer;
-          }
-
-          this.currentPlayerType = toType;
-
-          for (let eventType of Object.keys(this.eventHandlers)) {
-            for (let eventCallback of this.eventHandlers[eventType]) {
-              oldPlayer.off(eventType as YospacePlayerEvent, eventCallback);
-              this.player.on(eventType as YospacePlayerEvent, eventCallback);
+        this.player
+          .unload()
+          .then(() => {
+            const oldPlayer: BitmovinYospacePlayerAPI = this.player;
+            if (toType === YospacePlayerType.Bitmovin) {
+              this.player = this.bitmovinPlayer as BitmovinYospacePlayerAPI;
+            } else {
+              this.player = this.bitmovinYospacePlayer;
             }
-          }
 
-          new Bitmovin8Adapter(this.player);
+            this.currentPlayerType = toType;
 
-          Logger.log('BitmovinYospacePlayer loading source after switching players- ' + stringify(source));
+            for (const eventType of Object.keys(this.eventHandlers)) {
+              for (const eventCallback of this.eventHandlers[eventType]) {
+                oldPlayer.off(eventType as YospacePlayerEvent, eventCallback);
+                this.player.on(eventType as YospacePlayerEvent, eventCallback);
+              }
+            }
 
-          this.player.load(source, forceTechnology, disableSeeking).then(resolve).catch(reject);
-        }).catch(reject);
+            new Bitmovin8Adapter(this.player);
+
+            Logger.log('BitmovinYospacePlayer loading source after switching players- ' + stringify(source));
+
+            this.player.load(source, forceTechnology, disableSeeking).then(resolve).catch(reject);
+          })
+          .catch(reject);
       };
 
       // Only switch player when necessary
@@ -262,8 +217,10 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   // here to ensure the feature during the live time of the BitmovinYospacePlayer
   setPolicy(policy: BitmovinYospacePlayerPolicy): void {
     if (this.getCurrentPlayerType() === YospacePlayerType.Bitmovin) {
-      Logger.log('[BitmovinYospacePlayer] Policy does not apply for Bitmovin Player but is saved for further ' +
-        'BitmovinYospace Player usage');
+      Logger.log(
+        '[BitmovinYospacePlayer] Policy does not apply for Bitmovin Player but is saved for further ' +
+          'BitmovinYospace Player usage'
+      );
     }
 
     this.bitmovinYospacePlayer.setPolicy(policy);
@@ -603,6 +560,14 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 
   unmute(issuer?: string): void {
     return this.player.unmute();
+  }
+
+  setAspectRatio(aspectratio: string | number): void {
+    return this.player.setAspectRatio(aspectratio);
+  }
+
+  getAspectRatio(): number {
+    return this.player.getAspectRatio();
   }
 
   readonly drm: DrmAPI;

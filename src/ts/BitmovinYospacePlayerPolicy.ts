@@ -17,7 +17,7 @@ export class DefaultBitmovinYospacePlayerPolicy implements BitmovinYospacePlayer
     const currentTime = this.player.getCurrentTime();
     const adBreaks = this.player.ads.list();
 
-    const skippedAdBreaks = adBreaks.filter(adBreak => {
+    const skippedAdBreaks = adBreaks.filter((adBreak) => {
       return adBreak.scheduleTime > currentTime && adBreak.scheduleTime < seekTarget;
     });
 
@@ -56,6 +56,6 @@ export class DefaultBitmovinYospacePlayerPolicy implements BitmovinYospacePlayer
   }
 
   canChangePlaybackSpeed(): boolean {
-    return !Boolean(this.player.ads.getActiveAd());
+    return !this.player.ads.getActiveAd();
   }
 }

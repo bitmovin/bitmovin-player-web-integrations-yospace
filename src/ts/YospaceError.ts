@@ -5,9 +5,9 @@ export class YospacePlayerError implements Error {
   public readonly message: string;
   public readonly name: string;
   public readonly stack: string;
-  public readonly data: { [key: string]: any; };
+  public readonly data: { [key: string]: any };
 
-  constructor(code: YospaceErrorCode, data?: { [key: string]: any; }, message?: string) {
+  constructor(code: YospaceErrorCode, data?: { [key: string]: any }, message?: string) {
     this.code = code;
     this.name = YospaceErrorCode[code];
 
@@ -18,6 +18,6 @@ export class YospacePlayerError implements Error {
     }
 
     this.data = data;
-    this.stack = (new Error(this.message)).stack;
+    this.stack = new Error(this.message).stack;
   }
 }
