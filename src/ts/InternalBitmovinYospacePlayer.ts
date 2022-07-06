@@ -36,6 +36,7 @@ import {
   SeekEvent,
   TimeChangedEvent,
   TimeRange,
+  UserInteractionEvent,
 } from 'bitmovin-player/modules/bitmovinplayer-core';
 
 import {
@@ -273,7 +274,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       const properties = new SessionProperties();
       properties.setUserAgent(navigator.userAgent);
 
-      if (this.yospaceConfig.debug) {
+      if (this.yospaceConfig.debug || this.yospaceConfig.debugYospaceSdk) {
         YoLog.setDebugFlags(DEBUG_ALL);
       }
 
@@ -565,7 +566,14 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 
   private fireEvent<E extends PlayerEventBase | YospaceEventBase>(event: E): void {
     if (this.eventHandlers[event.type]) {
-      this.eventHandlers[event.type].forEach((callback: YospacePlayerEventCallback) => callback(event));
+      this.eventHandlers[event.type].forEach(
+        // Trigger events to the customer application asynchronously using setTimeout(fn, 0). The Yospace SDK manages
+        // the session state using time updates and other events, and if some event handlers (especially AdFinished)
+        // takes too long to execute, the Yospace SDK might get into a wrong state, reporting advertEnd twice etc. This
+        // can be avoided by enforcing the callback to be run as a separate point in the JS event loop.
+        (callback: YospacePlayerEventCallback) => setTimeout(() => callback(event), 0),
+        this
+      );
     }
   }
 
@@ -1012,7 +1020,9 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     },
 
     getModuleInfo: () => {
-      const moduleInfo = this.player.ads.getModuleInfo();
+      // If no advertising module is provided besides the core (i.e. `ima` or `bitmovin`), everything still works but
+      // getting the module info for analytics fails. Adding a fallback for this case.
+      const moduleInfo = this.player.ads?.getModuleInfo() || { name: 'advertising', version: this.player.version };
       moduleInfo.name += '-yospace-integration';
       return moduleInfo;
     },
@@ -1028,6 +1038,9 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     this.player.on(this.player.exports.PlayerEvent.StallStarted, this.onStallStarted);
     this.player.on(this.player.exports.PlayerEvent.StallEnded, this.onStallEnded);
 
+    this.player.on(this.player.exports.PlayerEvent.Muted, this.onMuted);
+    this.player.on(this.player.exports.PlayerEvent.Unmuted, this.onUnmuted);
+
     // To support ads in live streams we need to track metadata events
     this.player.on(this.player.exports.PlayerEvent.Metadata, this.onMetaData);
   }
@@ -1040,6 +1053,9 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     this.player.off(this.player.exports.PlayerEvent.Seeked, this.onSeeked);
     this.player.off(this.player.exports.PlayerEvent.StallStarted, this.onStallStarted);
     this.player.off(this.player.exports.PlayerEvent.StallEnded, this.onStallEnded);
+
+    this.player.on(this.player.exports.PlayerEvent.Muted, this.onMuted);
+    this.player.on(this.player.exports.PlayerEvent.Unmuted, this.onUnmuted);
 
     // To support ads in live streams we need to track metadata events
     this.player.off(this.player.exports.PlayerEvent.Metadata, this.onMetaData);
@@ -1057,12 +1073,12 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   };
 
   private onTimeChanged = (event: TimeChangedEvent) => {
-    this.lastTimeChangedTime = event.time;
-
     // There is an outstanding bug on Safari mobile where upon exiting an ad break,
     // our TimeChanged event "rewinds" ~12 ms. This is a temporary fix.
     // If we report this "rewind" to Yospace, it results in duplicate ad events.
     const timeDifference = event.time - this.lastTimeChangedTime;
+    this.lastTimeChangedTime = event.time;
+
     if (timeDifference >= 0 || timeDifference < -0.25) {
       this.session.onPlayheadUpdate(toMilliseconds(event.time));
     } else {
@@ -1117,6 +1133,16 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   private onStallEnded = (event: SeekEvent) => {
     Logger.log('[BitmovinYospacePlayer] - sending YospaceAdManagement.PlayerEvent.CONTINUE');
     this.session.onPlayerEvent(YsPlayerEvent.CONTINUE, toMilliseconds(this.player.getCurrentTime()));
+  };
+
+  private onMuted = (event: UserInteractionEvent) => {
+    Logger.log('[BitmovinYospacePlayer] - sending YospaceAdManagement.onVolumenChange(muted=true)');
+    this.session.onVolumeChange(true);
+  };
+
+  private onUnmuted = (event: UserInteractionEvent) => {
+    Logger.log('[BitmovinYospacePlayer] - sending YospaceAdManagement.onVolumenChange(muted=false)');
+    this.session.onVolumeChange(false);
   };
 
   private onMetaData = (event: MetadataEvent) => {

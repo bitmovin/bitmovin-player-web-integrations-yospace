@@ -1,2 +1,11 @@
 .idea
-yospace
+.vscode
+.husky
+.nvmrc
+.prettier*
+.eslint*
+src
+tizen
+WebOS
+tsconfig*
+webpack*

@@ -39,6 +39,10 @@
     ></script>
     <script
       type="text/javascript"
+      src="https://cdn.bitmovin.com/player/web/8/modules/bitmovinplayer-advertising-bitmovin.js"
+    ></script>
+    <script
+      type="text/javascript"
       src="https://cdn.bitmovin.com/player/web/8/modules/bitmovinplayer-mserenderer.js"
     ></script>
     <script
@@ -212,6 +216,16 @@
       var customStreamButton = $('#load-custom-steam');
       var customStreamTypeSelect = $('#stream-type-select');
 
+      function log(message) {
+        if (isValidationMode) return;
+        console.log(message);
+      }
+
+      function debug(message) {
+        if (isValidationMode) return;
+        console.debug(message);
+      }
+
       function unregisterAllServiceWorker() {
         if (navigator.serviceWorker) {
           return navigator.serviceWorker.getRegistrations().then((registrations) => {
@@ -234,6 +248,11 @@
           return decodeURI(results[1]) || 0;
         }
       };
+
+      var isValidationMode = false;
+      if ($.urlParam('validation')) {
+        isValidationMode = $.urlParam('validation').toLowerCase() === 'true';
+      }
 
       var debugOverride = true;
       if ($.urlParam('debug')) {
@@ -319,10 +338,10 @@
         yospacePlayer
           .load(artOfMotionSource)
           .then(() => {
-            console.log('[log] Non yospace source loaded');
+            log('[log] Non yospace source loaded');
           })
           .catch(() => {
-            console.log('[log] Loading non yospace source failed');
+            log('[log] Loading non yospace source failed');
           });
       });
 
@@ -403,8 +422,8 @@
         },
         logs: {
           level: 'none',
+          bitmovin: !isValidationMode,
         },
-        advertising: {},
         ui: false,
         tweaks: {
           enable_seek_for_live: true,
@@ -415,7 +434,8 @@
 
       // Yospace configuration
       var yospaceConfig = {
-        debug: debugOverride,
+        debug: debugOverride && !isValidationMode,
+        debugYospaceSdk: isValidationMode,
         disableStrictBreaks: false,
         disableServiceWorker: false,
       };
@@ -475,6 +495,7 @@
         bitmovin.player.core.Player.addModule(window.bitmovin.player['style'].default);
         bitmovin.player.core.Player.addModule(window.bitmovin.player['xml'].default);
         bitmovin.player.core.Player.addModule(window.bitmovin.player['advertising-core'].default);
+        bitmovin.player.core.Player.addModule(window.bitmovin.player['advertising-bitmovin'].default);
         bitmovin.player.core.Player.addModule(window.bitmovin.player['engine-bitmovin'].default);
         bitmovin.player.core.Player.addModule(window.bitmovin.player['mserenderer'].default);
         bitmovin.player.core.Player.addModule(window.bitmovin.player['hls'].default);
@@ -504,7 +525,7 @@
         var uiManager = new bitmovin.playerui.UIFactory.buildDefaultUI(yospacePlayer);
 
         yospacePlayer.on('sourceloaded', function (event) {
-          console.log('[BYP] sourceloaded ', cloneDeepSimple(event));
+          log('[BYP] sourceloaded ', cloneDeepSimple(event));
 
           yospacePlayer.ads.list().forEach(function (adBreak) {
             uiManager.addTimelineMarker({ time: adBreak.scheduleTime, title: 'Ad Break' });
@@ -512,7 +533,7 @@
         });
 
         yospacePlayer.on('ready', function (event) {
-          console.log('[BYP] ready ', cloneDeepSimple(event));
+          log('[BYP] ready ', cloneDeepSimple(event));
 
           if (!autoplay) {
             yospacePlayer.play();
@@ -520,7 +541,7 @@
         });
 
         yospacePlayer.on('moduleready', function (event) {
-          console.log('[BYP] moduleready ', cloneDeepSimple(event));
+          log('[BYP] moduleready ', cloneDeepSimple(event));
         });
 
         yospacePlayer.on('aderror', function (event) {
@@ -528,7 +549,7 @@
         });
 
         yospacePlayer.on('playing', function (event) {
-          console.log('[BYP] playing ', cloneDeepSimple(event));
+          log('[BYP] playing ', cloneDeepSimple(event));
         });
 
         yospacePlayer.on('yospaceerror', function (event) {
@@ -536,11 +557,11 @@
         });
 
         yospacePlayer.on('metadata', function (event) {
-          console.log('[BYP] Metadata: ', cloneDeepSimple(event));
+          log('[BYP] Metadata: ', cloneDeepSimple(event));
         });
 
         yospacePlayer.on('metadataparsed', function (event) {
-          console.log('[BYP] Metadata Parsed: ', cloneDeepSimple(event));
+          log('[BYP] Metadata Parsed: ', cloneDeepSimple(event));
         });
 
         yospacePlayer.setPolicy(sampleYospacePlayerPolicy);
@@ -567,19 +588,19 @@
         });
 
         yospacePlayer.on('adskipped', function (event) {
-          console.debug('[BYP] Ad Skipped: ', cloneDeepSimple(event));
+          debug('[BYP] Ad Skipped: ', cloneDeepSimple(event));
         });
 
         yospacePlayer.on('truexadfree', function (event) {
           truexAdFree = true;
-          console.debug(event);
+          debug(event);
           const seekPosition = adBreakState.ab.scheduleTime + 1;
           console.warn('TrueXAdFree Seeking to ' + seekPosition);
           yospacePlayer.forceSeek(seekPosition);
         });
 
         yospacePlayer.on('adstarted', function (event) {
-          console.debug('[BYP] Ad Started: ', cloneDeepSimple(event));
+          debug('[BYP] Ad Started: ', cloneDeepSimple(event));
           adBreakState.as++;
           adBreakState.ad = event.ad;
           updateAdEventTable();
@@ -596,7 +617,7 @@
           let activeAdBreak = yospacePlayer.ads.getActiveAdBreak();
           let activeAd = yospacePlayer.ads.getActiveAd();
 
-          console.debug('[BYP] Active Ad Break: ', cloneDeepSimple(activeAdBreak));
+          debug('[BYP] Active Ad Break: ', cloneDeepSimple(activeAdBreak));
           var table = $('#adTable');
           var header = $('<thead/>');
           // var row = $('<tr/>')
@@ -625,7 +646,7 @@
         });
 
         yospacePlayer.on('adfinished', function (event) {
-          console.info('[BYP] Ad Finished: ', cloneDeepSimple(event));
+          log('[BYP] Ad Finished: ', cloneDeepSimple(event));
           adBreakState.af++;
           updateAdEventTable();
           var companion = document.getElementById('companionDiv');
@@ -638,20 +659,20 @@
         });
 
         yospacePlayer.on('adbreakfinished', function (event) {
-          console.debug('[BYP] Ad Break Finished: ', cloneDeepSimple(event));
+          debug('[BYP] Ad Break Finished: ', cloneDeepSimple(event));
           adBreakState.abf++;
           updateAdEventTable();
         });
 
         yospacePlayer.on('adbreakstarted', function (event) {
-          console.debug('[BYP] Ad Break Started: ', cloneDeepSimple(event));
+          debug('[BYP] Ad Break Started: ', cloneDeepSimple(event));
           adBreakState.abs++;
           adBreakState.ab = event.adBreak;
           updateAdEventTable();
         });
 
         yospacePlayer.on('playbackfinished', function (event) {
-          console.debug('[BYP] Playback Finished: ', cloneDeepSimple(event));
+          debug('[BYP] Playback Finished: ', cloneDeepSimple(event));
 
           yospacePlayer.unload();
         });
@@ -659,7 +680,7 @@
         yospacePlayer.on('timechanged', function (event) {
           if (debugOverride) {
             // This log is noisy, only output when debug is enabled
-            console.log('[BYP] Time Changed: ', cloneDeepSimple(event));
+            log('[BYP] Time Changed: ', cloneDeepSimple(event));
           }
           let adBreak = yospacePlayer.ads.getActiveAdBreak();
           let ad = yospacePlayer.ads.getActiveAd();
@@ -680,8 +701,10 @@
               }
             }
 
-            $('#adBreakLabel').text('AdBreak: ' + duration + ' remaining');
-            $('#adLabel').text('Ad: ' + adCounter + ' of ' + adBreak.ads.length + '  ' + adDuration + ' remaining');
+            $('#adBreakLabel').text('AdBreak: ' + Number(duration).toFixed(2) + 's remaining');
+            $('#adLabel').text(
+              'Ad ' + adCounter + ' of ' + adBreak.ads.length + ': ' + Number(adDuration).toFixed(2) + 's remaining'
+            );
           } else {
             $('#adBreakLabel').text('AdBreak: false');
             $('#adLabel').text('Ad: false');

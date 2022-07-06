@@ -95,6 +95,7 @@ export enum CompanionAdType {
 
 export interface YospaceConfiguration {
   debug?: boolean;
+  debugYospaceSdk?: boolean;
   disableServiceWorker?: boolean;
   disableStrictBreaks?: boolean;
   useTizen?: boolean;

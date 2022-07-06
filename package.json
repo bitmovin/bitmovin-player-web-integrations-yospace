@@ -1,11 +1,11 @@
 {
   "name": "@bitmovin/player-integration-yospace",
-  "version": "1.2.25",
+  "version": "2.0.0",
   "description": "Yospace integration for the Bitmovin Player",
   "main": "./dist/js/bitmovin-player-yospace.js",
   "types": "./dist/js/main.d.ts",
   "scripts": {
-    "prepublishOnly": "npm run lint && npm run build",
+    "prepublishOnly": "npm run clean; npm run lint && npm run build",
     "build": "npm run copyStaticToDist && webpack --config webpack.prod.js",
     "build-tv": "npm run build && npm run copyToTizen && npm run copyToWebOS",
     "start": "npm run copyStaticToDist && webpack serve --open --config webpack.dev.js",
@@ -14,6 +14,7 @@
     "copyToWebOS": "cp ./dist/js/bitmovin-player-yospace.min.js ./WebOS/src/js",
     "lint": "eslint --quiet src/",
     "format": "prettier --write src/",
+    "clean": "rm -R ./dist",
     "prepare": "husky install"
   },
   "lint-staged": {
