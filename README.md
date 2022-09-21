@@ -4,6 +4,12 @@ This integration completely encapsulates the usage of Yospace. After creating th
 
 ## Usage
 
+### Create Sample
+
+1. Create .npmrc following instructions @ [Yospace Developer](https://developer.yospace.com/sdk-documentation/javascript/userguide/latest/en/downloads.html#running-a-sample-app) > #1.a & #1.b
+2. Run `npm install`
+3. Serve the example files in `/dist` folder
+
 ### Basic Setup
 
 #### With NPM
