@@ -12,3 +12,7 @@ export class BitmovinYospaceHelper {
     return /Safari/i.test(navigator.userAgent) && /iP(hone|od|ad)/i.test(navigator.userAgent);
   }
 }
+
+export enum EmsgSchemeIdUri {
+  V1 = 'https://aomedia.org/emsg/ID3',
+}
