@@ -83,7 +83,8 @@ import { BitmovinYospaceHelper, EmsgSchemeIdUri } from './BitmovinYospaceHelper'
 import stringify from 'fast-safe-stringify';
 import { XmlNode } from '@yospace/admanagement-sdk/types/Parsers/XmlNode';
 
-import { BitmovinId3FramesExtractor } from '../js/BitmovinId3FramesExtractor';
+import { BitmovinId3FramesExtractor, Frame } from './BitmovinId3FramesExtractor';
+// import { BitmovinId3FramesExtractor } from '../js/BitmovinId3FramesExtractor';
 
 const toSeconds = (ms: number): number => ms / 1000;
 const toMilliseconds = (s: number): number => s * 1000;
@@ -887,7 +888,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     this.fireEvent(event);
   }
 
-  private parseId3Tags(event: MetadataEvent, frames: Array<Map<string, any>> = null): TimedMetadata {
+  private parseId3Tags(event: MetadataEvent, frames: Frame[] = null): TimedMetadata {
     const charsToStr = (arr: [number]) => {
       return arr
         .filter((char) => char > 31 && char < 127)
@@ -903,6 +904,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 
     if (frames != null) {
       frames.forEach((frame: any) => {
+        Logger.log(charsToStr(frame.data));
         yospaceMetadataObject[frame.key] = charsToStr(frame.data);
       });
     } else {
@@ -937,9 +939,8 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       // messageData is decoded as UTF-8; hence encode back to UintArray
       const textEncoder = new TextEncoder();
       try {
-        const id3Frames = BitmovinId3FramesExtractor.extractId3FramesFromEmsg(
-          textEncoder.encode(metadata.messageData)
-        ) as any;
+        const framesExtractor = new BitmovinId3FramesExtractor();
+        const id3Frames = framesExtractor.extractId3FramesFromEmsg(textEncoder.encode(metadata.messageData));
         return this.parseId3Tags(event, id3Frames);
       } catch (e) {
         Logger.warn(e);

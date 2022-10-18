@@ -42,6 +42,8 @@ export class BitmovinId3FramesExtractor {
       throw 'ID3 version > 0x400.';
     }
 
+    console.log(header['version']);
+
     // flags; UNSYNC and EXTENDED HEADER are NOT required for Yospace implementation
     header['flags'] = BitmovinId3FramesExtractor.ReadUint(source, offset, 8);
     offset += 1;
