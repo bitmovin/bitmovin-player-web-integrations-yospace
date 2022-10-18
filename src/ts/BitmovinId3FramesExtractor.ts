@@ -145,6 +145,11 @@ export class BitmovinId3FramesExtractor {
     // file identifier; first 3 bytes.
     id3Tag.header.fileIdentifier = this.readBytesAsNumber(source, 3);
 
+    /* Excerpt from spec: 
+     * ID3v2/file identifier      "ID3"
+       The first three bytes of the tag are always "ID3", to indicate that
+       this is an ID3v2 tag.
+    */
     if (id3Tag.header.fileIdentifier != ID3_HEADER) {
       throw 'No ID3 fileIdentifier found.';
     }
@@ -152,6 +157,11 @@ export class BitmovinId3FramesExtractor {
     // version; next two bytes
     id3Tag.header.version = this.readBytesAsNumber(source, 2);
 
+    /* Excerpt from spec: 
+     * ID3v2 version              $04 00
+       If software with ID3v2.4.0 and below support should encounter version
+       five or higher it should simply ignore the whole tag.
+    */
     if (id3Tag.header.version > MAX_ID3_VERSION) {
       throw 'ID3 version > 0x400.';
     }
@@ -165,15 +175,24 @@ export class BitmovinId3FramesExtractor {
     }
 
     // LSF 4 bits MUST be unset
+    /* Excerpt from spec: 
+     * ID3v2 flags                %abcd0000
+       All the other flags MUST be cleared. If one of these undefined flags
+       are set, the tag might not be readable for a parser that does not
+       know the flags function.
+    */
     if ((id3Tag.header.flags & FLAG_CLEAR_BITS) != 0) {
       throw 'LSF 4 bit of Flag MUST be unset.';
     }
 
     id3Tag.header.syncSafeSize = this.readBytesAsSyncSafeNumber(source, 4);
 
+    // No frames found
+    /* Excerpt from spec:
+     * A tag MUST contain at least one frame.
+     */
     if (this.offset == id3Tag.header.syncSafeSize) {
-      // No frames found
-      return id3Tag.frames;
+      throw 'A tag MUST contain at least one frame.';
     }
 
     while (this.offset < id3Tag.header.syncSafeSize) {
@@ -183,8 +202,12 @@ export class BitmovinId3FramesExtractor {
       frame.syncSafeSize = this.readBytesAsSyncSafeNumber(source, 4);
 
       // Frame is empty
-      if (frame.syncSafeSize == 0) {
-        throw 'Frame is empty.';
+      /* Excerpt from spec:
+       * A frame must be at least 1 byte big, excluding the header.
+       */
+
+      if (frame.syncSafeSize < 0) {
+        throw 'A frame must be at least 1 byte big, excluding the header.';
       }
 
       //Fastforward the Frame flags
