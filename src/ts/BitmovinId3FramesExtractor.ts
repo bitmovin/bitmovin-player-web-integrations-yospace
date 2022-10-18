@@ -95,10 +95,10 @@ export class Frame {
 }
 
 export class BitmovinId3FramesExtractor {
-  private offset: number = 0;
+  private offset = 0;
 
   readBytes(buffer: Uint8Array, noOfBytes: number): Uint8Array {
-    let data = new Uint8Array(noOfBytes);
+    const data = new Uint8Array(noOfBytes);
     for (let i = 0; i < noOfBytes; i++) {
       data[i] = buffer[this.offset++];
     }
@@ -116,16 +116,15 @@ export class BitmovinId3FramesExtractor {
   }
 
   private readBytesAsSyncSafeNumber(buffer: Uint8Array, noOfBytes: number): number {
-    let size: number = 0;
+    let size = 0;
     for (let i = noOfBytes - 1; i >= 0; i--) {
-      let value = this.readBytesAsNumber(buffer, 1);
-      size += (value & SYNCSAFE_BIT) << (7 * i);
+      size += (this.readBytesAsNumber(buffer, 1) & SYNCSAFE_BIT) << (7 * i);
     }
     return size;
   }
 
   private readBytesAsNumberArray(buffer: Uint8Array, noOfBytes: number): Array<number> {
-    let numberArray = new Array<number>(noOfBytes); //new Int8Array(noOfBytes);
+    const numberArray = new Array<number>(noOfBytes); //new Int8Array(noOfBytes);
     for (let i = 0; i < noOfBytes; i++) {
       numberArray.push(this.readBytesAsNumber(buffer, 1));
     }
@@ -141,7 +140,7 @@ export class BitmovinId3FramesExtractor {
   }
 
   extractId3FramesFromEmsg(source: Uint8Array): Frame[] {
-    let id3Tag: Id3Tag = new Id3Tag();
+    const id3Tag: Id3Tag = new Id3Tag();
 
     // file identifier; first 3 bytes.
     id3Tag.header.fileIdentifier = this.readBytesAsNumber(source, 3);
@@ -178,7 +177,7 @@ export class BitmovinId3FramesExtractor {
     }
 
     while (this.offset < id3Tag.header.syncSafeSize) {
-      let frame = new Frame();
+      const frame = new Frame();
 
       frame.key = this.readBytesAsString(source, 4);
       frame.syncSafeSize = this.readBytesAsSyncSafeNumber(source, 4);
