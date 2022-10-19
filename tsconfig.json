@@ -8,7 +8,6 @@
     "declaration": true,
     "outDir": "dist/js",
     "sourceMap": true,
-    "lib": ["es2016", "es2015.promise", "dom"],
-    "allowJs": true
+    "lib": ["es2016", "es2015.promise", "dom"]
   }
 }

@@ -10,39 +10,24 @@ const SYNCSAFE_BIT = 0x7f; //i.e 0b01111111
  *  Per https://id3.org/id3v2.4.0-structure
  */
 
-class Id3TagHeader {
-  private _fileIdentifier: number;
-  private _version: number;
-  private _flags: number;
-  private _syncSafeSize: number;
+enum FrameTextEncoding {
+  Iso88591 = 0x00, // ISO-8859-1.
+  Utf16 = 0x01, // UTF-16 encoded Unicode BOM
+  Utf16be = 0x02, // UTF-16BE encoded Unicode
+  Utf8 = 0x03, // UTF-8 encoded Unicode
+}
 
-  set fileIdentifier(v: number) {
-    this._fileIdentifier = v;
-  }
-  get fileIdentifier(): number {
-    return this._fileIdentifier;
-  }
+interface Id3TagHeader {
+  fileIdentifier: number;
+  version: number;
+  flags: number;
+  syncSafeSize: number;
+}
 
-  set version(v: number) {
-    this._version = v;
-  }
-  get version(): number {
-    return this._version;
-  }
-
-  set flags(v: number) {
-    this._flags = v;
-  }
-  get flags(): number {
-    return this._flags;
-  }
-
-  set syncSafeSize(v: number) {
-    this._syncSafeSize = v;
-  }
-  get syncSafeSize(): number {
-    return this._syncSafeSize;
-  }
+export interface Frame {
+  key: string;
+  data: number[];
+  syncSafeSize: number;
 }
 
 class Id3Tag {
@@ -57,7 +42,7 @@ class Id3Tag {
   }
 
   constructor() {
-    this._header = new Id3TagHeader();
+    this._header = { fileIdentifier: 0, version: 0, flags: 0, syncSafeSize: 0 };
     this._frames = new Array<Frame>();
   }
 
@@ -66,43 +51,14 @@ class Id3Tag {
   }
 }
 
-export class Frame {
-  private _key: string;
-  private _data: number[];
-  private _syncSafeSize: number;
-
-  // private key : string;
-  set key(v: string) {
-    this._key = v;
-  }
-  get key(): string {
-    return this._key;
-  }
-
-  set data(v: number[]) {
-    this._data = v;
-  }
-  get data(): number[] {
-    return this._data;
-  }
-
-  set syncSafeSize(v: number) {
-    this._syncSafeSize = v;
-  }
-  get syncSafeSize(): number {
-    return this._syncSafeSize;
-  }
-}
-
 export class BitmovinId3FramesExtractor {
   private offset = 0;
 
-  readBytes(buffer: Uint8Array, noOfBytes: number): Uint8Array {
+  private readBytes(buffer: Uint8Array, noOfBytes: number): Uint8Array {
     const data = new Uint8Array(noOfBytes);
     for (let i = 0; i < noOfBytes; i++) {
       data[i] = buffer[this.offset++];
     }
-
     return data;
   }
 
@@ -123,11 +79,13 @@ export class BitmovinId3FramesExtractor {
     return size;
   }
 
-  private readBytesAsNumberArray(buffer: Uint8Array, noOfBytes: number): Array<number> {
-    const numberArray = new Array<number>(noOfBytes); //new Int8Array(noOfBytes);
+  private readBytesAsNumberArray(buffer: Uint8Array, noOfBytes: number): number[] {
+    const numberArray: number[] = [noOfBytes];
+
     for (let i = 0; i < noOfBytes; i++) {
-      numberArray.push(this.readBytesAsNumber(buffer, 1));
+      numberArray[i] = this.readBytesAsNumber(buffer, 1);
     }
+
     return numberArray;
   }
 
@@ -196,27 +154,28 @@ export class BitmovinId3FramesExtractor {
     }
 
     while (this.offset < id3Tag.header.syncSafeSize) {
-      const frame = new Frame();
-
-      frame.key = this.readBytesAsString(source, 4);
-      frame.syncSafeSize = this.readBytesAsSyncSafeNumber(source, 4);
+      const key = this.readBytesAsString(source, 4);
+      const syncSafeSize = this.readBytesAsSyncSafeNumber(source, 4);
 
       // Frame is empty
       /* Excerpt from spec:
        * A frame must be at least 1 byte big, excluding the header.
        */
 
-      if (frame.syncSafeSize < 0) {
+      if (syncSafeSize < 0) {
         throw 'A frame must be at least 1 byte big, excluding the header.';
       }
 
       //Fastforward the Frame flags
       this.offset += 2;
 
-      // We assume ASCII encoding
-      frame.data = this.readBytesAsNumberArray(source, frame.syncSafeSize);
+      // Read the data
+      const data = this.readBytesAsNumberArray(source, syncSafeSize);
 
-      id3Tag.pushFrame(frame);
+      // Parse frames that are ONLY UTF8
+      if (data[0] == FrameTextEncoding.Utf8) {
+        id3Tag.pushFrame({ key: key, syncSafeSize: syncSafeSize, data: data });
+      }
     }
 
     return id3Tag.frames;

@@ -84,17 +84,9 @@ import stringify from 'fast-safe-stringify';
 import { XmlNode } from '@yospace/admanagement-sdk/types/Parsers/XmlNode';
 
 import { BitmovinId3FramesExtractor, Frame } from './BitmovinId3FramesExtractor';
-// import { BitmovinId3FramesExtractor } from '../js/BitmovinId3FramesExtractor';
 
 const toSeconds = (ms: number): number => ms / 1000;
 const toMilliseconds = (s: number): number => s * 1000;
-
-const ID3_HEADER = 0x494433;
-const MAX_ID3_VERSION = 0x0400;
-const FLAG_UNSYNC_APPLIED = 0b10000000;
-const FLAG_EXTENDED_HEADER = 0b01000000;
-const FLAG_FOOTER = 0b00010000;
-const FLAG_CLEAR_BITS = 0xf; // i.e 0b0001111;
 
 interface StreamPart {
   start: number;
@@ -888,7 +880,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     this.fireEvent(event);
   }
 
-  private parseId3Tags(event: MetadataEvent, frames: Frame[] = null): TimedMetadata {
+  private parseId3Tags(event: MetadataEvent, frames: Frame[] = []): TimedMetadata {
     const charsToStr = (arr: [number]) => {
       return arr
         .filter((char) => char > 31 && char < 127)
@@ -902,16 +894,13 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       startTime: event.start ? event.start : this.player.getCurrentTime(),
     };
 
-    if (frames != null) {
-      frames.forEach((frame: any) => {
-        Logger.log(charsToStr(frame.data));
-        yospaceMetadataObject[frame.key] = charsToStr(frame.data);
-      });
-    } else {
-      metadata.frames.forEach((frame: any) => {
-        yospaceMetadataObject[frame.key] = charsToStr(frame.data);
-      });
+    if (frames.length != 0) {
+      metadata.frames = frames;
     }
+
+    metadata.frames.forEach((frame: any) => {
+      yospaceMetadataObject[frame.key] = charsToStr(frame.data);
+    });
 
     return TimedMetadata.createFromMetadata(
       /* ymid */
@@ -935,7 +924,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       Emsg box V0 vs V1 Yospace messageData needs to be parsed differently; hence the differentiation
       Note: this parsing logic for V1 in Yospace documentation is not available.
     */
-    if (metadata.schemeIdUri == EmsgSchemeIdUri.V1) {
+    if (metadata.schemeIdUri == EmsgSchemeIdUri.V1_ID3) {
       // messageData is decoded as UTF-8; hence encode back to UintArray
       const textEncoder = new TextEncoder();
       try {

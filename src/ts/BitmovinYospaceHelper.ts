@@ -14,5 +14,5 @@ export class BitmovinYospaceHelper {
 }
 
 export enum EmsgSchemeIdUri {
-  V1 = 'https://aomedia.org/emsg/ID3',
+  V1_ID3 = 'https://aomedia.org/emsg/ID3',
 }
