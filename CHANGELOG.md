@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+# [unreleased]
+
+# [2.1.0]
+
+## Added
+
+- Support for `EMSG` v1 metadata with scheme ID `https://aomedia.org/emsg/ID3`
+
 # [2.0.0]
 
 ## Added
@@ -285,27 +293,3 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 
 - Initial yospace integration
-
-[1.2.21]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/1.2.20...1.2.21
-[1.2.20]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/1.2.19...1.2.20
-[1.2.19]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/1.2.18...1.2.19
-[1.2.18]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/1.2.17...1.2.18
-[1.2.17]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/1.2.16...1.2.17
-[1.2.16]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/1.2.15...1.2.16
-[1.2.15]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/1.2.14...1.2.15
-[1.2.14]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/1.2.13...1.2.14
-[1.2.13]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/1.2.12...1.2.13
-[1.2.12]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/1.2.11...1.2.12
-[1.2.11]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/1.2.10...1.2.11
-[1.2.10]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/1.2.9...1.2.10
-[1.2.9]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/1.2.8...1.2.9
-[1.2.8]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/1.2.7...1.2.8
-[1.2.7]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/1.2.6...1.2.7
-[1.2.6]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/1.2.5...1.2.6
-[1.2.5]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/1.2.4...1.2.5
-[1.2.4]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/1.2.3...1.2.4
-[1.2.3]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/1.2.2...1.2.3
-[1.2.2]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/1.2.1...1.2.2
-[1.2.0]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/1.1.0...1.2.0
-[1.1.0]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/1.0.0...1.1.0
-[1.0.0]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/1406694e8e7c63bfa9d24b84fd6253b135cc0e74...1.0.0
