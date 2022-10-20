@@ -4,13 +4,18 @@ This integration completely encapsulates the usage of Yospace. After creating th
 
 ## Usage
 
+### Sample Apps
+1. Following the instructions on [Yospace Developer 6.4 Step 1](https://developer.yospace.com/sdk-documentation/javascript/userguide/latest/en/downloads.html#running-a-sample-app) to add Yospace's private npm registry to your setup
+2. Run `npm install`
+3. Run `npm start`
+
 ### Basic Setup
 
 #### With NPM
 
-1. Install the Bitmovin Player Yospace Integration: `npm i -S @bitmovin/player-integration-yospace`
-2. Install the Yospace Ad Management SDK: `npm i -S @yospace/admanagement-sdk`
-   - Hint: Yospace uses a private NPM registry and you need log in credentials provided by Yospace. Please refer to the Yospace Developer docs for details.
+1. Install the Yospace Ad Management SDK: `npm i -S @yospace/admanagement-sdk`
+   - Hint: Yospace uses a private NPM registry and you need log in credentials provided by Yospace. Please refer to the [Yospace Developer docs](https://developer.yospace.com/sdk-documentation/javascript/userguide/latest/en/downloads.html#running-a-sample-app) for details.
+2. Install the Bitmovin Player Yospace Integration: `npm i -S @bitmovin/player-integration-yospace`
 3. Import the `BitmovinYospacePlayer` into your code: `import { BitmovinYospacePlayer } from '@bitmovin/player-integration-yospace';`
 4. Import the Bitmovin `Player` core into your code: `import { Player } from 'bitmovin-player/modules/bitmovinplayer-core';`
 5. Add the relevant Bitmovin Player modules to the `Player` object using the static `Player.addModule(...)` API
