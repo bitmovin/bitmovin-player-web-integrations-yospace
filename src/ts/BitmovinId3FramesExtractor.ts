@@ -80,10 +80,10 @@ export class BitmovinId3FramesExtractor {
   }
 
   private readBytesAsNumberArray(buffer: Uint8Array, noOfBytes: number): number[] {
-    const numberArray: number[] = [noOfBytes];
+    const numberArray: number[] = [];
 
     for (let i = 0; i < noOfBytes; i++) {
-      numberArray[i] = this.readBytesAsNumber(buffer, 1);
+      numberArray.push(this.readBytesAsNumber(buffer, 1));
     }
 
     return numberArray;
