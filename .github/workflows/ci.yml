@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  push:
+    branches: 
+      - develop
+      - main
+      - release/*
+      - feature/*
+  pull_request:
+    branches:
+      - develop
+      - main
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  lint_and_build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Checkout
+        uses: actions/checkout@v3
+        
+      # The Yospace private npm registry seems to not support NPM token so we sadly need to use password and email
+      - name: Log in to Yospace private NPM registry
+        run: |
+          cp .npmrc ~/.npmrc
+          echo "//yospacerepo.jfrog.io/artifactory/api/npm/javascript-sdk/:_password=${{ secrets.NPM_YOSPACE_PASS }}" >> ~/.npmrc
+          echo "//yospacerepo.jfrog.io/artifactory/api/npm/javascript-sdk/:username=${{ secrets.NPM_YOSPACE_USER }}" >> ~/.npmrc
+          echo "//yospacerepo.jfrog.io/artifactory/api/npm/javascript-sdk/:email=${{ secrets.NPM_YOSPACE_EMAIL }}" >> ~/.npmrc
+
+      - name: Set up node.js
+        uses: actions/setup-node@v3.3.0
+        with:
+          node-version-file: .nvmrc
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build
+        run: npm run build

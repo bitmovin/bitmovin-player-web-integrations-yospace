@@ -79,9 +79,11 @@ import {
 } from 'bitmovin-player/modules/bitmovinplayer-advertising-core';
 import { Logger } from './Logger';
 import { DateRangeEmitter } from './DateRangeEmitter';
-import { BitmovinYospaceHelper } from './BitmovinYospaceHelper';
+import { BitmovinYospaceHelper, EmsgSchemeIdUri } from './BitmovinYospaceHelper';
 import stringify from 'fast-safe-stringify';
 import { XmlNode } from '@yospace/admanagement-sdk/types/Parsers/XmlNode';
+
+import { BitmovinId3FramesExtractor, Frame } from './BitmovinId3FramesExtractor';
 
 const toSeconds = (ms: number): number => ms / 1000;
 const toMilliseconds = (s: number): number => s * 1000;
@@ -878,7 +880,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     this.fireEvent(event);
   }
 
-  private parseId3Tags(event: MetadataEvent): TimedMetadata {
+  private parseId3Tags(event: MetadataEvent, frames: Frame[] = []): TimedMetadata {
     const charsToStr = (arr: [number]) => {
       return arr
         .filter((char) => char > 31 && char < 127)
@@ -887,9 +889,14 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     };
 
     const metadata = event.metadata as any;
+
     const yospaceMetadataObject: any = {
       startTime: event.start ? event.start : this.player.getCurrentTime(),
     };
+
+    if (frames.length != 0) {
+      metadata.frames = frames;
+    }
 
     metadata.frames.forEach((frame: any) => {
       yospaceMetadataObject[frame.key] = charsToStr(frame.data);
@@ -911,28 +918,55 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 
   private mapEmsgToId3Tags(event: MetadataEvent): TimedMetadata {
     const metadata = event.metadata as any;
-    const yospaceMetadataObject: any = {
-      startTime: metadata.presentationTime ? metadata.presentationTime : this.player.getCurrentTime(),
-    };
+    const startTime = metadata.presentationTime ? metadata.presentationTime : (this.player.getCurrentTime() as any);
 
-    const messageData: string = metadata.messageData;
-    messageData.split(',').forEach((metadata: string) => {
-      const tags = metadata.split('=');
-      yospaceMetadataObject[tags[0]] = tags[1];
-    });
+    /*
+      Emsg box V0 vs V1 Yospace messageData needs to be parsed differently; hence the differentiation
+      Note: this parsing logic for V1 in Yospace documentation is not available.
+    */
+    if (metadata.schemeIdUri == EmsgSchemeIdUri.V1_ID3) {
+      // messageData is decoded as UTF-8; hence encode back to UintArray
+      const textEncoder = new TextEncoder();
+      try {
+        const framesExtractor = new BitmovinId3FramesExtractor();
+        const id3Frames = framesExtractor.extractId3FramesFromEmsg(textEncoder.encode(metadata.messageData));
+        return this.parseId3Tags(event, id3Frames);
+      } catch (e) {
+        Logger.warn(e);
+        return TimedMetadata.createFromMetadata(
+          /* ymid */
+          null,
+          /* yseq */
+          null,
+          /* ytyp */
+          null,
+          /* ydur */
+          null,
+          /* playhead */
+          toMilliseconds(startTime)
+        );
+      }
+    } else {
+      const yospaceMetadataObject: any = {};
+      const messageData: string = metadata.messageData;
+      messageData.split(',').forEach((metadata: string) => {
+        const tags = metadata.split('=');
+        yospaceMetadataObject[tags[0]] = tags[1];
+      });
 
-    return TimedMetadata.createFromMetadata(
-      /* ymid */
-      yospaceMetadataObject.YMID,
-      /* yseq */
-      yospaceMetadataObject.YSEQ,
-      /* ytyp */
-      yospaceMetadataObject.YTYP,
-      /* ydur */
-      yospaceMetadataObject.YDUR,
-      /* playhead */
-      toMilliseconds(yospaceMetadataObject.startTime)
-    );
+      return TimedMetadata.createFromMetadata(
+        /* ymid */
+        yospaceMetadataObject.YMID,
+        /* yseq */
+        yospaceMetadataObject.YSEQ,
+        /* ytyp */
+        yospaceMetadataObject.YTYP,
+        /* ydur */
+        yospaceMetadataObject.YDUR,
+        /* playhead */
+        toMilliseconds(startTime)
+      );
+    }
   }
 
   // Custom advertising module with overwritten methods
