@@ -178,16 +178,16 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   load(source: YospaceSourceConfig, forceTechnology?: string, disableSeeking?: boolean): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       // for now we only support hls source
-      if (!source.hls) {
-        this.resetState();
-        this.handleYospaceError(new YospacePlayerError(YospaceErrorCode.HLS_SOURCE_MISSING));
-        reject();
-        return;
-      }
+      // if (!source.hls) {
+      //   this.resetState();
+      //   this.handleYospaceError(new YospacePlayerError(YospaceErrorCode.HLS_SOURCE_MISSING));
+      //   reject();
+      //   return;
+      // }
       this.resetState();
       this.registerPlayerEvents();
 
-      const url = source.hls;
+      const url = source.hls || source.dash;
 
       this.yospaceSourceConfig = source;
       const onInitComplete = (event: any) => {
@@ -240,7 +240,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
           // clone source to not modify passed object
           const clonedSource = {
             ...source,
-            hls: this.session.getPlaybackUrl(), // use received url from yospace
+            dash: this.session.getPlaybackUrl(), // use received url from yospace
           };
 
           // convert start time (relative) to an absolute time
