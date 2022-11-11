@@ -241,8 +241,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
           // clone source to not modify passed object
           const clonedSource = {
             ...source,
-            // dash: this.session.getPlaybackUrl(), // use received url from yospace
-            dash: 'https://csm-e-cedeveurxaws101j8-20qcsm7hcksw.bln1.yospace.com/csm/live/376797116/1.mpd;jsessionid=DF42FA20069B35C1808FBA1401CC6D45.csm-e-cedeveurxaws101j8-20qcsm7hcksw.bln1.yospace.com?yo.av=3&externalId=dash',
+            dash: this.session.getPlaybackUrl(), // use received url from yospace
           };
 
           // convert start time (relative) to an absolute time
@@ -1190,9 +1189,10 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   };
 
   private onMetaData = (event: MetadataEvent) => {
+    Logger.log('[BitmovinYospacePlayer] - onMetaData:', event);
+
     const validTypes = ['ID3', 'EMSG', 'DATERANGE'];
     const type = event.metadataType;
-    Logger.log('[BitmovinYospacePlayer] - onMetaData:', type);
 
     if (!validTypes.includes(type) || !this.player.isLive()) {
       return;
