@@ -424,7 +424,7 @@
           autoplay: autoplay, // Fix for Pre-roll 'blip' does not work with autoplay enabled
         },
         logs: {
-          level: 'none',
+          level: 'debug',
           bitmovin: !isValidationMode,
         },
         ui: false,
@@ -432,6 +432,14 @@
           enable_seek_for_live: true,
           resume_live_content_at_previous_position_after_ad_break: true,
           FAIRPLAY_IGNORE_DUPLICATE_INIT_DATA_KEY_ERRORS: true,
+        },
+        events: {
+          metadata: (params) => {
+            console.log(params);
+          },
+          metadataparsed: (params) => {
+            console.log(params);
+          },
         },
       };
 
