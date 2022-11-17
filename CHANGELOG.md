@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## Added
 
 - Support for `EMSG` v1 metadata with scheme ID `https://aomedia.org/emsg/ID3`
+- Support for DASH stream
 
 # [2.0.0]
 
