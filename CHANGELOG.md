@@ -11,8 +11,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Added
 
-- Support for `EMSG` v1 metadata with scheme ID `https://aomedia.org/emsg/ID3`
 - Support for DASH stream
+- Yospace Error code HLS_SOURCE_MISSING(1010) has now been deprecated and SUPPORTED_SOURCE_MISSING(1012) is being used instead
+
+# [2.1.0]
+
+## Added
+
+- Support for `EMSG` v1 metadata with scheme ID `https://aomedia.org/emsg/ID3`
 
 # [2.0.0]
 

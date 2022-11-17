@@ -21,7 +21,7 @@ This integration completely encapsulates the usage of Yospace. After creating th
 4. Import the Bitmovin `Player` core into your code: `import { Player } from 'bitmovin-player/modules/bitmovinplayer-core';`
 5. Add the relevant Bitmovin Player modules to the `Player` object using the static `Player.addModule(...)` API
 6. Create a new player instance, and pass the BitmovinPlayerStaticAPI to it: `new BitmovinYospacePlayer(Player, container, config)`
-7. Load a `YospaceSourceConfig` with your Yospace HLS/DASH URL. It's a `PlayerConfig` with Yospace-specific extension. Most important extension is the `assetType`, which needs to be set.
+7. Load a `YospaceSourceConfig` with your Yospace HLS/DASH URL. It's a `PlayerConfig` with Yospace-specific extension. Most important extension is the `assetType`, which needs to be set. In addition, HLS is picked before DASH, so if the user wants to play a dash stream the hls config has to be omitted.
 
 ```ts
 const playerConfig: PlayerConfig = {
@@ -37,6 +37,7 @@ const uiManager = UIFactory.buildDefaultUI(player);
 // Load a new yospace source
 const source: YospaceSourceConfig = {
   hls: 'your yospace url',
+  // Please omit 'hls' field if dash stream is intended
   // dash: 'your yospace url',
 
   // The type of the asset, can be imported: `import { YospaceAssetType } from '@bitmovin/player-integration-yospace';`

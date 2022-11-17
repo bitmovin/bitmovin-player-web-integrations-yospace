@@ -242,10 +242,12 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
             ? {
                 ...source,
                 hls: this.session.getPlaybackUrl(), // use received url from yospace
+                dash: undefined as string,
               }
             : {
                 ...source,
                 dash: this.session.getPlaybackUrl(), // use received url from yospace
+                hls: undefined as string,
               };
 
           // convert start time (relative) to an absolute time
