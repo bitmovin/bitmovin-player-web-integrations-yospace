@@ -342,8 +342,6 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
         this.player.exports.PlayerEvent.AdQuartile,
         this.player.exports.PlayerEvent.AdSkipped,
         this.player.exports.PlayerEvent.AdStarted,
-
-        // this.player.exports.PlayerEvent.MetadataParsed,
       ];
 
       const event = eventType as PlayerEvent;
