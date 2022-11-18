@@ -9,12 +9,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 # [2.1.0]
 
+# [2.1.0]
+
 ## Added
 
-- Support for DASH stream
-- Yospace Error code HLS_SOURCE_MISSING(1010) has now been deprecated and SUPPORTED_SOURCE_MISSING(1012) is being used instead
+- Support for DASH LIVE and VOD streams
+- new error code SUPPORTED_SOURCE_MISSING (1012)
 
-# [2.1.0]
+## Removed
+
+- Yospace Error code HLS_SOURCE_MISSING (1010) has now been deprecated 
 
 ## Added
 
