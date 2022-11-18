@@ -1100,7 +1100,6 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 
     // To support ads in live streams we need to track metadata events
     this.player.off(this.player.exports.PlayerEvent.Metadata, this.onMetaData);
-    this.player.off(this.player.exports.PlayerEvent.MetadataParsed, this.onMetaDataParsed);
   }
 
   private onPlaying = () => {
