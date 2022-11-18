@@ -1188,8 +1188,6 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   };
 
   private onMetaData = (event: MetadataEvent) => {
-    Logger.log('[BitmovinYospacePlayer] - onMetaData:', event);
-
     const validTypes = ['ID3', 'EMSG', 'DATERANGE'];
     const type = event.metadataType;
 
