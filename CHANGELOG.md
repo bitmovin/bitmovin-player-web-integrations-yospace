@@ -7,9 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 # [unreleased]
 
-# [2.1.0]
-
-# [2.1.0]
+# [2.2.0]
 
 ## Added
 
@@ -19,6 +17,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## Removed
 
 - Yospace Error code HLS_SOURCE_MISSING (1010) has now been deprecated 
+
+# [2.1.0]
 
 ## Added
 
