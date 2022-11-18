@@ -35,6 +35,7 @@ import {
   PlayerEventBase,
   PlayerEventCallback,
   SeekEvent,
+  SourceConfig,
   TimeChangedEvent,
   TimeRange,
   UserInteractionEvent,
@@ -238,16 +239,16 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
           this.session = session;
 
           this.calculateAdParts();
-          const clonedSource = source.hls
+          const clonedSource: SourceConfig = source.hls
             ? {
                 ...source,
                 hls: this.session.getPlaybackUrl(), // use received url from yospace
-                dash: undefined as string,
+                dash: undefined,
               }
             : {
                 ...source,
                 dash: this.session.getPlaybackUrl(), // use received url from yospace
-                hls: undefined as string,
+                hls: undefined,
               };
 
           // convert start time (relative) to an absolute time
