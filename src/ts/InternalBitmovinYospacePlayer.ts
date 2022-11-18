@@ -1188,10 +1188,6 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     this.session.onVolumeChange(false);
   };
 
-  private onMetaDataParsed = (event: MetadataParsedEvent) => {
-    // Logger.log('[BitmovinYospacePlayer] - onMetaDataParsed:', event);
-  };
-
   private onMetaData = (event: MetadataEvent) => {
     Logger.log('[BitmovinYospacePlayer] - onMetaData:', event);
 
