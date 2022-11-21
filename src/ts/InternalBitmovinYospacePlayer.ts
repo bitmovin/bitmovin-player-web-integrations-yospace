@@ -27,7 +27,6 @@ import {
   BufferType,
   MediaType,
   MetadataEvent,
-  MetadataParsedEvent,
   PlaybackEvent,
   PlayerAPI,
   PlayerBufferAPI,
