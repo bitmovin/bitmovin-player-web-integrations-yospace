@@ -7,8 +7,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 # [unreleased]
 
-# [2.2.0]
-
 ## Added
 
 - Support for DASH LIVE and VOD streams
@@ -16,7 +14,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Removed
 
-- Yospace Error code HLS_SOURCE_MISSING (1010) has now been deprecated 
+- Yospace Error code HLS_SOURCE_MISSING (1010) has now been deprecated
 
 # [2.1.0]
 
