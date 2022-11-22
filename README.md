@@ -36,9 +36,9 @@ const uiManager = UIFactory.buildDefaultUI(player);
 
 // Load a new yospace source
 const source: YospaceSourceConfig = {
+  // omit 'hls' field if dash stream is intended
   hls: 'your yospace url',
-  // Please omit 'hls' field if dash stream is intended
-  // dash: 'your yospace url',
+  dash: 'your yospace url',
 
   // The type of the asset, can be imported: `import { YospaceAssetType } from '@bitmovin/player-integration-yospace';`
   assetType: YospaceAssetType.VOD,
