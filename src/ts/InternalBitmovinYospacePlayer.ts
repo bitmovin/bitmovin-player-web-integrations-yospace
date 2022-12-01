@@ -146,6 +146,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   private startSent: boolean;
 
   private lastTimeChangedTime = 0;
+  private deferredStart = false;
 
   constructor(containerElement: HTMLElement, player: PlayerAPI, yospaceConfig: YospaceConfiguration = {}) {
     this.yospaceConfig = yospaceConfig;
@@ -720,6 +721,11 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     }
 
     this.player.setPlaybackSpeed(this.playbackSpeed);
+
+    if (this.deferredStart) {
+      this.session.onPlayerEvent(YsPlayerEvent.START, toMilliseconds(this.player.getCurrentTime()));
+      this.deferredStart = false;
+    }
   };
 
   private onAnalyticsFired = (event: BYSAnalyticsFiredEvent) => {
@@ -1105,7 +1111,20 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     if (!this.startSent) {
       Logger.log('[BitmovinYospacePlayer] - sending YospaceAdManagement.PlayerEvent.START');
       this.startSent = true;
-      this.session.onPlayerEvent(YsPlayerEvent.START, toMilliseconds(this.player.getCurrentTime()));
+
+      const time = this.player.getCurrentTime();
+
+      // immediately force through a playhead update in order
+      // to give yospace a chance to detect prerolls
+      this.session.onPlayheadUpdate(toMilliseconds(time));
+
+      // only trigger YsPlayerEvent.START when content starts rolling
+      if (this.isAdActive()) {
+        // trigger start on ad break finished instead
+        this.deferredStart = true;
+      } else {
+        this.session.onPlayerEvent(YsPlayerEvent.START, toMilliseconds(time));
+      }
     } else {
       Logger.log('[BitmovinYospacePlayer] - sending YospaceAdManagement.PlayerEvent.RESUME');
       this.session.onPlayerEvent(YsPlayerEvent.RESUME, toMilliseconds(this.player.getCurrentTime()));

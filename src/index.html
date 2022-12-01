@@ -389,8 +389,10 @@
 
       var vodSource = {
         title: 'VOD Stream',
-        // hls: 'http://csm-e.cds1.yospace.com/access/d/400/u/0/1/130782300?f=0000130753172&format=vmap',
-        hls: 'https://csm-e-sdk-validation.bln1.yospace.com/csm/access/207411697/c2FtcGxlL21hc3Rlci5tM3U4?yo.av=3',
+        // hls without preroll
+        // hls: 'https://csm-e-sdk-validation.bln1.yospace.com/csm/access/207411697/c2FtcGxlL21hc3Rlci5tM3U4?yo.av=3',
+        // hls with preroll
+        hls: 'https://csm-e-sdk-validation.bln1.yospace.com/csm/access/156611618/c2FtcGxlL21hc3Rlci5tM3U4?yo.av=3',
         // Yospace configuration
         assetType: bitmovin.player.ads.yospace.YospaceAssetType.VOD,
         truexConfiguration: {},
