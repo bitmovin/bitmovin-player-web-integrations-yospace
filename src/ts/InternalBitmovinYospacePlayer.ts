@@ -856,6 +856,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     this.cachedSeekTarget = null;
     this.truexAdFree = undefined;
     this.startSent = false;
+    this.deferredStart = false;
   }
 
   private handleQuartileEvent(adQuartileEventName: string): void {
