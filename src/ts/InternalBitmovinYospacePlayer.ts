@@ -1115,16 +1115,18 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 
       const time = this.player.getCurrentTime();
 
+      this.deferredStart = true;
+
       // immediately force through a playhead update in order
       // to give yospace a chance to detect prerolls
       this.session.onPlayheadUpdate(toMilliseconds(time));
 
       // only trigger YsPlayerEvent.START when content starts rolling
-      if (this.isAdActive()) {
+      if (!this.isAdActive()) {
         // trigger start on ad break finished instead
-        this.deferredStart = true;
-      } else {
+
         this.session.onPlayerEvent(YsPlayerEvent.START, toMilliseconds(time));
+        this.deferredStart = false;
       }
     } else {
       Logger.log('[BitmovinYospacePlayer] - sending YospaceAdManagement.PlayerEvent.RESUME');
