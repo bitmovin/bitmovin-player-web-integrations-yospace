@@ -937,7 +937,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       Emsg box V0 vs V1 Yospace messageData needs to be parsed differently; hence the differentiation
       Note: this parsing logic for V1 in Yospace documentation is not available.
     */
-    if (metadata.schemeIdUri == EmsgSchemeIdUri.V1_ID3) {
+    if (metadata.schemeIdUri === EmsgSchemeIdUri.V1_ID3) {
       // messageData is decoded as UTF-8; hence encode back to UintArray
       const textEncoder = new TextEncoder();
       try {
@@ -959,7 +959,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
           toMilliseconds(startTime)
         );
       }
-    } else {
+    } else if (metadata.schemeIdUri === EmsgSchemeIdUri.V0_ID3_YOSPACE_PROPRIETARY) {
       const yospaceMetadataObject: any = {};
       const messageData: string = metadata.messageData;
       messageData.split(',').forEach((metadata: string) => {
@@ -979,6 +979,8 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
         /* playhead */
         toMilliseconds(startTime)
       );
+    } else {
+      Logger.warn('Yospace integration encountered metadata that it cannot parse');
     }
   }
 
