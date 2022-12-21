@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 # [unreleased]
 
+## Added
+
+- Support for DASH LIVE and VOD streams
+- new error code SUPPORTED_SOURCE_MISSING (1012)
+- Support for pre-roll ads
+
+## Removed
+
+- Yospace Error code HLS_SOURCE_MISSING (1010) has now been deprecated
+
 # [2.1.0]
 
 ## Added

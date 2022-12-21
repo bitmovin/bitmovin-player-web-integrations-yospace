@@ -34,6 +34,7 @@ import {
   PlayerEventBase,
   PlayerEventCallback,
   SeekEvent,
+  SourceConfig,
   TimeChangedEvent,
   TimeRange,
   UserInteractionEvent,
@@ -145,6 +146,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   private startSent: boolean;
 
   private lastTimeChangedTime = 0;
+  private deferredStart = false;
 
   constructor(containerElement: HTMLElement, player: PlayerAPI, yospaceConfig: YospaceConfiguration = {}) {
     this.yospaceConfig = yospaceConfig;
@@ -177,17 +179,16 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 
   load(source: YospaceSourceConfig, forceTechnology?: string, disableSeeking?: boolean): Promise<void> {
     return new Promise<void>((resolve, reject) => {
-      // for now we only support hls source
-      if (!source.hls) {
+      if (!source.hls && !source.dash) {
         this.resetState();
-        this.handleYospaceError(new YospacePlayerError(YospaceErrorCode.HLS_SOURCE_MISSING));
+        this.handleYospaceError(new YospacePlayerError(YospaceErrorCode.SUPPORTED_SOURCE_MISSING));
         reject();
         return;
       }
       this.resetState();
       this.registerPlayerEvents();
 
-      const url = source.hls;
+      const url = source.hls || source.dash;
 
       this.yospaceSourceConfig = source;
       const onInitComplete = (event: any) => {
@@ -237,11 +238,17 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
           this.session = session;
 
           this.calculateAdParts();
-          // clone source to not modify passed object
-          const clonedSource = {
-            ...source,
-            hls: this.session.getPlaybackUrl(), // use received url from yospace
-          };
+          const clonedSource: SourceConfig = source.hls
+            ? {
+                ...source,
+                hls: this.session.getPlaybackUrl(), // use received url from yospace
+                dash: undefined,
+              }
+            : {
+                ...source,
+                dash: this.session.getPlaybackUrl(), // use received url from yospace
+                hls: undefined,
+              };
 
           // convert start time (relative) to an absolute time
           if (
@@ -714,6 +721,11 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     }
 
     this.player.setPlaybackSpeed(this.playbackSpeed);
+
+    if (this.deferredStart) {
+      this.session.onPlayerEvent(YsPlayerEvent.START, toMilliseconds(this.player.getCurrentTime()));
+      this.deferredStart = false;
+    }
   };
 
   private onAnalyticsFired = (event: BYSAnalyticsFiredEvent) => {
@@ -844,6 +856,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     this.cachedSeekTarget = null;
     this.truexAdFree = undefined;
     this.startSent = false;
+    this.deferredStart = false;
   }
 
   private handleQuartileEvent(adQuartileEventName: string): void {
@@ -924,7 +937,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       Emsg box V0 vs V1 Yospace messageData needs to be parsed differently; hence the differentiation
       Note: this parsing logic for V1 in Yospace documentation is not available.
     */
-    if (metadata.schemeIdUri == EmsgSchemeIdUri.V1_ID3) {
+    if (metadata.schemeIdUri === EmsgSchemeIdUri.V1_ID3) {
       // messageData is decoded as UTF-8; hence encode back to UintArray
       const textEncoder = new TextEncoder();
       try {
@@ -946,7 +959,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
           toMilliseconds(startTime)
         );
       }
-    } else {
+    } else if (metadata.schemeIdUri === EmsgSchemeIdUri.V0_ID3_YOSPACE_PROPRIETARY) {
       const yospaceMetadataObject: any = {};
       const messageData: string = metadata.messageData;
       messageData.split(',').forEach((metadata: string) => {
@@ -966,6 +979,8 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
         /* playhead */
         toMilliseconds(startTime)
       );
+    } else {
+      Logger.warn('Yospace integration encountered metadata that it cannot parse');
     }
   }
 
@@ -1099,7 +1114,21 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     if (!this.startSent) {
       Logger.log('[BitmovinYospacePlayer] - sending YospaceAdManagement.PlayerEvent.START');
       this.startSent = true;
-      this.session.onPlayerEvent(YsPlayerEvent.START, toMilliseconds(this.player.getCurrentTime()));
+
+      const time = this.player.getCurrentTime();
+
+      this.deferredStart = true;
+
+      // immediately force through a playhead update in order
+      // to give yospace a chance to detect prerolls
+      this.session.onPlayheadUpdate(toMilliseconds(time));
+
+      // only trigger YsPlayerEvent.START when content starts rolling
+      // either here, or after the preroll ends
+      if (!this.isAdActive()) {
+        this.session.onPlayerEvent(YsPlayerEvent.START, toMilliseconds(time));
+        this.deferredStart = false;
+      }
     } else {
       Logger.log('[BitmovinYospacePlayer] - sending YospaceAdManagement.PlayerEvent.RESUME');
       this.session.onPlayerEvent(YsPlayerEvent.RESUME, toMilliseconds(this.player.getCurrentTime()));

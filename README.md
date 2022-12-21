@@ -5,6 +5,7 @@ This integration completely encapsulates the usage of Yospace. After creating th
 ## Usage
 
 ### Sample Apps
+
 1. Following the instructions on [Yospace Developer 6.4 Step 1](https://developer.yospace.com/sdk-documentation/javascript/userguide/latest/en/downloads.html#running-a-sample-app) to add Yospace's private npm registry to your setup
 2. Run `npm install`
 3. Run `npm start`
@@ -20,7 +21,7 @@ This integration completely encapsulates the usage of Yospace. After creating th
 4. Import the Bitmovin `Player` core into your code: `import { Player } from 'bitmovin-player/modules/bitmovinplayer-core';`
 5. Add the relevant Bitmovin Player modules to the `Player` object using the static `Player.addModule(...)` API
 6. Create a new player instance, and pass the BitmovinPlayerStaticAPI to it: `new BitmovinYospacePlayer(Player, container, config)`
-7. Load a `YospaceSourceConfig` with your Yospace HLS URL. It's a `PlayerConfig` with Yospace-specific extension. Most important extension is the `assetType`, which needs to be set.
+7. Load a `YospaceSourceConfig` with your Yospace HLS/DASH URL. It's a `PlayerConfig` with Yospace-specific extension. Most important extension is the `assetType`, which needs to be set. In addition, HLS is picked before DASH, so if the user wants to play a dash stream the hls config has to be omitted.
 
 ```ts
 const playerConfig: PlayerConfig = {
@@ -35,7 +36,9 @@ const uiManager = UIFactory.buildDefaultUI(player);
 
 // Load a new yospace source
 const source: YospaceSourceConfig = {
+  // omit 'hls' field if dash stream is intended
   hls: 'your yospace url',
+  dash: 'your yospace url',
 
   // The type of the asset, can be imported: `import { YospaceAssetType } from '@bitmovin/player-integration-yospace';`
   assetType: YospaceAssetType.VOD,
@@ -110,7 +113,6 @@ const yospaceConfig = {
 ## Limitations
 
 - No support for ad tracking during live streams in Safari if EMSG tags are used. (EMSG tags are not supported by Safari)
-- Only HLS is supported at this point, no DASH support.
 
 ## Development, Contribution, Releases
 
