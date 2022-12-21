@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - Support for DASH LIVE and VOD streams
 - new error code SUPPORTED_SOURCE_MISSING (1012)
+- Support for pre-roll ads
 
 ## Removed
 
