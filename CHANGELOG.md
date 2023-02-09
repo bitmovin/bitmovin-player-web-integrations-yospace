@@ -5,17 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-# [unreleased]
+# [2.2.0]
 
 ## Added
 
 - Support for DASH LIVE and VOD streams
-- new error code SUPPORTED_SOURCE_MISSING (1012)
+- New error code SUPPORTED_SOURCE_MISSING (1012)
 - Support for pre-roll ads
 
 ## Removed
 
-- Yospace Error code HLS_SOURCE_MISSING (1010) has now been deprecated
+- Yospace Error code `HLS_SOURCE_MISSING` (1010) has now been deprecated in favor of `SUPPORTED_SOURCE_MISSING` (1012)
 
 # [2.1.0]
 
