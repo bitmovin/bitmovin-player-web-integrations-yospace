@@ -14,5 +14,6 @@ export class BitmovinYospaceHelper {
 }
 
 export enum EmsgSchemeIdUri {
+  V0_ID3_YOSPACE_PROPRIETARY = 'urn:yospace:a:id3:2016',
   V1_ID3 = 'https://aomedia.org/emsg/ID3',
 }
