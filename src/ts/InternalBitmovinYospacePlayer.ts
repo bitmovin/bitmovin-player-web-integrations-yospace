@@ -148,6 +148,9 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   private lastTimeChangedTime = 0;
   private deferredStart = false;
 
+  private metadataQueue: TimedMetadata[] = [];
+  private biggestPlayheadReported = 0;
+
   constructor(containerElement: HTMLElement, player: PlayerAPI, yospaceConfig: YospaceConfiguration = {}) {
     this.yospaceConfig = yospaceConfig;
     Logger.log('[BitmovinYospacePlayer] loading YospacePlayer with config= ' + stringify(this.yospaceConfig));
@@ -1142,8 +1145,44 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     const timeDifference = event.time - this.lastTimeChangedTime;
     this.lastTimeChangedTime = event.time;
 
+    const playheadInMilliseconds = toMilliseconds(event.time);
+
+    if (this.metadataQueue.length > 0) {
+      this.metadataQueue = this.metadataQueue
+        // filter out and report events for which time have passed
+        .filter((item) => {
+          const isPast = item.getPlayhead() < playheadInMilliseconds;
+
+          console.log(
+            'MDD: item playhead',
+            item.getPlayhead(),
+            'current playhead',
+            playheadInMilliseconds,
+            'will report:',
+            isPast,
+            'diff in seconds:',
+            (playheadInMilliseconds - item.getPlayhead()) / 1000,
+            'queue length:',
+            this.metadataQueue.length
+          );
+
+          if (isPast) {
+            console.log('MDD: reported item', item.getPlayhead(), item);
+            this.session.onTimedMetadata(item);
+
+            if (item.getPlayhead() >= this.biggestPlayheadReported) {
+              this.biggestPlayheadReported = item.getPlayhead();
+            } else {
+              console.log('MDD: BAD ORDER!');
+            }
+          }
+
+          return !isPast;
+        });
+    }
+
     if (timeDifference >= 0 || timeDifference < -0.25) {
-      this.session.onPlayheadUpdate(toMilliseconds(event.time));
+      this.session.onPlayheadUpdate(playheadInMilliseconds);
     } else {
       Logger.warn(
         'Encountered a small negative TimeChanged update, not reporting to Yospace. Difference was: ' + timeDifference
@@ -1220,12 +1259,13 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     if (type === 'ID3') {
       yospaceMetadataObject = this.parseId3Tags(event);
       Logger.log('[BitmovinYospacePlayer] - sending YSPlayerEvents.METADATA ' + stringify(yospaceMetadataObject));
-      this.session.onTimedMetadata(yospaceMetadataObject);
     } else if (type === 'EMSG') {
       yospaceMetadataObject = this.mapEmsgToId3Tags(event);
       Logger.log('[BitmovinYospacePlayer] - sending YSPlayerEvents.METADATA ' + stringify(yospaceMetadataObject));
-      this.session.onTimedMetadata(yospaceMetadataObject);
     }
+
+    this.metadataQueue.push(yospaceMetadataObject);
+    console.log('MDD: queued', yospaceMetadataObject.getPlayhead(), yospaceMetadataObject);
   };
 
   private calculateAdParts() {
