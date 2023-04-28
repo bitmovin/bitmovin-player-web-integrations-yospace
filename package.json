@@ -15,7 +15,8 @@
     "lint": "eslint --quiet src/",
     "format": "prettier --write src/",
     "clean": "rm -R ./dist",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "3.6.0": "rm -rf node_modules; npm i -S @yospace/admanagement-sdk@3.6.0; npm i -S bitmovin-player@8.114.0; npm install"
   },
   "lint-staged": {
     "**/*": "prettier --write --ignore-unknown"
@@ -35,8 +36,8 @@
     "stream-browserify": "^3.0.0"
   },
   "peerDependencies": {
-    "@yospace/admanagement-sdk": "^3.4.0",
-    "bitmovin-player": "^8.86.0"
+    "@yospace/admanagement-sdk": "3.6.0",
+    "bitmovin-player": "^8.114.0"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^5.27.1",
