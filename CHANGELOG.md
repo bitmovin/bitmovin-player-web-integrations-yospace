@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+# [2.3.0]
+
+## Changed
+
+- Yospace SDK to v3.6.0
+- Bitmovin Player to version [8.114.0](https://developer.bitmovin.com/playback/docs/release-notes-web#81140)
+
 # [2.2.0]
 
 ## Added
@@ -71,7 +78,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Changed
 
-- Bitmovin player to version [8.66.0](https://bitmovin.com/docs/player/releases/web/web-8-66-0)
+- Bitmovin player to version [8.66.0](https://developer.bitmovin.com/playback/docs/release-notes-web#8660)
 - Flag `removeUnsupportedExtensions `to `false`
 
 ## Fixed

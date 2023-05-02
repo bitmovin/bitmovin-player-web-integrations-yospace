@@ -12,7 +12,7 @@ import {
   Session,
   SessionLive,
   SessionProperties,
-  SessionResult,
+  SessionState,
   SessionVOD,
   TimedMetadata,
   UNKNOWN_FORMAT,
@@ -82,7 +82,7 @@ import { Logger } from './Logger';
 import { DateRangeEmitter } from './DateRangeEmitter';
 import { BitmovinYospaceHelper, EmsgSchemeIdUri } from './BitmovinYospaceHelper';
 import stringify from 'fast-safe-stringify';
-import { XmlNode } from '@yospace/admanagement-sdk/types/Parsers/XmlNode';
+import { XmlNode } from '@yospace/admanagement-sdk/types/Core/XmlNode';
 
 import { BitmovinId3FramesExtractor, Frame } from './BitmovinId3FramesExtractor';
 
@@ -193,7 +193,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       this.yospaceSourceConfig = source;
       const onInitComplete = (event: any) => {
         const session: Session = event.getPayload();
-        const result = session.getSessionResult();
+        const state = session.getSessionState();
         const code = session.getResultCode();
 
         const getYospaceError = (): YospacePlayerError => {
@@ -202,9 +202,9 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
           let detailedErrorMessage: string;
 
           // Detect general error
-          if (result === SessionResult.NO_ANALYTICS) {
+          if (state === SessionState.NO_ANALYTICS) {
             errorCode = YospaceErrorCode.NO_ANALYTICS;
-          } else if (result === SessionResult.NOT_INITIALISED) {
+          } else if (state !== SessionState.INITIALISED) {
             errorCode = YospaceErrorCode.NOT_INITIALISED;
           }
 
@@ -234,7 +234,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
           });
         };
 
-        if (result === SessionResult.INITIALISED) {
+        if (state === SessionState.INITIALISED) {
           this.session = session;
 
           this.calculateAdParts();

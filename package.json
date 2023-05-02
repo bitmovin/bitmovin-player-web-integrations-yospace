@@ -1,6 +1,6 @@
 {
   "name": "@bitmovin/player-integration-yospace",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "description": "Yospace integration for the Bitmovin Player",
   "main": "./dist/js/bitmovin-player-yospace.js",
   "types": "./dist/js/main.d.ts",
@@ -30,13 +30,15 @@
     "node": "16.15.1"
   },
   "dependencies": {
+    "@yospace/admanagement-sdk": "^3.6.0",
+    "bitmovin-player": "^8.114.0",
     "fast-safe-stringify": "^2.0.7",
     "process": "^0.11.10",
     "stream-browserify": "^3.0.0"
   },
   "peerDependencies": {
-    "@yospace/admanagement-sdk": "^3.4.0",
-    "bitmovin-player": "^8.86.0"
+    "@yospace/admanagement-sdk": "3.6.0",
+    "bitmovin-player": "^8.114.0"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^5.27.1",
