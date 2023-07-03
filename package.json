@@ -12,7 +12,7 @@
     "copyStaticToDist": "mkdir -p dist && cp src/index.html dist/ && cp src/sw.js dist/",
     "copyToTizen": "cp ./dist/js/bitmovin-player-yospace.min.js ./tizen/js",
     "copyToWebOS": "cp ./dist/js/bitmovin-player-yospace.min.js ./WebOS/src/js",
-    "lint": "eslint --quiet src/",
+    "lint": "eslint --quiet src/ && kacl lint",
     "format": "prettier --write src/",
     "clean": "rm -R ./dist",
     "prepare": "husky install"
@@ -30,7 +30,7 @@
     "node": "16.15.1"
   },
   "dependencies": {
-    "@yospace/admanagement-sdk": "^3.6.0",
+    "@yospace/admanagement-sdk": "3.6.0",
     "bitmovin-player": "^8.114.0",
     "fast-safe-stringify": "^2.0.7",
     "process": "^0.11.10",
@@ -47,6 +47,7 @@
     "bitmovin-player-ui": "^3.37.0",
     "eslint": "^8.17.0",
     "husky": "^8.0.1",
+    "kacl": "^1.1.1",
     "lint-staged": "^13.0.1",
     "prettier": "2.6.2",
     "ts-loader": "^9.3.0",
