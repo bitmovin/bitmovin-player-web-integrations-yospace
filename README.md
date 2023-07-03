@@ -1,4 +1,4 @@
-# Bitmovin Player Yospace Analytics Integration
+# Bitmovin Player Yospace Integration
 
 This is an open-source project to enable the use of a third-party component (Yospace) with the Bitmovin Player Web SDK.
 
