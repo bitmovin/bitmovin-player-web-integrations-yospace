@@ -7,7 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
-- Removed node "16.15.1" requirement from npm package.
+## Removed
+
+- Node "16.15.1" engines requirement from npm package.
 
 ## 2.3.0 - 2023-05-02
 
