@@ -26,9 +26,6 @@
   },
   "author": "Bitmovin",
   "license": "MIT",
-  "engines": {
-    "node": "16.15.1"
-  },
   "dependencies": {
     "@yospace/admanagement-sdk": "3.6.0",
     "bitmovin-player": "^8.114.0",
