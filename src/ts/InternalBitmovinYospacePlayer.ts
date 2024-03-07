@@ -1110,9 +1110,6 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 
       const time = this.player.getCurrentTime();
 
-      // immediately force through a playhead update in order
-      // to give yospace a chance to detect prerolls
-
       this.session.onPlayerEvent(YsPlayerEvent.START, toMilliseconds(time));
     } else {
       Logger.log('[BitmovinYospacePlayer] - sending YospaceAdManagement.PlayerEvent.RESUME');
