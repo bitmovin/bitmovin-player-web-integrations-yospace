@@ -49,6 +49,10 @@ export interface BitmovinYospacePlayerAPI extends PlayerAPI {
 
   getCurrentPlayerType(): YospacePlayerType;
 
+  getCurrentTimeWithAds(): number;
+
+  getDurationWithAds(): number;
+
   forceSeek(time: number, issuer?: string): boolean;
 }
 

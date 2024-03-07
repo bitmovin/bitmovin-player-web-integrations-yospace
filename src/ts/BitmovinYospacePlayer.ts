@@ -338,6 +338,10 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     return this.player.getCurrentTime();
   }
 
+  getCurrentTimeWithAds(): number {
+    return this.player.getCurrentTimeWithAds();
+  }
+
   getDownloadedAudioData(): DownloadedAudioData {
     return this.player.getDownloadedAudioData();
   }
@@ -352,6 +356,10 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 
   getDuration(): number {
     return this.player.getDuration();
+  }
+
+  getDurationWithAds(): number {
+    return this.player.getDurationWithAds();
   }
 
   getManifest(): string {

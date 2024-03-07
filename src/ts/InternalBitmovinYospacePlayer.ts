@@ -95,6 +95,10 @@ interface StreamPart {
   adBreak?: AdBreak;
 }
 
+interface YospaceTimeChangedEvent extends TimeChangedEvent {
+  timeWithAds: number;
+}
+
 // TODO: remove this when it's available in the Player
 export interface YospaceLinearAd extends LinearAd {
   extensions: VastAdExtension[];
@@ -416,6 +420,10 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     return this.toMagicTime(this.player.getCurrentTime());
   }
 
+  getCurrentTimeWithAds(): number {
+    return this.player.getCurrentTime();
+  }
+
   getDuration(): number {
     if (!this.session) return 0;
 
@@ -430,6 +438,10 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     return toSeconds(
       (this.session as SessionVOD).getContentPositionForPlayhead(toMilliseconds(this.player.getDuration()))
     );
+  }
+
+  getDurationWithAds(): number {
+    return this.player.getDuration();
   }
 
   /**
@@ -1133,10 +1145,11 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     }
 
     // fire magic time-changed event
-    this.fireEvent<TimeChangedEvent>({
+    this.fireEvent<YospaceTimeChangedEvent>({
       timestamp: Date.now(),
       type: this.player.exports.PlayerEvent.TimeChanged,
       time: this.getCurrentTime(),
+      timeWithAds: this.getCurrentTimeWithAds(),
     });
   };
 
