@@ -338,6 +338,10 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     return this.player.getCurrentTime();
   }
 
+  getCurrentAdBreakDuration(): number {
+    return this.player.getCurrentAdBreakDuration();
+  }
+
   getCurrentTimeWithAds(): number {
     return this.player.getCurrentTimeWithAds();
   }

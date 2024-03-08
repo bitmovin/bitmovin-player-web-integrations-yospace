@@ -49,6 +49,8 @@ export interface BitmovinYospacePlayerAPI extends PlayerAPI {
 
   getCurrentPlayerType(): YospacePlayerType;
 
+  getCurrentAdBreakDuration(): number;
+
   getCurrentTimeWithAds(): number;
 
   getDurationWithAds(): number;
