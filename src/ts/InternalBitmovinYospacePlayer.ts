@@ -95,10 +95,6 @@ interface StreamPart {
   adBreak?: AdBreak;
 }
 
-interface YospaceTimeChangedEvent extends TimeChangedEvent {
-  timeWithAds: number;
-}
-
 // TODO: remove this when it's available in the Player
 export interface YospaceLinearAd extends LinearAd {
   extensions: VastAdExtension[];
@@ -1157,11 +1153,10 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     }
 
     // fire magic time-changed event
-    this.fireEvent<YospaceTimeChangedEvent>({
+    this.fireEvent<TimeChangedEvent>({
       timestamp: Date.now(),
       type: this.player.exports.PlayerEvent.TimeChanged,
       time: this.getCurrentTime(),
-      timeWithAds: this.getCurrentTimeWithAds(),
     });
   };
 
