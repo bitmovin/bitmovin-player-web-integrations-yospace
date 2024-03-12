@@ -84,6 +84,7 @@ export interface TruexConfiguration {
 export interface YospaceAdBreak extends AdBreak {
   duration: number;
   position?: YospaceAdBreakPosition;
+  active: boolean;
 }
 
 export interface YospaceAdBreakEvent extends PlayerEventBase {

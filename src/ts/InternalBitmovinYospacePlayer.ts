@@ -147,6 +147,11 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   private startSent: boolean;
 
   private lastTimeChangedTime = 0;
+  private adImmunityConfig = {
+    duration: 20000, // 0 duration = disabled
+  };
+  private adImmune = false;
+  private adImmunityCountDown: number | null = null;
 
   constructor(containerElement: HTMLElement, player: PlayerAPI, yospaceConfig: YospaceConfiguration = {}) {
     this.yospaceConfig = yospaceConfig;
@@ -393,7 +398,25 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       return false;
     }
 
+    // set all breaks seeked past during immunity to inactive
+    // this prevents the default player policy from redirecting
+    // the seek target
+    if (this.adImmune) {
+      const adBreaks: AdBreak[] = this.session.getAdBreaksByType(BreakType.LINEAR);
+      const currentTime = this.player.getCurrentTime();
+
+      adBreaks.forEach((adBreak) => {
+        const breakStart = this.toMagicTime(toSeconds(adBreak.getStart()));
+
+        // Check if break is being seeked past and deactivate it
+        if (breakStart > currentTime && breakStart < time) {
+          adBreak.setInactive();
+        }
+      });
+    }
+
     const allowedSeekTarget = this.playerPolicy.canSeekTo(time);
+
     if (allowedSeekTarget !== time) {
       // cache original seek target
       this.cachedSeekTarget = time;
@@ -548,7 +571,26 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     this.player.setPlaybackSpeed(this.playbackSpeed);
   }
 
+  setAdImmunityConfig(config: any) {
+    this.adImmunityConfig = config;
+  }
+
   // Helper
+  private startAdHoliday() {
+    // only start a timer if a duration has been configured, and ad immunity is not
+    // already active. Only enable for VOD content.
+    if (this.adImmune || this.yospaceSourceConfig.assetType !== YospaceAssetType.VOD) {
+      return;
+    } else if (this.adImmunityConfig.duration) {
+      this.adImmune = true;
+
+      this.adImmunityCountDown = window.setTimeout(() => {
+        this.adImmune = false;
+        this.adImmunityCountDown = null;
+      }, this.adImmunityConfig.duration);
+    }
+  }
+
   private isAdActive(): boolean {
     return Boolean(this.getCurrentAd());
   }
@@ -723,6 +765,8 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 
     this.fireEvent<YospaceAdBreakEvent>(playerEvent);
 
+    this.startAdHoliday();
+
     if (this.cachedSeekTarget) {
       this.seek(this.cachedSeekTarget, 'yospace-ad-skipping');
       this.cachedSeekTarget = null;
@@ -756,6 +800,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       ads: ysAdBreak.getAdverts().map(AdTranslator.mapYsAdvert),
       duration: toSeconds(ysAdBreak.getDuration()),
       position: ysAdBreak.getPosition() as YospaceAdBreakPosition,
+      active: ysAdBreak.isActive(),
     };
   }
 
@@ -850,10 +895,18 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       this.session = null;
     }
 
+    if (this.adImmunityCountDown) {
+      window.clearTimeout(this.adImmunityCountDown);
+      this.adImmunityCountDown = null;
+    }
+
     if (this.dateRangeEmitter) {
       this.dateRangeEmitter.reset();
     }
 
+    this.adImmune = false;
+    // should adImmunityConfig be reset here? If yes, it
+    // would require configuration for each new video start
     this.adParts = [];
     this.adStartedTimestamp = null;
     this.cachedSeekTarget = null;
@@ -1127,6 +1180,30 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   };
 
   private onTimeChanged = (event: TimeChangedEvent) => {
+    // the offset of 500ms is an attempt to prevent the
+    // first few frames of an ad playing before the seek
+    // past the break has time to propagate
+    const adBreakCheckOffset = 500;
+    const upcomingAdBreak: AdBreak | null = this.session.getAdBreakForPlayhead(event.time * 1000 + adBreakCheckOffset);
+
+    // Seek past previously deactivated ad breaks
+    if (upcomingAdBreak && !upcomingAdBreak.isActive()) {
+      this.player.seek(toSeconds(upcomingAdBreak.getStart() + upcomingAdBreak.getDuration()));
+
+      // do not propagate time to the rest of the app, we want to seek past it
+      return;
+    }
+
+    // seek past and deactivate ad breaks entered during ad immunity
+    if (upcomingAdBreak && this.adImmune) {
+      upcomingAdBreak.setInactive();
+
+      this.player.seek(toSeconds(upcomingAdBreak.getStart() + upcomingAdBreak.getDuration()));
+
+      // do not propagate time to the rest of the app, we want to seek past it
+      return;
+    }
+
     // There is an outstanding bug on Safari mobile where upon exiting an ad break,
     // our TimeChanged event "rewinds" ~12 ms. This is a temporary fix.
     // If we report this "rewind" to Yospace, it results in duplicate ad events.
