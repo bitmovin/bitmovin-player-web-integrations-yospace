@@ -151,7 +151,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 
   private lastTimeChangedTime = 0;
   private adImmunityConfig = {
-    duration: 20000, // 0 duration = disabled
+    duration: 0, // 0 duration = disabled
   };
   private adImmune = false;
   private adImmunityCountDown: number | null = null;
