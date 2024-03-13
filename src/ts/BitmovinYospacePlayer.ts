@@ -50,6 +50,7 @@ import {
   YospacePlayerType,
   YospacePolicyErrorCode,
   YospaceSourceConfig,
+  AdImmunityConfig,
 } from './BitmovinYospacePlayerAPI';
 import { Logger } from './Logger';
 import { BitmovinYospaceHelper } from './BitmovinYospaceHelper';
@@ -574,6 +575,22 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 
   getAspectRatio(): number {
     return this.player.getAspectRatio();
+  }
+
+  getAdImmunityConfig() {
+    return this.player.getAdImmunityConfig();
+  }
+
+  isAdImmunityActive() {
+    return this.player.isAdImmunityActive();
+  }
+
+  endAdImmunity() {
+    this.player.endAdImmunity();
+  }
+
+  setAdImmunityConfig(options: AdImmunityConfig) {
+    this.player.setAdImmunityConfig(options);
   }
 
   readonly drm: DrmAPI;

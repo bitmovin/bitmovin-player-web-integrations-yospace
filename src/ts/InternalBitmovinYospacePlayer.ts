@@ -52,6 +52,8 @@ import {
 import { DefaultBitmovinYospacePlayerPolicy } from './BitmovinYospacePlayerPolicy';
 import { ArrayUtils } from 'bitmovin-player-ui/dist/js/framework/arrayutils';
 import {
+  AdImmunityConfiguredEvent,
+  AdImmunityEndedEvent,
   BitmovinYospacePlayerAPI,
   BitmovinYospacePlayerPolicy,
   CompanionAdType,
@@ -69,6 +71,7 @@ import {
   YospacePolicyErrorCode,
   YospacePolicyErrorEvent,
   YospaceSourceConfig,
+  AdImmunityStartedEvent,
 } from './BitmovinYospacePlayerAPI';
 import { YospacePlayerError } from './YospaceError';
 import {
@@ -573,10 +576,43 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 
   setAdImmunityConfig(config: any) {
     this.adImmunityConfig = config;
+    Logger.log('[BitmovinYospacePlayer] Ad Immunity Configured:', this.adImmunityConfig);
+    this.handleYospaceEvent<AdImmunityConfiguredEvent>({
+      timestamp: Date.now(),
+      type: YospacePlayerEvent.AdImmunityConfigured,
+      config,
+    });
+  }
+
+  getAdImmunityConfig() {
+    return this.adImmunityConfig;
+  }
+
+  isAdImmunityActive() {
+    return this.adImmune;
+  }
+
+  endAdImmunity() {
+    this.endAdImmunityPeriod();
   }
 
   // Helper
-  private startAdHoliday() {
+
+  private endAdImmunityPeriod() {
+    if (typeof this.adImmunityCountDown === 'number') {
+      window.clearTimeout(this.adImmunityCountDown);
+    }
+
+    this.adImmune = false;
+    this.adImmunityCountDown = null;
+    Logger.log('[BitmovinYospacePlayer] Ad Immunity Ended');
+    this.handleYospaceEvent<AdImmunityEndedEvent>({
+      timestamp: Date.now(),
+      type: YospacePlayerEvent.AdImmunityEnded,
+    });
+  }
+
+  private startAdImmunityPeriod() {
     // only start a timer if a duration has been configured, and ad immunity is not
     // already active. Only enable for VOD content.
     if (this.adImmune || this.yospaceSourceConfig.assetType !== YospaceAssetType.VOD) {
@@ -585,9 +621,15 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       this.adImmune = true;
 
       this.adImmunityCountDown = window.setTimeout(() => {
-        this.adImmune = false;
-        this.adImmunityCountDown = null;
+        this.endAdImmunityPeriod();
       }, this.adImmunityConfig.duration);
+
+      Logger.log('[BitmovinYospacePlayer] Ad Immunity Started, duration', this.adImmunityConfig.duration);
+      this.handleYospaceEvent<AdImmunityStartedEvent>({
+        timestamp: Date.now(),
+        type: YospacePlayerEvent.AdImmunityStarted,
+        duration: this.adImmunityConfig.duration,
+      });
     }
   }
 
@@ -765,7 +807,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 
     this.fireEvent<YospaceAdBreakEvent>(playerEvent);
 
-    this.startAdHoliday();
+    this.startAdImmunityPeriod();
 
     if (this.cachedSeekTarget) {
       this.seek(this.cachedSeekTarget, 'yospace-ad-skipping');
@@ -1190,6 +1232,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     if (upcomingAdBreak && !upcomingAdBreak.isActive()) {
       this.player.seek(toSeconds(upcomingAdBreak.getStart() + upcomingAdBreak.getDuration()));
 
+      Logger.log('[BitmovinYospacePlayer] - seeking past deactivated ad break');
       // do not propagate time to the rest of the app, we want to seek past it
       return;
     }
@@ -1198,6 +1241,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     if (upcomingAdBreak && this.adImmune) {
       upcomingAdBreak.setInactive();
 
+      Logger.log('[BitmovinYospacePlayer] - Ad Immunity - seeking past and deactivating ad break');
       this.player.seek(toSeconds(upcomingAdBreak.getStart() + upcomingAdBreak.getDuration()));
 
       // do not propagate time to the rest of the app, we want to seek past it

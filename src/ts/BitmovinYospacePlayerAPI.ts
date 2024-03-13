@@ -69,6 +69,32 @@ export interface BitmovinYospacePlayerAPI extends PlayerAPI {
   getDuration(mode?: TimeMode): number;
 
   forceSeek(time: number, issuer?: string): boolean;
+
+  /**
+   * Provide a duration greater than 0 to enable the ad immunity feature.
+   * The user will become immune to ad breaks for the duration upon
+   * fully watching an ad break.
+   *
+   * duration 0 disables the feature
+   */
+  setAdImmunityConfig(options: AdImmunityConfig): void;
+
+  /**
+   * Returns the current ad immunity configuration
+   *
+   * duration 0 means the feature is disabled
+   */
+  getAdImmunityConfig(): AdImmunityConfig;
+
+  /**
+   * Returns a boolean value indicating if the user is currently immune to ad breaks
+   */
+  isAdImmunityActive(): boolean;
+
+  /**
+   * Immediately ends an ongoing ad immunity period, before it would naturally expire
+   */
+  endAdImmunity(): void;
 }
 
 export interface YospaceSourceConfig extends SourceConfig {
@@ -229,4 +255,8 @@ export interface AdImmunityStartedEvent extends YospaceEventBase {
 
 export interface AdImmunityEndedEvent extends YospaceEventBase {
   type: YospacePlayerEvent.AdImmunityEnded;
+}
+
+export interface AdImmunityConfig {
+  duration: number;
 }
