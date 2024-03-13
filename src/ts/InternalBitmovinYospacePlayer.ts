@@ -402,14 +402,14 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     // this prevents the default player policy from redirecting
     // the seek target
     if (this.adImmune) {
-      const adBreaks: AdBreak[] = this.session.getAdBreaksByType(BreakType.LINEAR);
       const currentTime = this.player.getCurrentTime();
 
-      adBreaks.forEach((adBreak) => {
+      this.session.getAdBreaksByType(BreakType.LINEAR).forEach((adBreak) => {
         const breakStart = this.toMagicTime(toSeconds(adBreak.getStart()));
 
         // Check if break is being seeked past and deactivate it
         if (breakStart > currentTime && breakStart < time) {
+          Logger.log('[BitmovinYospacePlayer] Ad Immunity deactivated ad break during seek', adBreak);
           adBreak.setInactive();
         }
       });
