@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+
+- Event loop on pre-roll ad end
+
 ## 2.3.1 - 2024-02-14
 
 ### Removed
