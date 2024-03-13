@@ -165,6 +165,9 @@ export enum YospacePlayerEvent {
   PolicyError = 'policyerror',
   TruexAdFree = 'truexadfree',
   TruexAdBreakFinished = 'truexadbreakfinished',
+  AdImmunityConfigured = 'adimmunityconfigured',
+  AdImmunityStarted = 'adimmunitystarted',
+  AdImmunityEnded = 'adimmunityended',
 }
 
 export enum YospaceErrorCode {
@@ -212,4 +215,18 @@ export interface YospaceEventBase {
 
 export interface YospacePlayerEventCallback {
   (event: PlayerEventBase | YospaceEventBase): void;
+}
+
+export interface AdImmunityConfiguredEvent extends YospaceEventBase {
+  type: YospacePlayerEvent.AdImmunityConfigured;
+  config: { duration: number };
+}
+
+export interface AdImmunityStartedEvent extends YospaceEventBase {
+  type: YospacePlayerEvent.AdImmunityStarted;
+  duration: number;
+}
+
+export interface AdImmunityEndedEvent extends YospaceEventBase {
+  type: YospacePlayerEvent.AdImmunityEnded;
 }
