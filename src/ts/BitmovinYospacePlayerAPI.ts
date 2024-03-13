@@ -75,6 +75,9 @@ export interface BitmovinYospacePlayerAPI extends PlayerAPI {
    * The user will become immune to ad breaks for the duration upon
    * fully watching an ad break.
    *
+   * Ad breaks played over or seeked past during immunity will be marked
+   * as deactivated, making the user permanently immune to those breaks.
+   *
    * duration 0 disables the feature
    */
   setAdImmunityConfig(options: AdImmunityConfig): void;
