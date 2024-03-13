@@ -71,7 +71,7 @@ export interface BitmovinYospacePlayerAPI extends PlayerAPI {
   forceSeek(time: number, issuer?: string): boolean;
 
   /**
-   * Provide a duration greater than 0 to enable the ad immunity feature.
+   * Provide a duration in seconds greater than 0 to enable the ad immunity feature.
    * The user will become immune to ad breaks for the duration upon
    * fully watching an ad break.
    *
@@ -79,6 +79,9 @@ export interface BitmovinYospacePlayerAPI extends PlayerAPI {
    * as deactivated, making the user permanently immune to those breaks.
    *
    * duration 0 disables the feature
+   *
+   * postrolls are excluded from ad immunity
+   *
    */
   setAdImmunityConfig(options: AdImmunityConfig): void;
 

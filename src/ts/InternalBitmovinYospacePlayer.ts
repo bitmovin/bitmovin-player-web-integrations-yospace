@@ -622,7 +622,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 
       this.adImmunityCountDown = window.setTimeout(() => {
         this.endAdImmunityPeriod();
-      }, this.adImmunityConfig.duration);
+      }, this.adImmunityConfig.duration * 1000);
 
       Logger.log('[BitmovinYospacePlayer] Ad Immunity Started, duration', this.adImmunityConfig.duration);
       this.handleYospaceEvent<AdImmunityStartedEvent>({
@@ -1228,24 +1228,27 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     const adBreakCheckOffset = 500;
     const upcomingAdBreak: AdBreak | null = this.session.getAdBreakForPlayhead(event.time * 1000 + adBreakCheckOffset);
 
-    // Seek past previously deactivated ad breaks
-    if (upcomingAdBreak && !upcomingAdBreak.isActive()) {
-      this.player.seek(toSeconds(upcomingAdBreak.getStart() + upcomingAdBreak.getDuration()));
+    // exclude postrolls and unknown break positions from ad immunity to prevent seek loops at end of video
+    if (upcomingAdBreak?.getPosition() !== 'postroll' && upcomingAdBreak?.getPosition() !== 'unknown') {
+      // Seek past previously deactivated ad breaks
+      if (upcomingAdBreak && !upcomingAdBreak.isActive()) {
+        Logger.log('[BitmovinYospacePlayer] - Ad Immunity seeking past deactivated ad break');
+        this.player.seek(toSeconds(upcomingAdBreak.getStart() + upcomingAdBreak.getDuration()));
 
-      Logger.log('[BitmovinYospacePlayer] - seeking past deactivated ad break');
-      // do not propagate time to the rest of the app, we want to seek past it
-      return;
-    }
+        // do not propagate time to the rest of the app, we want to seek past it
+        return;
+      }
 
-    // seek past and deactivate ad breaks entered during ad immunity
-    if (upcomingAdBreak && this.adImmune) {
-      upcomingAdBreak.setInactive();
+      // seek past and deactivate ad breaks entered during ad immunity
+      if (upcomingAdBreak && this.adImmune) {
+        upcomingAdBreak.setInactive();
 
-      Logger.log('[BitmovinYospacePlayer] - Ad Immunity - seeking past and deactivating ad break');
-      this.player.seek(toSeconds(upcomingAdBreak.getStart() + upcomingAdBreak.getDuration()));
+        Logger.log('[BitmovinYospacePlayer] - Ad Immunity - seeking past and deactivating ad break');
+        this.player.seek(toSeconds(upcomingAdBreak.getStart() + upcomingAdBreak.getDuration()));
 
-      // do not propagate time to the rest of the app, we want to seek past it
-      return;
+        // do not propagate time to the rest of the app, we want to seek past it
+        return;
+      }
     }
 
     // There is an outstanding bug on Safari mobile where upon exiting an ad break,
