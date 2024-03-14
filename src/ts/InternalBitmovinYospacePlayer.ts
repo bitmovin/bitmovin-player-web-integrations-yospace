@@ -72,6 +72,7 @@ import {
   YospacePolicyErrorEvent,
   YospaceSourceConfig,
   AdImmunityStartedEvent,
+  AdImmunityConfig,
 } from './BitmovinYospacePlayerAPI';
 import { YospacePlayerError } from './YospaceError';
 import type {
@@ -574,7 +575,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     this.player.setPlaybackSpeed(this.playbackSpeed);
   }
 
-  setAdImmunityConfig(config: any) {
+  setAdImmunityConfig(config: AdImmunityConfig) {
     this.adImmunityConfig = config;
     Logger.log('[BitmovinYospacePlayer] Ad Immunity Configured:', this.adImmunityConfig);
     this.handleYospaceEvent<AdImmunityConfiguredEvent>({

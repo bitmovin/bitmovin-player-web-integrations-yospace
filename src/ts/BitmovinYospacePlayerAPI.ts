@@ -251,7 +251,7 @@ export interface YospacePlayerEventCallback {
 
 export interface AdImmunityConfiguredEvent extends YospaceEventBase {
   type: YospacePlayerEvent.AdImmunityConfigured;
-  config: { duration: number };
+  config: AdImmunityConfig;
 }
 
 export interface AdImmunityStartedEvent extends YospaceEventBase {
