@@ -577,7 +577,7 @@
           log('[BYP] Metadata Parsed: ', cloneDeepSimple(event));
         });
 
-        //        yospacePlayer.setPolicy(sampleYospacePlayerPolicy);
+        yospacePlayer.setPolicy(sampleYospacePlayerPolicy);
 
         yospacePlayer.on('segmentplayback', function (event) {
           if (event.mimeType === 'video/mp4') {
