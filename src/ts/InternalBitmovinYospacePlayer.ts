@@ -938,16 +938,12 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       this.session = null;
     }
 
-    if (this.adImmunityCountDown) {
-      window.clearTimeout(this.adImmunityCountDown);
-      this.adImmunityCountDown = null;
-    }
+    this.endAdImmunityPeriod();
 
     if (this.dateRangeEmitter) {
       this.dateRangeEmitter.reset();
     }
 
-    this.adImmune = false;
     // should adImmunityConfig be reset here? If yes, it
     // would require configuration for each new video start
     this.adParts = [];
