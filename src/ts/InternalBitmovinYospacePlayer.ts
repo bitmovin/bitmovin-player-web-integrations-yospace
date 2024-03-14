@@ -602,10 +602,12 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   private endAdImmunityPeriod() {
     if (typeof this.adImmunityCountDown === 'number') {
       window.clearTimeout(this.adImmunityCountDown);
+      this.adImmunityCountDown = null;
     }
 
+    if (!this.adImmune) return;
+
     this.adImmune = false;
-    this.adImmunityCountDown = null;
     Logger.log('[BitmovinYospacePlayer] Ad Immunity Ended');
     this.handleYospaceEvent<AdImmunityEndedEvent>({
       timestamp: Date.now(),
