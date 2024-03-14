@@ -623,7 +623,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 
       this.adImmunityCountDown = window.setTimeout(() => {
         this.endAdImmunityPeriod();
-      }, this.adImmunityConfig.duration * 1000);
+      }, toMilliseconds(this.adImmunityConfig.duration));
 
       Logger.log('[BitmovinYospacePlayer] Ad Immunity Started, duration', this.adImmunityConfig.duration);
       this.handleYospaceEvent<AdImmunityStartedEvent>({
@@ -1227,7 +1227,9 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     // first few frames of an ad playing before the seek
     // past the break has time to propagate
     const adBreakCheckOffset = 500;
-    const upcomingAdBreak: AdBreak | null = this.session.getAdBreakForPlayhead(event.time * 1000 + adBreakCheckOffset);
+    const upcomingAdBreak: AdBreak | null = this.session.getAdBreakForPlayhead(
+      toMilliseconds(event.time) + adBreakCheckOffset
+    );
 
     // exclude postrolls and unknown break positions from ad immunity to prevent seek loops at end of video
     if (upcomingAdBreak?.getPosition() !== 'postroll' && upcomingAdBreak?.getPosition() !== 'unknown') {
