@@ -1118,10 +1118,14 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       // need to stay in the SDK as there might be AdBreak Impressions and other beacons Yospace might need to trigger.
       // These ad breaks wouldn't be visible to the user and have a duration of `0`. Yospace's recommendation for us
       // is to filter out ads with duration = 0.
-      return this.session
-        .getAdBreaksByType(BreakType.LINEAR)
-        .map((adBreak: AdBreak) => this.mapAdBreak(adBreak))
-        .filter((adBreak: YospaceAdBreak) => adBreak.duration > 0);
+      return (
+        this.session
+          .getAdBreaksByType(BreakType.LINEAR)
+          .map((adBreak: AdBreak) => this.mapAdBreak(adBreak))
+          // filter out ad breaks deactivated by ad immunity
+          .filter((adBreak: YospaceAdBreak) => adBreak.active)
+          .filter((adBreak: YospaceAdBreak) => adBreak.duration > 0)
+      );
     },
 
     schedule: (adConfig: AdConfig) => {
