@@ -264,7 +264,10 @@ export interface AdImmunityEndedEvent extends YospaceEventBase {
 /**
  * @description Ad Immunity Configuration Object
  * @property duration - a number indicating the duration of the ad immunity period. 0 disables the feature.
+ * @property adBreakCheckOffset - a number indicating how far ahead ad immunity should look for ad breaks
+ * to skip past, in order to mitigate ad frames being displayed before they have time to be seeked past.
  */
 export interface AdImmunityConfig {
   duration: number;
+  adBreakCheckOffset?: number;
 }
