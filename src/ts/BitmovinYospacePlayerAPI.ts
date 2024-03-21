@@ -50,8 +50,22 @@ export interface BitmovinYospacePlayerAPI extends PlayerAPI {
 
   getCurrentPlayerType(): YospacePlayerType;
 
+  /*
+   * By default, the method returns the current content position, discarding stitched ad durations. If an ad
+   * is playing, the position inside of the ad will instead be returned.
+   *
+   * if TimeMode.AbsoluteTime is provided as an argument to the method, it will instead always return the current time
+   * including stitched ad durations.
+   */
   getCurrentTime(mode?: TimeMode): number;
 
+  /*
+   * By default, the method returns the current content duration, discarding stitched ad durations. If an ad
+   * is playing, the duration of the ad will instead be returned.
+   *
+   * if TimeMode.AbsoluteTime is provided as an argument to the method, it will instead always return the duration
+   * including stitched ad durations.
+   */
   getDuration(mode?: TimeMode): number;
 
   forceSeek(time: number, issuer?: string): boolean;
