@@ -14,7 +14,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 
 - `mode` argument to `getCurrentTime` to enable fetching absolute time including ad durations
-- added mode argument to getDuration to enable fetching absolute duration
+- `mode` argument to `getDuration` to enable fetching absolute duration including ad durations
 
 ## 2.3.1 - 2024-02-14
 
