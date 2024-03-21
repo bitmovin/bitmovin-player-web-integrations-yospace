@@ -7,8 +7,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
-<<<<<<< HEAD
-
 ### Fixed
 
 - Event loop on pre-roll ad end
@@ -17,13 +15,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - `mode` argument to `getCurrentTime` to enable fetching absolute time including ad durations
 - `mode` argument to `getDuration` to enable fetching absolute duration including ad durations
-
-# ||||||| parent of 5fc19b3 (chore: add changelog)
-
-## 2.4.0
-
-### Added
-
 - ad immunity feature:
 
   The user will become immune to ad breaks for a duration upon
@@ -32,14 +23,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   Ad breaks played over or seeked past during immunity will be marked
   as deactivated, making the user permanently immune to them.
 
-  setting duration to 0 disables the feature.
+  Post-roll ads and ads with unknown positioning are excluded from ad immunity.
 
-  postrolls and ads with unknown positioning are excluded from ad immunity.
+  By default, pre-rolls are also excluded, since the user needs to finish
+  an ad break to enter an ad immunity period.
 
   `setAdImmunityConfig(options: AdImmunityConfig): void;`
 
   Returns the current ad immunity configuration.
-  duration 0 means the feature is disabled.
+
   `getAdImmunityConfig(): AdImmunityConfig;`
 
   Returns a boolean value indicating if the user is currently immune to ad breaks
@@ -49,14 +41,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   `endAdImmunity(): void;`
 
 - ad immunity events to `YospacePlayerEvent` enum
-- `getCurrentAdBreakDuration` method. It returns the full duration of the currently playing ad break.
-- methods to fetch current time and duration of a vod, including stitched ad duration: `getCurrentTimeWithAds` and `getDurationWithAds`.
-
-### Fixed
-
-- prevent multiple ad break finished events
-
-> > > > > > > 5fc19b3 (chore: add changelog)
 
 ## 2.3.1 - 2024-02-14
 
