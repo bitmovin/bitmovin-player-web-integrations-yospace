@@ -1232,7 +1232,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     // the offset is an attempt to prevent the first few frames of an ad
     // playing before the seek past the break has time to propagate
     const adBreakCheckOffset =
-      typeof this.adImmunityConfig.adBreakCheckOffset === 'number' ? this.adImmunityConfig.adBreakCheckOffset : 200;
+      typeof this.adImmunityConfig.adBreakCheckOffset === 'number' ? this.adImmunityConfig.adBreakCheckOffset : 300;
     const upcomingAdBreak: AdBreak | null = this.session.getAdBreakForPlayhead(
       toMilliseconds(event.time) + adBreakCheckOffset
     );
