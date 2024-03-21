@@ -78,17 +78,15 @@ export interface BitmovinYospacePlayerAPI extends PlayerAPI {
    * Ad breaks played over or seeked past during immunity will be marked
    * as deactivated, making the user permanently immune to those breaks.
    *
-   * duration 0 disables the feature
+   * Post-rolls are excluded from ad immunity
    *
-   * postrolls are excluded from ad immunity
-   *
+   * Pre-roll ads are excluded from ad immunity as at least one ad break needs to be
+   * watched completely
    */
   setAdImmunityConfig(options: AdImmunityConfig): void;
 
   /**
    * Returns the current ad immunity configuration
-   *
-   * duration 0 means the feature is disabled
    */
   getAdImmunityConfig(): AdImmunityConfig;
 
