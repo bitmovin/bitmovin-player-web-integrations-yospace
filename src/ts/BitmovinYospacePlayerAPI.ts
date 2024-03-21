@@ -263,6 +263,10 @@ export interface AdImmunityEndedEvent extends YospaceEventBase {
   type: YospacePlayerEvent.AdImmunityEnded;
 }
 
+/**
+ * @description Ad Immunity Configuration Object
+ * @property duration - a number indicating the duration of the ad immunity period. 0 disables the feature.
+ */
 export interface AdImmunityConfig {
   duration: number;
 }
