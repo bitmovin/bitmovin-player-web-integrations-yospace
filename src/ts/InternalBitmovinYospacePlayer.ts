@@ -153,10 +153,10 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   private lastTimeChangedTime = 0;
   private adImmunityConfig: AdImmunityConfig = {
     duration: 0, // 0 duration = disabled
-    adBreakCheckOffset: 200,
   };
   private adImmune = false;
   private adImmunityCountDown: number | null = null;
+  private unpauseAfterSeek = false;
 
   constructor(containerElement: HTMLElement, player: PlayerAPI, yospaceConfig: YospaceConfiguration = {}) {
     this.yospaceConfig = yospaceConfig;
@@ -577,7 +577,10 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   }
 
   setAdImmunityConfig(config: AdImmunityConfig) {
-    this.adImmunityConfig = config;
+    this.adImmunityConfig = {
+      ...this.adImmunityConfig,
+      ...config,
+    };
     Logger.log('[BitmovinYospacePlayer] Ad Immunity Configured:', this.adImmunityConfig);
     this.handleYospaceEvent<AdImmunityConfiguredEvent>({
       timestamp: Date.now(),
@@ -1226,10 +1229,10 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   };
 
   private onTimeChanged = (event: TimeChangedEvent) => {
-    // the offset of 500ms is an attempt to prevent the
-    // first few frames of an ad playing before the seek
-    // past the break has time to propagate
-    const adBreakCheckOffset = this.adImmunityConfig.adBreakCheckOffset;
+    // the offset is an attempt to prevent the first few frames of an ad
+    // playing before the seek past the break has time to propagate
+    const adBreakCheckOffset =
+      typeof this.adImmunityConfig.adBreakCheckOffset === 'number' ? this.adImmunityConfig.adBreakCheckOffset : 200;
     const upcomingAdBreak: AdBreak | null = this.session.getAdBreakForPlayhead(
       toMilliseconds(event.time) + adBreakCheckOffset
     );
@@ -1238,7 +1241,16 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     if (upcomingAdBreak?.getPosition() !== 'postroll' && upcomingAdBreak?.getPosition() !== 'unknown') {
       // Seek past previously deactivated ad breaks
       if (upcomingAdBreak && !upcomingAdBreak.isActive()) {
-        Logger.log('[BitmovinYospacePlayer] - Ad Immunity seeking past deactivated ad break');
+        this.suppressedEventsController.add(
+          this.player.exports.PlayerEvent.Paused,
+          this.player.exports.PlayerEvent.Seek,
+          this.player.exports.PlayerEvent.Seeked
+        );
+
+        this.player.pause();
+        this.unpauseAfterSeek = true;
+
+        Logger.log('[BitmovinYospacePlayer] - Ad Immunity pausing and seeking past deactivated ad break');
         this.player.seek(toSeconds(upcomingAdBreak.getStart() + upcomingAdBreak.getDuration()));
 
         // do not propagate time to the rest of the app, we want to seek past it
@@ -1249,7 +1261,16 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       if (upcomingAdBreak && this.adImmune) {
         upcomingAdBreak.setInactive();
 
-        Logger.log('[BitmovinYospacePlayer] - Ad Immunity - seeking past and deactivating ad break');
+        this.suppressedEventsController.add(
+          this.player.exports.PlayerEvent.Paused,
+          this.player.exports.PlayerEvent.Seek,
+          this.player.exports.PlayerEvent.Seeked
+        );
+
+        this.player.pause();
+        this.unpauseAfterSeek = true;
+
+        Logger.log('[BitmovinYospacePlayer] - Ad Immunity pausing, seeking past and deactivating ad break');
         this.player.seek(toSeconds(upcomingAdBreak.getStart() + upcomingAdBreak.getDuration()));
 
         // do not propagate time to the rest of the app, we want to seek past it
@@ -1300,6 +1321,12 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 
   private onSeeked = (event: SeekEvent) => {
     Logger.log('[BitmovinYospacePlayer] - sending YospaceAdManagement.PlayerEvent.SEEK (from Seeked player event)');
+
+    if (this.unpauseAfterSeek) {
+      this.unpauseAfterSeek = false;
+      this.play();
+    }
+
     this.session.onPlayerEvent(YsPlayerEvent.SEEK, toMilliseconds(this.player.getCurrentTime()));
 
     if (!this.suppressedEventsController.isSuppressed(this.player.exports.PlayerEvent.Seeked)) {
