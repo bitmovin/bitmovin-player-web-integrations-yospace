@@ -1228,6 +1228,19 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     }
   };
 
+  private performBreakSkip(seekTarget: number) {
+    this.suppressedEventsController.add(
+      this.player.exports.PlayerEvent.Paused,
+      this.player.exports.PlayerEvent.Seek,
+      this.player.exports.PlayerEvent.Seeked
+    );
+
+    this.player.pause();
+    this.unpauseAfterSeek = true;
+
+    this.player.seek(seekTarget);
+  }
+
   private onTimeChanged = (event: TimeChangedEvent) => {
     // the offset is an attempt to prevent the first few frames of an ad
     // playing before the seek past the break has time to propagate
@@ -1241,17 +1254,9 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     if (upcomingAdBreak?.getPosition() !== 'postroll' && upcomingAdBreak?.getPosition() !== 'unknown') {
       // Seek past previously deactivated ad breaks
       if (upcomingAdBreak && !upcomingAdBreak.isActive()) {
-        this.suppressedEventsController.add(
-          this.player.exports.PlayerEvent.Paused,
-          this.player.exports.PlayerEvent.Seek,
-          this.player.exports.PlayerEvent.Seeked
-        );
-
-        this.player.pause();
-        this.unpauseAfterSeek = true;
-
         Logger.log('[BitmovinYospacePlayer] - Ad Immunity pausing and seeking past deactivated ad break');
-        this.player.seek(toSeconds(upcomingAdBreak.getStart() + upcomingAdBreak.getDuration()));
+
+        this.performBreakSkip(toSeconds(upcomingAdBreak.getStart() + upcomingAdBreak.getDuration()));
 
         // do not propagate time to the rest of the app, we want to seek past it
         return;
@@ -1261,17 +1266,9 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       if (upcomingAdBreak && this.adImmune) {
         upcomingAdBreak.setInactive();
 
-        this.suppressedEventsController.add(
-          this.player.exports.PlayerEvent.Paused,
-          this.player.exports.PlayerEvent.Seek,
-          this.player.exports.PlayerEvent.Seeked
-        );
-
-        this.player.pause();
-        this.unpauseAfterSeek = true;
-
         Logger.log('[BitmovinYospacePlayer] - Ad Immunity pausing, seeking past and deactivating ad break');
-        this.player.seek(toSeconds(upcomingAdBreak.getStart() + upcomingAdBreak.getDuration()));
+
+        this.performBreakSkip(toSeconds(upcomingAdBreak.getStart() + upcomingAdBreak.getDuration()));
 
         // do not propagate time to the rest of the app, we want to seek past it
         return;
