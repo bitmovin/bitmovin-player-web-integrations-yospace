@@ -36,6 +36,7 @@ import {
   SeekEvent,
   SourceConfig,
   TimeChangedEvent,
+  TimeMode,
   TimeRange,
   UserInteractionEvent,
 } from 'bitmovin-player/modules/bitmovinplayer-core';
@@ -406,7 +407,11 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     return this.player.seek(magicSeekTarget, issuer);
   }
 
-  getCurrentTime(): number {
+  getCurrentTime(mode?: TimeMode): number {
+    if (mode === TimeMode.AbsoluteTime) {
+      return this.player.getCurrentTime();
+    }
+
     if (this.isAdActive()) {
       // return currentTime in AdBreak
       const currentAdPosition = this.player.getCurrentTime();
@@ -416,8 +421,12 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     return this.toMagicTime(this.player.getCurrentTime());
   }
 
-  getDuration(): number {
+  getDuration(mode?: TimeMode): number {
     if (!this.session) return 0;
+
+    if (mode === TimeMode.AbsoluteTime) {
+      return this.player.getDuration();
+    }
 
     if (this.isAdActive()) {
       return this.getCurrentAdDuration();

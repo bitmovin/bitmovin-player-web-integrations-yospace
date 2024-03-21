@@ -11,6 +11,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - Event loop on pre-roll ad end
 
+### Added
+
+- `mode` argument to `getCurrentTime` to enable fetching absolute time including ad durations
+- `mode` argument to `getDuration` to enable fetching absolute duration including ad durations
+
 ## 2.3.1 - 2024-02-14
 
 ### Removed
@@ -51,7 +56,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - `shownToUser` method to Companion Ads, which should be fired when the ad is shown to the user
 - `hiddenFromUser` method to Companion Ads, which should be fired when the ad is hidden from the user
 - `UNKNOWN_FORMAT` error (code `1011`)
-- `YospaceConfiguration.debugYospaceSdk` to enable debug logs of the Yospace SDK without enabling logs for the `BitmovinYospacePlayer` (helpful for Yospace validation)
+- `YospaceConfiguration.debugYospaceSdk` to enable debug logs of the Yospace SDK without enabling logs for
+  the `BitmovinYospacePlayer` (helpful for Yospace validation)
 - Support for tracking muted/unmuted changes
 
 ### Changed
@@ -125,7 +131,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 
-- Use standalone Bitmovin Analytics Adapter for flexibility. And move initialization to `load()` to dynamically attach to the correct player based on source.
+- Use standalone Bitmovin Analytics Adapter for flexibility. And move initialization to `load()` to dynamically attach
+  to the correct player based on source.
   - Note: This change required updating to TypeScript version 3.
 
 ## 1.2.20-2 - 2021-07-28
@@ -149,13 +156,17 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 
-- Remove the [arrayAccessForm](https://github.com/x2js/x2js/blob/development/x2js.d.ts#L116), config option from `X2JS` initialization for parsing VAST Extensions. This was causing unpredictable arrays for the `Extension.CreativeParameters` property. Without the option, it consistently returns an object when there is only one `CreativeParameter` property.
+- Remove the [arrayAccessForm](https://github.com/x2js/x2js/blob/development/x2js.d.ts#L116), config option from `X2JS`
+  initialization for parsing VAST Extensions. This was causing unpredictable arrays for
+  the `Extension.CreativeParameters` property. Without the option, it consistently returns an object when there is only
+  one `CreativeParameter` property.
 
 ## 1.2.19 - 2021-01-20
 
 ### Fixed
 
-- Added a temporary fix for a bug on Safari mobile that results in duplicate ad events from Yospace, as a result of incorrect Position updates reported to the YS SDK.
+- Added a temporary fix for a bug on Safari mobile that results in duplicate ad events from Yospace, as a result of
+  incorrect Position updates reported to the YS SDK.
 
 ### Added
 
@@ -263,7 +274,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 
-- When the `disableServiceWorker` flag is set to true, don't make calls to `navigator.serviceWorker.getRegistrations()`. This was causing issues on Tizen devices.
+- When the `disableServiceWorker` flag is set to true, don't make calls to `navigator.serviceWorker.getRegistrations()`.
+  This was causing issues on Tizen devices.
 
 ## 1.2.5 - 2020-04-15
 
@@ -287,7 +299,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 
-- Fire `TruexAdFree` in the `adBreakFinished` listener instead of `adFinished`, as the stream isn't fully reloaded for seeking after `adFinished`
+- Fire `TruexAdFree` in the `adBreakFinished` listener instead of `adFinished`, as the stream isn't fully reloaded for
+  seeking after `adFinished`
 - Update Bitmovin Web SDK to 08.31.0
 - `player.isLive()` returns false when in a VPAID, so store `isLiveStream` in a variable upon playing the stream.
 
@@ -301,7 +314,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Changed
 
 - Always fire the `TrueXAdFree` event
-- Reduce the replaceContentDuration by 2 seconds in order to allow the player to properly skip the VPAID / TrueX ad if needed
+- Reduce the replaceContentDuration by 2 seconds in order to allow the player to properly skip the VPAID / TrueX ad if
+  needed
 - Updated Bitmovin Web SDK to 8.30.0
 - Fire a new `TruexAdBreakFinished` event
 
