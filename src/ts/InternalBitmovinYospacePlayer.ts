@@ -151,8 +151,9 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   private startSent: boolean;
 
   private lastTimeChangedTime = 0;
-  private adImmunityConfig = {
+  private adImmunityConfig: AdImmunityConfig = {
     duration: 0, // 0 duration = disabled
+    adBreakCheckOffset: 200,
   };
   private adImmune = false;
   private adImmunityCountDown: number | null = null;
@@ -1228,7 +1229,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     // the offset of 500ms is an attempt to prevent the
     // first few frames of an ad playing before the seek
     // past the break has time to propagate
-    const adBreakCheckOffset = 500;
+    const adBreakCheckOffset = this.adImmunityConfig.adBreakCheckOffset;
     const upcomingAdBreak: AdBreak | null = this.session.getAdBreakForPlayhead(
       toMilliseconds(event.time) + adBreakCheckOffset
     );
