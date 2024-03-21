@@ -412,7 +412,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
         const breakStart = this.toMagicTime(toSeconds(adBreak.getStart()));
 
         // Check if break is being seeked past and deactivate it
-        if (breakStart > currentTime && breakStart < time) {
+        if (breakStart > currentTime && breakStart <= time) {
           Logger.log('[BitmovinYospacePlayer] Ad Immunity deactivated ad break during seek', adBreak);
           adBreak.setInactive();
         }
