@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - Event loop on pre-roll ad end
 
-### Changed
+### Added
 
 - added mode argument to getCurrentTime to enable fetching absolute time
 - added mode argument to getDuration to enable fetching absolute duration
