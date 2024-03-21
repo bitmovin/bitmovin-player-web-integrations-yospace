@@ -36,6 +36,7 @@ import {
   SeekEvent,
   SourceConfig,
   TimeChangedEvent,
+  TimeMode,
   TimeRange,
   UserInteractionEvent,
 } from 'bitmovin-player/modules/bitmovinplayer-core';
@@ -406,7 +407,11 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     return this.player.seek(magicSeekTarget, issuer);
   }
 
-  getCurrentTime(): number {
+  getCurrentTime(mode?: TimeMode): number {
+    if (mode === TimeMode.AbsoluteTime) {
+      return this.player.getCurrentTime();
+    }
+
     if (this.isAdActive()) {
       // return currentTime in AdBreak
       const currentAdPosition = this.player.getCurrentTime();
@@ -416,12 +421,12 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     return this.toMagicTime(this.player.getCurrentTime());
   }
 
-  getCurrentTimeWithAds(): number {
-    return this.player.getCurrentTime();
-  }
-
-  getDuration(): number {
+  getDuration(mode?: TimeMode): number {
     if (!this.session) return 0;
+
+    if (mode === TimeMode.AbsoluteTime) {
+      return this.player.getDuration();
+    }
 
     if (this.isAdActive()) {
       return this.getCurrentAdDuration();
@@ -434,18 +439,6 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     return toSeconds(
       (this.session as SessionVOD).getContentPositionForPlayhead(toMilliseconds(this.player.getDuration()))
     );
-  }
-
-  getCurrentAdBreakDuration(): number {
-    if (this.isAdActive()) {
-      return this.getAdBreakDuration(this.getCurrentAdBreak());
-    }
-
-    return 0;
-  }
-
-  getDurationWithAds(): number {
-    return this.player.getDuration();
   }
 
   /**
@@ -785,10 +778,6 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 
   private getAdDuration(ad: Advert): number {
     return toSeconds(ad.getDuration());
-  }
-
-  private getAdBreakDuration(adbreak: AdBreak): number {
-    return toSeconds(adbreak.getDuration());
   }
 
   private getAdStartTime(ad: Advert): number {

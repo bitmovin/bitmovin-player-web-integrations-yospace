@@ -8,6 +8,7 @@ import {
   PlayerExports,
   SourceConfig,
 } from 'bitmovin-player';
+import { TimeMode } from 'bitmovin-player/modules/bitmovinplayer-core';
 
 // Enums
 
@@ -49,11 +50,9 @@ export interface BitmovinYospacePlayerAPI extends PlayerAPI {
 
   getCurrentPlayerType(): YospacePlayerType;
 
-  getCurrentAdBreakDuration(): number;
+  getCurrentTime(mode?: TimeMode): number;
 
-  getCurrentTimeWithAds(): number;
-
-  getDurationWithAds(): number;
+  getDuration(mode?: TimeMode): number;
 
   forceSeek(time: number, issuer?: string): boolean;
 }

@@ -1,4 +1,5 @@
 import {
+  AdaptationAPI,
   AudioQuality,
   AudioTrack,
   DownloadedAudioData,
@@ -23,6 +24,7 @@ import {
   SupportedTechnologyMode,
   Technology,
   Thumbnail,
+  TimeMode,
   TimeRange,
   VideoQuality,
   ViewMode,
@@ -334,16 +336,8 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     return this.player.getContainer();
   }
 
-  getCurrentTime(): number {
-    return this.player.getCurrentTime();
-  }
-
-  getCurrentAdBreakDuration(): number {
-    return this.player.getCurrentAdBreakDuration();
-  }
-
-  getCurrentTimeWithAds(): number {
-    return this.player.getCurrentTimeWithAds();
+  getCurrentTime(mode?: TimeMode): number {
+    return this.player.getCurrentTime(mode);
   }
 
   getDownloadedAudioData(): DownloadedAudioData {
@@ -358,12 +352,12 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     return this.player.getDroppedVideoFrames();
   }
 
-  getDuration(): number {
-    return this.player.getDuration();
+  getDuration(mode?: TimeMode): number {
+    return this.player.getDuration(mode);
   }
 
-  getDurationWithAds(): number {
-    return this.player.getDurationWithAds();
+  get adaptation(): AdaptationAPI {
+    return this.player.adaptation;
   }
 
   getManifest(): string {
