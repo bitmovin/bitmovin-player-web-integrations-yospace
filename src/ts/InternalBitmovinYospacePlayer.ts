@@ -600,7 +600,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   // Helper
 
   private endAdImmunityPeriod() {
-    if (typeof this.adImmunityCountDown === 'number') {
+    if (this.adImmunityCountDown !== null) {
       window.clearTimeout(this.adImmunityCountDown);
       this.adImmunityCountDown = null;
     }
