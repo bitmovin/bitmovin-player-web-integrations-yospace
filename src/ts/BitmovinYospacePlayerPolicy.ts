@@ -1,5 +1,5 @@
 import { LinearAd } from 'bitmovin-player';
-import { BitmovinYospacePlayerAPI, BitmovinYospacePlayerPolicy } from './BitmovinYospacePlayerAPI';
+import { BitmovinYospacePlayerAPI, BitmovinYospacePlayerPolicy, YospaceAdBreak } from './BitmovinYospacePlayerAPI';
 
 export class DefaultBitmovinYospacePlayerPolicy implements BitmovinYospacePlayerPolicy {
   private player: BitmovinYospacePlayerAPI;
@@ -15,10 +15,11 @@ export class DefaultBitmovinYospacePlayerPolicy implements BitmovinYospacePlayer
 
   canSeekTo(seekTarget: number): number {
     const currentTime = this.player.getCurrentTime();
-    const adBreaks = this.player.ads.list();
+    // @ts-expect-error the BitmovinYospacePlayerAPI interface is not up to date
+    const adBreaks: YospaceAdBreak[] = this.player.ads.list();
 
     const skippedAdBreaks = adBreaks.filter((adBreak) => {
-      return adBreak.scheduleTime > currentTime && adBreak.scheduleTime < seekTarget;
+      return adBreak.active && adBreak.scheduleTime > currentTime && adBreak.scheduleTime < seekTarget;
     });
 
     if (skippedAdBreaks.length > 0) {
