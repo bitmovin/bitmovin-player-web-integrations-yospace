@@ -28,25 +28,26 @@
   "license": "MIT",
   "dependencies": {
     "@yospace/admanagement-sdk": "3.6.0",
-    "bitmovin-player": "^8.157.0",
     "fast-safe-stringify": "^2.0.7",
     "process": "^0.11.10",
     "stream-browserify": "^3.0.0"
   },
   "peerDependencies": {
     "@yospace/admanagement-sdk": "3.6.0",
-    "bitmovin-player": "^8.114.0"
+    "bitmovin-player": "^8.157.0"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^5.27.1",
     "@typescript-eslint/parser": "^5.27.1",
     "bitmovin-analytics": "^2.27.0",
     "bitmovin-player-ui": "^3.37.0",
+    "changelog-parser": "^3.0.1",
     "eslint": "^8.17.0",
     "husky": "^8.0.1",
     "kacl": "^1.1.1",
     "lint-staged": "^13.0.1",
     "prettier": "2.6.2",
+    "semver": "^7.6.0",
     "ts-loader": "^9.3.0",
     "typescript": "^3.9.10",
     "webpack": "^5.73.0",
