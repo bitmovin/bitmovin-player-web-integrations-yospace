@@ -49,7 +49,7 @@ jobs:
         with:
           script: |
             const { defineReleaseVersion } = require('./.github/scripts/defineVersion.js')
-            return defineReleaseVersion({core}, "${{ steps.define-package-json-version.outputs.packageJsonVersion }}", './CHANGELOG.md' )
+            return defineReleaseVersion({core}, "${{ steps.read-latest-release-version.outputs.latestReleaseVersion }}", './CHANGELOG.md' )
 
       - name: Bump package.json and Changelog version and tag commit
         run: |

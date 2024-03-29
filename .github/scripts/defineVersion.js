@@ -33,3 +33,5 @@ async function defineReleaseVersion({ core }, currentVersion, changelogFile) {
     }
   });
 }
+
+module.exports.defineReleaseVersion = defineReleaseVersion;
