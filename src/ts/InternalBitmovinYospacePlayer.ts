@@ -1229,12 +1229,6 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   };
 
   private performBreakSkip(seekTarget: number) {
-    this.suppressedEventsController.add(
-      this.player.exports.PlayerEvent.Paused,
-      this.player.exports.PlayerEvent.Seek,
-      this.player.exports.PlayerEvent.Seeked
-    );
-
     this.player.pause();
     this.unpauseAfterSeek = true;
 
