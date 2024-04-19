@@ -96,6 +96,12 @@ export interface BitmovinYospacePlayerAPI extends PlayerAPI {
   isAdImmunityActive(): boolean;
 
   /**
+   * Immediately starts an ad immunity period, if ad immunity config exists. This method does nothing if ad immunity is already active.
+   * To refresh an ad immunity period, first call endAdImmunity followed by startAdImmunity.
+   */
+  startAdImmunity(): void;
+
+  /**
    * Immediately ends an ongoing ad immunity period, before it would naturally expire
    */
   endAdImmunity(): void;

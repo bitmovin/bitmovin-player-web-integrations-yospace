@@ -601,6 +601,10 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     this.endAdImmunityPeriod();
   }
 
+  startAdImmunity() {
+    this.startAdImmunityPeriod();
+  }
+
   // Helper
 
   private endAdImmunityPeriod() {
