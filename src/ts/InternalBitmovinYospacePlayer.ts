@@ -1129,8 +1129,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
           .getAdBreaksByType(BreakType.LINEAR)
           .map((adBreak: AdBreak) => this.mapAdBreak(adBreak))
           // filter out ad breaks deactivated by ad immunity
-          .filter((adBreak: YospaceAdBreak) => adBreak.active)
-          .filter((adBreak: YospaceAdBreak) => adBreak.duration > 0)
+          .filter((adBreak: YospaceAdBreak) => adBreak.active && adBreak.duration > 0)
       );
     },
 
