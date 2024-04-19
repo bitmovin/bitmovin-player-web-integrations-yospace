@@ -585,6 +585,10 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     return this.player.isAdImmunityActive();
   }
 
+  startAdImmunity() {
+    this.player.startAdImmunity();
+  }
+
   endAdImmunity() {
     this.player.endAdImmunity();
   }

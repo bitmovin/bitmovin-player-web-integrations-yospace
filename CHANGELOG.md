@@ -43,6 +43,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   Returns a boolean value indicating if the user is currently immune to ad breaks
   `isAdImmunityActive(): boolean;`
 
+  Immediately starts an ad immunity period, if ad immunity config exists. This method does nothing if ad immunity is already active.
+  `startAdImmunity(): void;`
+
   Immediately ends an ongoing ad immunity period, before it would naturally expire
   `endAdImmunity(): void;`
 
