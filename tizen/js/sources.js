@@ -1,8 +1,16 @@
 var sources = {
   vodSource: {
     title: 'VOD Stream',
-    hls: 'https://vod-manifests-aka-qa.warnermediacdn.com/csm/tcm/clear/3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c/master_cl.m3u8?afid=222591187&caid=2100555&conf_csid=tbs.com_videopage_test&context=182883174&nw=42448&prof=48804%3Amp4_plus_vast_truex&vdur=1800&yo.vp=true',
+    // hls without preroll
+    // hls: 'https://csm-e-sdk-validation.bln1.yospace.com/csm/access/207411697/c2FtcGxlL21hc3Rlci5tM3U4?yo.av=3',
+    // hls with preroll
+    hls: 'https://csm-e-sdk-validation.bln1.yospace.com/csm/access/156611618/c2FtcGxlL21hc3Rlci5tM3U4?yo.av=3',
+    // Yospace configuration
     assetType: bitmovin.player.ads.yospace.YospaceAssetType.VOD,
+    truexConfiguration: {},
+    // options: {
+    //   startOffset: 600
+    // }
   },
   artOfMotionSource: {
     dash: 'https://bitmovin-a.akamaihd.net/content/MI201109210084_1/mpds/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.mpd',
