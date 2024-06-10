@@ -393,7 +393,7 @@
           autoplay: autoplay, // Fix for Pre-roll 'blip' does not work with autoplay enabled
         },
         logs: {
-          level: 'none',
+          level: !isValidationMode ? 'warn' : 'none',
           bitmovin: !isValidationMode,
         },
         ui: false,
