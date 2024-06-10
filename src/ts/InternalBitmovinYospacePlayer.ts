@@ -261,11 +261,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
               };
 
           // convert start time (relative) to an absolute time
-          if (
-            this.yospaceSourceConfig.assetType === YospaceAssetType.VOD &&
-            clonedSource.options &&
-            clonedSource.options.startOffset
-          ) {
+          if (this.yospaceSourceConfig.assetType === YospaceAssetType.VOD && clonedSource.options && clonedSource.options.startOffset) {
             clonedSource.options.startOffset = this.toAbsoluteTime(clonedSource.options.startOffset);
             Logger.log('startOffset adjusted to: ' + clonedSource.options.startOffset);
           }
@@ -464,25 +460,21 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       return this.player.getDuration();
     }
 
-    return toSeconds(
-      (this.session as SessionVOD).getContentPositionForPlayhead(toMilliseconds(this.player.getDuration()))
-    );
+    return toSeconds((this.session as SessionVOD).getContentPositionForPlayhead(toMilliseconds(this.player.getDuration())));
   }
 
   /**
    * @deprecated Use {@link PlayerBufferAPI.getLevel} instead.
    */
   getVideoBufferLength(): number | null {
-    return this.buffer.getLevel(this.player.exports.BufferType.ForwardDuration, this.player.exports.MediaType.Video)
-      .level;
+    return this.buffer.getLevel(this.player.exports.BufferType.ForwardDuration, this.player.exports.MediaType.Video).level;
   }
 
   /**
    * @deprecated Use {@link PlayerBufferAPI.getLevel} instead.
    */
   getAudioBufferLength(): number | null {
-    return this.buffer.getLevel(this.player.exports.BufferType.ForwardDuration, this.player.exports.MediaType.Audio)
-      .level;
+    return this.buffer.getLevel(this.player.exports.BufferType.ForwardDuration, this.player.exports.MediaType.Audio).level;
   }
 
   getBufferedRanges(): TimeRange[] {
@@ -776,10 +768,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       ...mapToYospaceCompanionAd(currentAd.getCompanionAdsByType(ResourceType.STATIC), CompanionAdType.StaticResource),
       ...mapToYospaceCompanionAd(currentAd.getCompanionAdsByType(ResourceType.HTML), CompanionAdType.HtmlResource),
       ...mapToYospaceCompanionAd(currentAd.getCompanionAdsByType(ResourceType.IFRAME), CompanionAdType.IFrameResource),
-      ...mapToYospaceCompanionAd(
-        currentAd.getCompanionAdsByType(ResourceType.UNKNOWN),
-        CompanionAdType.UnknownResource
-      ),
+      ...mapToYospaceCompanionAd(currentAd.getCompanionAdsByType(ResourceType.UNKNOWN), CompanionAdType.UnknownResource),
     ];
 
     const playerEvent = AdEventsFactory.createAdEvent(
@@ -802,11 +791,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   private onAdFinished = () => {
     const currentAd = this.getCurrentAd();
 
-    const playerEvent = AdEventsFactory.createAdEvent(
-      this.player,
-      this.player.exports.PlayerEvent.AdFinished,
-      currentAd
-    );
+    const playerEvent = AdEventsFactory.createAdEvent(this.player, this.player.exports.PlayerEvent.AdFinished, currentAd);
     this.fireEvent<AdEvent>(playerEvent);
     this.adStartedTimestamp = null;
   };
@@ -869,9 +854,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   }
 
   private getAdBreaksBefore(position: number): AdBreak[] {
-    return this.adParts
-      .filter((part) => part.start < position && position >= part.end)
-      .map((element) => element.adBreak);
+    return this.adParts.filter((part) => part.start < position && position >= part.end).map((element) => element.adBreak);
   }
 
   private getAdDuration(ad: Advert): number {
@@ -997,7 +980,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     this.fireEvent(event);
   }
 
-  private parseId3Tags(event: MetadataEvent, frames: Frame[] = []): TimedMetadata {
+  private parseId3Tags(event: MetadataEvent, frames: Frame[] = []): TimedMetadata | null {
     const charsToStr = (arr: [number]) => {
       return arr
         .filter((char) => char > 31 && char < 127)
@@ -1016,8 +999,15 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     }
 
     metadata.frames.forEach((frame: any) => {
-      yospaceMetadataObject[frame.key] = charsToStr(frame.data);
+      if (Array.isArray(frame.data)) {
+        yospaceMetadataObject[frame.key] = charsToStr(frame.data);
+      }
     });
+
+    if (!yospaceMetadataObject.YMID || !yospaceMetadataObject.YSEQ || !yospaceMetadataObject.YTYP || !yospaceMetadataObject.YDUR) {
+      // this was not a proper Yospace metadata but generic one and should not be passed to Yospace.
+      return null;
+    }
 
     return TimedMetadata.createFromMetadata(
       /* ymid */
@@ -1033,7 +1023,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     );
   }
 
-  private mapEmsgToId3Tags(event: MetadataEvent): TimedMetadata {
+  private mapEmsgToId3Tags(event: MetadataEvent): TimedMetadata | null {
     const metadata = event.metadata as any;
     const startTime = metadata.presentationTime ? metadata.presentationTime : (this.player.getCurrentTime() as any);
 
@@ -1050,18 +1040,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
         return this.parseId3Tags(event, id3Frames);
       } catch (e) {
         Logger.warn(e);
-        return TimedMetadata.createFromMetadata(
-          /* ymid */
-          null,
-          /* yseq */
-          null,
-          /* ytyp */
-          null,
-          /* ydur */
-          null,
-          /* playhead */
-          toMilliseconds(startTime)
-        );
+        return null;
       }
     } else if (metadata.schemeIdUri === EmsgSchemeIdUri.V0_ID3_YOSPACE_PROPRIETARY) {
       const yospaceMetadataObject: any = {};
@@ -1085,6 +1064,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       );
     } else {
       Logger.warn('Yospace integration encountered metadata that it cannot parse');
+      return null;
     }
   }
 
@@ -1281,9 +1261,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     if (timeDifference >= 0 || timeDifference < -0.25) {
       this.session.onPlayheadUpdate(toMilliseconds(event.time));
     } else {
-      Logger.warn(
-        'Encountered a small negative TimeChanged update, not reporting to Yospace. Difference was: ' + timeDifference
-      );
+      Logger.warn('Encountered a small negative TimeChanged update, not reporting to Yospace. Difference was: ' + timeDifference);
     }
 
     // fire magic time-changed event
@@ -1361,12 +1339,15 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     let yospaceMetadataObject: TimedMetadata;
     if (type === 'ID3') {
       yospaceMetadataObject = this.parseId3Tags(event);
-      Logger.log('[BitmovinYospacePlayer] - sending YSPlayerEvents.METADATA ' + stringify(yospaceMetadataObject));
-      this.session.onTimedMetadata(yospaceMetadataObject);
     } else if (type === 'EMSG') {
       yospaceMetadataObject = this.mapEmsgToId3Tags(event);
+    }
+
+    if (yospaceMetadataObject) {
       Logger.log('[BitmovinYospacePlayer] - sending YSPlayerEvents.METADATA ' + stringify(yospaceMetadataObject));
       this.session.onTimedMetadata(yospaceMetadataObject);
+    } else {
+      Logger.log('[BitmovinYospacePlayer] - found metadata but does not appear to be yospace related: ' + stringify(event));
     }
   };
 
