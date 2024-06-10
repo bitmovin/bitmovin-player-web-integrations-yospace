@@ -19,7 +19,7 @@ import {
   YoLog,
 } from '@yospace/admanagement-sdk';
 
-import {
+import type {
   AdEvent,
   AdQuartile,
   AdQuartileEvent,
@@ -432,7 +432,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   }
 
   getCurrentTime(mode?: TimeMode): number {
-    if (mode === TimeMode.AbsoluteTime) {
+    if (mode === 'absolutetime') {
       return this.player.getCurrentTime();
     }
 
@@ -448,7 +448,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   getDuration(mode?: TimeMode): number {
     if (!this.session) return 0;
 
-    if (mode === TimeMode.AbsoluteTime) {
+    if (mode === 'absolutetime') {
       return this.player.getDuration();
     }
 
