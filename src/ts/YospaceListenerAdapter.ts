@@ -107,6 +107,18 @@ export class YospaceAdListenerAdapter {
     this.emitEvent(event);
   }
 
+  onAdvertBreakEarlyReturn() {
+    Logger.warn('[BYP][listener] onAdvertBreakEarlyReturn not implemented');
+  }
+
+  onSessionError() {
+    Logger.warn('[BYP][listener] onSessionError not implemented');
+  }
+
+  onTrackingError() {
+    Logger.warn('[BYP][listener] onTrackingError not implemented');
+  }
+
   private emitEvent(event: BYSListenerEventBase) {
     if (this.listeners[event.type]) {
       for (const callback of this.listeners[event.type]) {
