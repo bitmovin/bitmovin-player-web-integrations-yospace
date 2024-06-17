@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Fixed
 
 - Event loop on pre-roll ad end
+- Bitmovin Player getting bundled into the YospaceBitmovinPlayer
 
 ### Added
 
