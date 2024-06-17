@@ -19,7 +19,7 @@ import {
   YoLog,
 } from '@yospace/admanagement-sdk';
 
-import {
+import type {
   AdEvent,
   AdQuartile,
   AdQuartileEvent,
@@ -71,7 +71,7 @@ import {
   YospaceSourceConfig,
 } from './BitmovinYospacePlayerAPI';
 import { YospacePlayerError } from './YospaceError';
-import {
+import type {
   AdConfig,
   CompanionAd,
   LinearAd,
