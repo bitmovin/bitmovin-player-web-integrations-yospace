@@ -1,14 +1,14 @@
-import {
-  AdBreak,
-  CompanionAd,
+import type {
   PlayerAPI,
   PlayerEvent,
   PlayerEventBase,
   PlayerEventCallback,
   PlayerExports,
   SourceConfig,
-} from 'bitmovin-player';
-import { TimeMode } from 'bitmovin-player/modules/bitmovinplayer-core';
+  TimeMode,
+} from 'bitmovin-player/modules/bitmovinplayer-core';
+
+import type { AdBreak, CompanionAd } from 'bitmovin-player/modules/bitmovinplayer-advertising-core';
 
 // Enums
 

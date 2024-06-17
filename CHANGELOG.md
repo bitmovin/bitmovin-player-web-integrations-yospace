@@ -7,14 +7,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
-### Fixed
-
-- Event loop on pre-roll ad end
-
 ### Added
 
 - `mode` argument to `getCurrentTime` to enable fetching absolute time including ad durations
 - `mode` argument to `getDuration` to enable fetching absolute duration including ad durations
+
+### Fixed
+
+- Event loop on pre-roll ad end
+- Bitmovin Player getting bundled into the YospaceBitmovinPlayer
 
 ## 2.3.1 - 2024-02-14
 
