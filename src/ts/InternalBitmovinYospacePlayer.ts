@@ -154,6 +154,9 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   private adImmunityConfig: AdImmunityConfig = {
     duration: 0, // 0 duration = disabled
   };
+  // Ad holiday offset for discovering upcoming ad breaks before an ad frame is shown to the user
+  private defaultAdBreakCheckOffset = 0.3;
+
   private adImmune = false;
   private adImmunityCountDown: number | null = null;
   private unpauseAfterSeek = false;
@@ -1222,7 +1225,9 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     // the offset is an attempt to prevent the first few frames of an ad
     // playing before the seek past the break has time to propagate
     const adBreakCheckOffset =
-      typeof this.adImmunityConfig.adBreakCheckOffset === 'number' ? this.adImmunityConfig.adBreakCheckOffset : 0.3;
+      typeof this.adImmunityConfig.adBreakCheckOffset === 'number'
+        ? this.adImmunityConfig.adBreakCheckOffset
+        : this.defaultAdBreakCheckOffset;
     const upcomingAdBreak: AdBreak | null = this.session.getAdBreakForPlayhead(
       toMilliseconds(event.time) + toMilliseconds(adBreakCheckOffset)
     );
