@@ -45,6 +45,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - Event loop on pre-roll ad end
 - Bitmovin Player getting bundled into the YospaceBitmovinPlayer
+- Parsing non-Yospace ID3 tags and passing those to the Yospace SDK
 
 ## 2.3.1 - 2024-02-14
 
