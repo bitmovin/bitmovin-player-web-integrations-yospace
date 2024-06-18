@@ -16,11 +16,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - `mode` argument to `getCurrentTime` to enable fetching absolute time including ad durations
 - `mode` argument to `getDuration` to enable fetching absolute duration including ad durations
-
-## 2.4.0
-
-### Added
-
 - ad immunity feature:
 
   The user will become immune to ad breaks for a duration upon
