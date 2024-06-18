@@ -7,10 +7,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
-### Fixed
-
-- Event loop on pre-roll ad end
-
 ### Added
 
 - `mode` argument to `getCurrentTime` to enable fetching absolute time including ad durations
@@ -44,6 +40,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   `endAdImmunity(): void;`
 
 - ad immunity events to `YospacePlayerEvent` enum
+
+### Fixed
+
+- Event loop on pre-roll ad end
+- Bitmovin Player getting bundled into the YospaceBitmovinPlayer
 
 ## 2.3.1 - 2024-02-14
 

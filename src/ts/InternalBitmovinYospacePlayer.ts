@@ -75,7 +75,7 @@ import {
   AdImmunityConfig,
 } from './BitmovinYospacePlayerAPI';
 import { YospacePlayerError } from './YospaceError';
-import {
+import type {
   AdConfig,
   CompanionAd,
   LinearAd,

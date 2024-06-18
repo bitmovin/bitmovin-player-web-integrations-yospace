@@ -1,0 +1,71 @@
+name: Release new version
+
+on:
+  workflow_dispatch:
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      # The Yospace private npm registry seems to not support NPM token so we sadly need to use password and email
+      - name: Log in to Yospace private NPM registry
+        run: |
+          cp .npmrc ~/.npmrc
+          echo "//yospacerepo.jfrog.io/artifactory/api/npm/javascript-sdk/:_password=${{ secrets.NPM_YOSPACE_PASS }}" >> ~/.npmrc
+          echo "//yospacerepo.jfrog.io/artifactory/api/npm/javascript-sdk/:username=${{ secrets.NPM_YOSPACE_USER }}" >> ~/.npmrc
+          echo "//yospacerepo.jfrog.io/artifactory/api/npm/javascript-sdk/:email=${{ secrets.NPM_YOSPACE_EMAIL }}" >> ~/.npmrc
+
+      - name: Set up node.js
+        uses: actions/setup-node@v3.3.0
+        with:
+          node-version-file: .nvmrc
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build
+        run: npm run build
+
+      - name: Read latest release version from package.json
+        uses: actions/github-script@v6
+        id: read-latest-release-version
+        with:
+          script: |
+            const { version } = require('./package.json')
+            core.info(`Latest release version is ${version}`)
+            core.setOutput('latestReleaseVersion', version)
+
+      - name: Define next release version based on Changelog entries
+        uses: actions/github-script@v6
+        id: define-release-version
+        with:
+          script: |
+            const { defineReleaseVersion } = require('./.github/scripts/defineVersion.js')
+            return defineReleaseVersion({core}, "${{ steps.read-latest-release-version.outputs.latestReleaseVersion }}", './CHANGELOG.md' )
+
+      - name: Bump package.json and Changelog version and tag commit
+        run: |
+          git config --global user.name 'Automated Release'
+          git config --global user.email 'release-automation@bitmovin.com'
+          npm version "${{ fromJson(steps.define-release-version.outputs.result) }}"
+          npx kacl release
+
+      - name: Push changes
+        run: |
+          git add .
+          git commit -m "Bump version and update changelog"
+          git push origin develop
+          git push origin --tags
+
+      - name: build and publish
+        run: |
+          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_AUTH_TOKEN }}" > ~/.npmrc
+          npm run publish
