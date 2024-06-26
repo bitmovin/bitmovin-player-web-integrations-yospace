@@ -11,7 +11,7 @@
     "start": "npm run copyStaticToDist && webpack serve --open --config webpack.dev.js",
     "copyStaticToDist": "mkdir -p dist && cp src/index.html dist/ && cp src/sw.js dist/",
     "copyToTizen": "cp ./dist/js/bitmovin-player-yospace.js ./tizen/js",
-    "copyToWebOS": "cp ./dist/js/bitmovin-player-yospace.min.js ./WebOS/src/js",
+    "copyToWebOS": "cp ./dist/js/bitmovin-player-yospace.js ./WebOS/src/js",
     "lint": "eslint --quiet src/ && kacl lint",
     "format": "prettier --write src/",
     "clean": "rm -R ./dist",

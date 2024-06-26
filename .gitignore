@@ -6,3 +6,4 @@ node_modules
 .vscode
 **/bitmovin-player-yospace.js
 tizen/*.wgt
+WebOS/*.ipk
