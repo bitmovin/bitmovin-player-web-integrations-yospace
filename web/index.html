@@ -77,6 +77,9 @@
     <script type="text/javascript" src="https://cdn.bitmovin.com/player/web/8/modules/bitmovinplayer-webos.js"></script>
 
     <script type="text/javascript" src="//cdn.bitmovin.com/player/web/8/bitmovinplayer-ui.js"></script>
+
+    <script type="text/javascript" src="js/simplePolicy.js"></script>
+
     <link rel="stylesheet" href="//cdn.bitmovin.com/player/web/8/bitmovinplayer-ui.css" />
     <style>
       .player-wrapper {
@@ -384,52 +387,10 @@
         ad: null,
       };
 
-      var liveSource = {
-        title: 'Live Stream',
-        // dash: "https://csm-e-sdk-validation.bln1.yospace.com/csm/extlive/yosdk01,t2-dash.mpd?yo.av=3", // v0 emsg
-        dash: 'https://csm-e-sdk-validation.bln1.yospace.com/csm/extlive/yosdk01,dash.mpd?yo.av=3', // v1 emsg
-        // hls: 'https://csm-e-sdk-validation.bln1.yospace.com/csm/extlive/yospace02,hlssample42.m3u8?yo.br=true&yo.av=3',
-        // Yospace configuration
-        assetType: bitmovin.player.ads.yospace.YospaceAssetType.LINEAR,
-      };
-
-      var vodSource = {
-        title: 'VOD Stream',
-        // hls without preroll
-        // hls: 'https://csm-e-sdk-validation.bln1.yospace.com/csm/access/207411697/c2FtcGxlL21hc3Rlci5tM3U4?yo.av=3',
-        // hls with preroll
-        hls: 'https://csm-e-sdk-validation.bln1.yospace.com/csm/access/156611618/c2FtcGxlL21hc3Rlci5tM3U4?yo.av=3',
-        // Yospace configuration
-        assetType: bitmovin.player.ads.yospace.YospaceAssetType.VOD,
-        truexConfiguration: {},
-        // options: {
-        //   startOffset: 600
-        // }
-      };
-
-      var trueXSource = {
-        title: 'TrueX Stream',
-        hls: 'https://vod-manifests-aka-qa.warnermediacdn.com/csm/tcm/clear/3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c/master_cl.m3u8?afid=222591187&caid=2100555&conf_csid=tbs.com_videopage_test&context=182883174&nw=42448&prof=48804%3Amp4_plus_vast_truex&vdur=1800&yo.vp=true',
-        // Yospace configuration
-        assetType: bitmovin.player.ads.yospace.YospaceAssetType.VOD,
-        truexConfiguration: {
-          vastConfigUrl:
-            'https://qa-get.truex.com/a2a6aa9ae3d7bd9b8b2675781696b28d50ca0736/vast?dimension_1=#e{series.title}&dimension_2=#{slot.position}&dimension_3=#e{asset.title}&dimension_4=#e{asset.id}&dimension_5=truex_sold&stream_id=#{request.videoRandom}&stream_position=preroll&cb=#e{random}',
-        },
-      };
-
-      var artOfMotionSource = {
-        dash: 'https://bitmovin-a.akamaihd.net/content/MI201109210084_1/mpds/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.mpd',
-        hls: 'https://bitmovin-a.akamaihd.net/content/MI201109210084_1/m3u8s/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.m3u8',
-        progressive:
-          'https://bitmovin-a.akamaihd.net/content/MI201109210084_1/MI201109210084_mpeg-4_hd_high_1080p25_10mbits.mp4',
-        poster: 'https://bitmovin-a.akamaihd.net/content/MI201109210084_1/poster.jpg',
-      };
-
       var truexAdFree = false;
 
       var conf = {
-        key: 'YOUR-KEY',
+        key: '7b49d26a-8609-45ad-96a0-46c22240cef2',
         playback: {
           muted: false,
           autoplay: autoplay, // Fix for Pre-roll 'blip' does not work with autoplay enabled
@@ -452,27 +413,6 @@
         debugYospaceSdk: isValidationMode,
         disableStrictBreaks: false,
         disableServiceWorker: false,
-      };
-
-      var sampleYospacePlayerPolicy = {
-        canMute: () => {
-          return true;
-        },
-        canSeek: () => {
-          return true;
-        },
-        canSeekTo: (seekTarget) => {
-          return seekTarget;
-        },
-        canSkip: () => {
-          return true;
-        },
-        canPause: () => {
-          return true;
-        },
-        canChangePlaybackSpeed: () => {
-          return true;
-        },
       };
 
       var setupTable = function () {
@@ -582,7 +522,7 @@
           log('[BYP] Metadata Parsed: ', cloneDeepSimple(event));
         });
 
-        yospacePlayer.setPolicy(sampleYospacePlayerPolicy);
+        yospacePlayer.setPolicy(simplePolicy);
 
         yospacePlayer.on('segmentplayback', function (event) {
           if (event.mimeType === 'video/mp4') {

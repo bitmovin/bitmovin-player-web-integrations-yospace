@@ -5,12 +5,13 @@ module.exports = merge(common, {
   mode: 'development',
   devtool: 'inline-source-map',
   devServer: {
-    static: './dist',
+    static: ['./web', './dist'],
     devMiddleware: {
       index: true,
-      publicPath: './dist',
+      publicPath: './web',
       serverSideRender: true,
       writeToDisk: true,
     },
+    watchFiles: ['src/**/*', 'web/**/*'],
   },
 });
