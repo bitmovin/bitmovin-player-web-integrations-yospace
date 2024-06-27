@@ -37,7 +37,7 @@ function setupTestPage() {
     }
 
     yospacePlayer.unload();
-    yospacePlayer.load(overrideSourceAdKvps(customSource));
+    yospacePlayer.load(modifySourceBeforeLoading(customSource));
   });
 }
 
@@ -82,6 +82,11 @@ function overrideSourceAdKvps(source) {
   return source;
 }
 
+function modifySourceBeforeLoading(source) {
+  source = overrideSourceAdKvps(source);
+  return updateWithPlatformSpecificSourceConfig(source);
+}
+
 function createSourceList(streamType, containerId) {
   var sourceList = document.querySelector('#' + containerId);
   Object.keys(sources[streamType]).forEach(function (source) {
@@ -96,7 +101,7 @@ function createSourceList(streamType, containerId) {
     label.classList.add('btn-outline-secondary');
     label.innerText = streamType.toUpperCase() + ': ' + (sources[streamType][source].title ? sources[streamType][source].title : source);
     label.onclick = function (event) {
-      yospacePlayer.load(overrideSourceAdKvps(sources[streamType][source]));
+      yospacePlayer.load(modifySourceBeforeLoading(sources[streamType][source]));
       deselectCustomLoadButton();
     };
 

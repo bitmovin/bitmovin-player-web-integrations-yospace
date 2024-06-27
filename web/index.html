@@ -39,7 +39,7 @@
     <script type="text/javascript" src="js/simplePolicy.js"></script>
     <script type="text/javascript" src="js/sources.js"></script>
 
-    <script type="text/javascript" src="js/platformSpecifcInit.js"></script>
+    <script type="text/javascript" src="platformSpecifcInit.js"></script>
 
     <style>
       .player-wrapper {
@@ -197,7 +197,7 @@
         },
       };
 
-      conf = addPlatformSpecificConfig(conf);
+      conf = updateWithPlatformSpecificConfig(conf);
 
       // Yospace configuration
       var yospaceConfig = {
@@ -205,6 +205,8 @@
         debugYospaceSdk: isValidationMode,
         disableStrictBreaks: false,
         disableServiceWorker: false,
+        useTizen: platformType === 'tizen',
+        useWebos: platformType === 'webos',
       };
 
       platformReadyForPlayerPromise.then(() => {
