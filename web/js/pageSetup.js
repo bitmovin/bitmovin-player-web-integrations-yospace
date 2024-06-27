@@ -70,6 +70,11 @@ function applyQueryParameters() {
   if ($.urlParam('vpaid')) {
     vpaid = $.urlParam('vpaid').toLowerCase() === 'true';
   }
+
+  if ($.urlParam('autoLoadSource')) {
+    var sourceNumber = parseInt($.urlParam('autoLoadSource'));
+    autoLoadSource = !Number.isNaN(sourceNumber) ? sourceNumber : -1;
+  }
 }
 
 function overrideSourceAdKvps(source) {
