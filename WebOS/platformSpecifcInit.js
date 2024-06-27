@@ -1,4 +1,8 @@
 var platformReadyForPlayerPromise = (function () {
+  // If the app is started shortly after webOS is rebooted the DRM system and CMD
+  // might not be fully ready to use for DRM playback. Therefore we should await
+  // drmAgents onsuccess callback before we try to load DRM source.
+
   var keySystem = webOSDev && webOSDev.DRM.Type.WIDEVINE;
   var webosDrmAgent = webOSDev && keySystem && webOSDev.drmAgent(keySystem);
 
@@ -6,9 +10,22 @@ var platformReadyForPlayerPromise = (function () {
     return Promise.reject('No drmAgent');
   }
 
-  // If the app is started shortly after webOS is rebooted the DRM system and CMD
-  // might not be fully ready to use for DRM playback. Therefore we should await
-  // drmAgents onsuccess callback before we try to load DRM source.
+  function loadDrm(drmAgent) {
+    return new Promise(function (resolve, reject) {
+      try {
+        drmAgent.load({
+          onSuccess: function (res) {
+            resolve(res);
+          },
+          onFailure: function (e) {
+            reject(e);
+          },
+        });
+      } catch (e) {
+        reject('Error while loading DRM manager', e);
+      }
+    });
+  }
 
   return new Promise(function (resolve, reject) {
     webosDrmAgent.isLoaded({
@@ -32,11 +49,11 @@ var platformReadyForPlayerPromise = (function () {
   });
 })();
 
-function updateWithPlatformSpecificConfig(conf) {
+function updateWithPlatformSpecificConfig(config) {
   config.tweaks = config.tweaks || {};
   config.tweaks.file_protocol = true;
   config.tweaks.app_id = 'com.bitmovin.bitmovinyospaceplayer.demo';
-  return conf;
+  return config;
 }
 
 function updateWithPlatformSpecificSourceConfig(source) {
