@@ -7,3 +7,7 @@ node_modules
 **/bitmovin-player-yospace.js
 tizen/*.wgt
 WebOS/*.ipk
+tizen/index.html
+tizen/js/*.js
+WebOS/index.html
+WebOS/src/js/*.js
