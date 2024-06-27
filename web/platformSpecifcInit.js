@@ -10,6 +10,12 @@ var platformReadyForPlayerPromise = (function () {
   }
 })();
 
-function addPlatformSpecificConfig(conf) {
+function updateWithPlatformSpecificConfig(conf) {
   return conf;
 }
+
+function updateWithPlatformSpecificSourceConfig(source) {
+  return source;
+}
+
+var platformType = 'web';
