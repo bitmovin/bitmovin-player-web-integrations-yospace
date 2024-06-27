@@ -10,8 +10,11 @@ var platformReadyForPlayerPromise = (function () {
   }
 })();
 
-function updateWithPlatformSpecificConfig(conf) {
-  return conf;
+function updateWithPlatformSpecificConfig(config) {
+  config.playback = config.playback || {};
+  // default muted to true as many browser block unmuted autoplay
+  config.playback.muted = true;
+  return config;
 }
 
 function updateWithPlatformSpecificSourceConfig(source) {
