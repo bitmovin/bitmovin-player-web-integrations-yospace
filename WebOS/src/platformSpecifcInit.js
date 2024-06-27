@@ -33,6 +33,9 @@ var platformReadyForPlayerPromise = (function () {
 })();
 
 function updateWithPlatformSpecificConfig(conf) {
+  config.tweaks = config.tweaks || {};
+  config.tweaks.file_protocol = true;
+  config.tweaks.app_id = 'com.bitmovin.bitmovinyospaceplayer.demo';
   return conf;
 }
 
