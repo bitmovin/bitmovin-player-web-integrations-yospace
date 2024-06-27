@@ -1,14 +1,14 @@
-# Bitmovin Player Yospace Integration WebOS Sample
+# Bitmovin Player Yospace Integration Tizen Sample
 
-This folder contains a sample for how to use the Bitmovin Player Yospace Integration library in LG WebOS TV apps.
+This folder contains a sample for how to use the Bitmovin Player Yospace Integration library in Samsung Tizen TV apps.
 
 ## Getting started
 
 Run `npm run build-tv` (or `npm run build-tv:dev`) in the project root to build the library and copy all required files, including the sample web page and Javascript files, to the correct location in this folder.
 
-Open this `WebOS` folder in Visual Studio Code with the `webOS TV` extension to create a package and launch on the TV as usual.
+Open this `tizen` folder in Tizen Studio or Visual Studio Code with the `tizen-tv` extension to create a signed package or launch directly as usual.
 
-Please note that changes in the `WebOS/index.html` and `WebOS/src/js/*` files will be overwritten by the build tooling, changes should be made in the `web/*` folder only.
+Please note that changes in the `tizen/index.html` and `tizen/js/*` files will be overwritten by the build tooling, changes should be made in the `web/*` folder only.
 
 ### Notes for developing your own app
 
@@ -25,7 +25,7 @@ var conf = {
 	},
 	tweaks : {
 		file_protocol : true,
-		app_id : "com.bitmovin.demo.webapp"
+		app_id : "Ff4zhu5kqV.TizenBitmovinYospacePlayer"
 	}
 };
 ```
