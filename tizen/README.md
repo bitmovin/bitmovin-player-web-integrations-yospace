@@ -8,7 +8,7 @@ Run `npm run build-tv` (or `npm run build-tv:dev`) in the project root to build 
 
 Open this `tizen` folder in Tizen Studio or Visual Studio Code with the `tizen-tv` extension to create a signed package or launch directly as usual.
 
-Please note that changes in the `tizen/index.html` and `tizen/js/*` files will be overwritten by the build tooling, changes should be made in the `web/*` folder only.
+Please note that changes in the `tizen/index.html` and `tizen/js/*` files will be overwritten by the build tooling, changes should be made in the [../web/](../web/) folder only.
 
 ### Notes for developing your own app
 
