@@ -57,6 +57,12 @@ function updateWithPlatformSpecificConfig(config) {
 }
 
 function updateWithPlatformSpecificSourceConfig(source) {
+  if (source.drm && source.drm.playready) {
+    source.drm.playready.utf8message = true;
+    source.drm.playready.plaintextChallenge = true;
+    source.drm.playready.headers = source.drm.playready.headers || {};
+    source.drm.playready.headers['Content-Type'] = 'text/xml';
+  }
   return source;
 }
 
