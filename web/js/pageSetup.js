@@ -12,8 +12,9 @@ function setupTestPage() {
     yospacePlayer.unload();
     deselectCustomLoadButton();
   });
-  createSourceList('vod', 'predefined-sources');
-  createSourceList('linear', 'predefined-sources');
+  var startIndex = 1;
+  var nextIndex = createSourceList('vod', 'predefined-sources', startIndex);
+  createSourceList('linear', 'predefined-sources', nextIndex);
 
   setupTable();
 
@@ -92,7 +93,7 @@ function modifySourceBeforeLoading(source) {
   return updateWithPlatformSpecificSourceConfig(source);
 }
 
-function createSourceList(streamType, containerId) {
+function createSourceList(streamType, containerId, index) {
   var sourceList = document.querySelector('#' + containerId);
   Object.keys(sources[streamType]).forEach(function (source) {
     var input = document.createElement('input');
@@ -104,9 +105,12 @@ function createSourceList(streamType, containerId) {
     var label = document.createElement('label');
     label.classList.add('btn');
     label.classList.add('btn-outline-secondary');
-    label.innerText = streamType.toUpperCase() + ': ' + (sources[streamType][source].title ? sources[streamType][source].title : source);
+    label.innerText =
+      index + ': ' + streamType.toUpperCase() + ': ' + (sources[streamType][source].title ? sources[streamType][source].title : source);
+    index++;
     label.onclick = function (event) {
-      yospacePlayer.load(modifySourceBeforeLoading(sources[streamType][source]));
+      var sourceId = source.substring(source.indexOf(': '));
+      yospacePlayer.load(modifySourceBeforeLoading(sources[streamType][sourceId]));
       deselectCustomLoadButton();
     };
 
@@ -114,6 +118,8 @@ function createSourceList(streamType, containerId) {
 
     sourceList.appendChild(label);
   });
+
+  return index;
 }
 
 function log(message) {
