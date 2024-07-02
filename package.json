@@ -11,8 +11,8 @@
     "build:dev": "webpack --config webpack.dev.js",
     "build-tv:dev": "npm run build:dev && npm run copyToTizen && npm run copyToWebOS",
     "start": "webpack serve --open --config webpack.dev.js",
-    "copyToTizen": "cp ./dist/js/bitmovin-player-yospace.js ./tizen/js && cp ./web/index.html ./tizen && cp ./web/js/*.js ./tizen/js",
-    "copyToWebOS": "cp ./dist/js/bitmovin-player-yospace.js ./WebOS/js && cp ./web/index.html ./WebOS && cp ./web/js/*.js ./WebOS/js && npm run insertWebOSScript",
+    "copyToTizen": "mkdir -p ./tizen/js && cp ./dist/js/bitmovin-player-yospace.js ./tizen/js/ && cp ./web/index.html ./tizen && cp ./web/js/*.js ./tizen/js/",
+    "copyToWebOS": "mkdir -p ./WebOS/js && cp ./dist/js/bitmovin-player-yospace.js ./WebOS/js/ && cp ./web/index.html ./WebOS && cp ./web/js/*.js ./WebOS/js/ && npm run insertWebOSScript",
     "insertWebOSScript": "npx replace-in-file '<!-- <SCRIPT_PLACEHOLDER> -->' '<script type=\"text/javascript\" src=\"webOSTVjs-1.1.0/webOSTV.js\"></script><script type=\"text/javascript\" src=\"webOSTVjs-1.1.0/webOSTV-dev.js\"></script>' ./WebOS/index.html",
     "lint": "eslint --quiet src/ && kacl lint",
     "format": "prettier --write src/",
@@ -20,7 +20,7 @@
     "clean-dist": "rm -R ./dist",
     "clean-tv": "npm run clean-tv-tizen && npm run clean-tv-webos",
     "clean-tv-tizen": "rm tizen/js/*.js && rm tizen/index.html",
-    "clean-tv-webos": "rm WebOS/src/js/* && rm WebOS/index.html",
+    "clean-tv-webos": "rm WebOS/js/* && rm WebOS/index.html",
     "prepare": "husky install"
   },
   "lint-staged": {
@@ -53,6 +53,7 @@
     "kacl": "^1.1.1",
     "lint-staged": "^13.0.1",
     "prettier": "2.6.2",
+    "replace-in-file": "^8.0.2",
     "semver": "^7.6.0",
     "ts-loader": "^9.3.0",
     "typescript": "^3.9.10",

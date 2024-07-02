@@ -10,4 +10,4 @@ WebOS/*.ipk
 tizen/index.html
 tizen/js/*.js
 WebOS/index.html
-WebOS/src/js/*.js
+WebOS/js/*.js
