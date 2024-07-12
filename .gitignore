@@ -4,3 +4,12 @@ node_modules
 **/*.DS_Store
 *.DS_Store
 .vscode
+**/bitmovin-player-yospace.js
+tizen/*.wgt
+WebOS/*.ipk
+tizen/index.html
+tizen/js/*.js
+WebOS/index.html
+WebOS/js/*.js
+generic-tv/index.html
+generic-tv/js/*.js

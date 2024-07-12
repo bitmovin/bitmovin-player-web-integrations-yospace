@@ -104,7 +104,7 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     this.createPlayer();
 
     if (yospaceConfig.useTizen && !this.BitmovinPlayerStaticApi.getModules().includes(this.player.exports.ModuleName.Tizen)) {
-      Logger.warn('Built for WebOS usage but no BitmovinPlayer WebOS module found.');
+      Logger.warn('Built for Tizen usage but no BitmovinPlayer Tizen module found.');
     }
     if (yospaceConfig.useWebos && !this.BitmovinPlayerStaticApi.getModules().includes(this.player.exports.ModuleName.Webos)) {
       Logger.warn('Built for WebOS usage but no BitmovinPlayer WebOS module found.');

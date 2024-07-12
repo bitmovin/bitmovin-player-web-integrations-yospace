@@ -112,7 +112,7 @@ const bitmovinYospacePlayer = new BitmovinYospacePlayer(Player, playerContainer,
 tweaks: {
     ...
     file_protocol : true, // Required if app is being loaded from file system
-    app_id : "Ff4zhu5kqV.TizenBitmovinPlayerAppMode" // this Tizen App Id should also be allow-listed in Player License and optionally, Analytics License
+    app_id : "Ff4zhu5kqV.TizenBitmovinPlayerAppMode" // This should be your Tizen App Id which needs to be allow-listed in Player License and optionally, Analytics License
 }
 ```
 
@@ -132,7 +132,39 @@ const yospaceConfig = {
 #### Tizen Demo
 
 - Run `npm run build-tv`
-- Import the Tizen folder(as General -> Existing Project) into your Tizen Studio and run as a Tizen Web Application
+- Import the `tizen` folder (as General -> Existing Project) into Tizen Studio and run as a Tizen Web Application, or open the folder in Visual Studio Code with the tizen-tv extension.
+
+### WebOS
+
+#### WebOS Config
+
+- Include the following Tweaks to the PlayerConfig:
+
+```
+tweaks: {
+    ...
+    file_protocol : true, // Required if app is being loaded from file system
+    app_id : "com.bitmovin.yospace.demo" // This should be your WebOS App Id which needs to be allow-listed in Player License and optionally, Analytics License
+}
+```
+
+- Make sure the app_id is allow-listed in your Player's License
+- In the `YospaceConfig` set the param `YospaceConfig.disableServiceWorker` to `true`
+- In the `YospaceConfig` set the param `YospaceConfig.useWebos` to `true`
+
+```ts
+// Yospace configuration
+const yospaceConfig = {
+    ...
+    disableServiceWorker: true, // Disable Service Worker for Tizen Web App use
+    useTizen: true,
+};
+```
+
+#### Tizen Demo
+
+- Run `npm run build-tv`
+- Open the `WebOS` folder in Visual Studio Code with the WebOS TV extension, or use the WebOS CLI directly.
 
 ## Limitations
 
