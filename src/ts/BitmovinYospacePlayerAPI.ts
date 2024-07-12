@@ -69,6 +69,42 @@ export interface BitmovinYospacePlayerAPI extends PlayerAPI {
   getDuration(mode?: TimeMode): number;
 
   forceSeek(time: number, issuer?: string): boolean;
+
+  /**
+   * Provide a duration in seconds greater than 0 to enable the ad immunity feature.
+   * The user will become immune to ad breaks for the duration upon
+   * fully watching an ad break.
+   *
+   * Ad breaks played over or seeked past during immunity will be marked
+   * as deactivated, making the user permanently immune to those breaks.
+   *
+   * Post-rolls are excluded from ad immunity
+   *
+   * Pre-roll ads are excluded from ad immunity as at least one ad break needs to be
+   * watched completely
+   */
+  setAdImmunityConfig(options: AdImmunityConfig): void;
+
+  /**
+   * Returns the current ad immunity configuration
+   */
+  getAdImmunityConfig(): AdImmunityConfig;
+
+  /**
+   * Returns a boolean value indicating if the user is currently immune to ad breaks
+   */
+  isAdImmunityActive(): boolean;
+
+  /**
+   * Immediately starts an ad immunity period, if ad immunity config exists. This method does nothing if ad immunity is already active.
+   * To refresh an ad immunity period, first call endAdImmunity followed by startAdImmunity.
+   */
+  startAdImmunity(): void;
+
+  /**
+   * Immediately ends an ongoing ad immunity period, before it would naturally expire
+   */
+  endAdImmunity(): void;
 }
 
 export interface YospaceSourceConfig extends SourceConfig {
@@ -84,6 +120,7 @@ export interface TruexConfiguration {
 export interface YospaceAdBreak extends AdBreak {
   duration: number;
   position?: YospaceAdBreakPosition;
+  active: boolean;
 }
 
 export interface YospaceAdBreakEvent extends PlayerEventBase {
@@ -164,6 +201,9 @@ export enum YospacePlayerEvent {
   PolicyError = 'policyerror',
   TruexAdFree = 'truexadfree',
   TruexAdBreakFinished = 'truexadbreakfinished',
+  AdImmunityConfigured = 'adimmunityconfigured',
+  AdImmunityStarted = 'adimmunitystarted',
+  AdImmunityEnded = 'adimmunityended',
 }
 
 export enum YospaceErrorCode {
@@ -211,4 +251,29 @@ export interface YospaceEventBase {
 
 export interface YospacePlayerEventCallback {
   (event: PlayerEventBase | YospaceEventBase): void;
+}
+
+export interface AdImmunityConfiguredEvent extends YospaceEventBase {
+  type: YospacePlayerEvent.AdImmunityConfigured;
+  config: AdImmunityConfig;
+}
+
+export interface AdImmunityStartedEvent extends YospaceEventBase {
+  type: YospacePlayerEvent.AdImmunityStarted;
+  duration: number;
+}
+
+export interface AdImmunityEndedEvent extends YospaceEventBase {
+  type: YospacePlayerEvent.AdImmunityEnded;
+}
+
+/**
+ * @description Ad Immunity Configuration Object
+ * @property duration - a number indicating the duration of the ad immunity period. 0 disables the feature.
+ * @property adBreakCheckOffset - a number indicating how far ahead ad immunity should look for ad breaks
+ * to skip past, in order to mitigate ad frames being displayed before they have time to be seeked past.
+ */
+export interface AdImmunityConfig {
+  duration: number;
+  adBreakCheckOffset?: number;
 }

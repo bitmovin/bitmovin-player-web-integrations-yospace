@@ -7,6 +7,50 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+
+- Yospace SDK to v3.6.9
+
+### Fixed
+
+- Parsing non-Yospace ID3 tags and passing those to the Yospace SDK
+
+## [2.5.0] - 2024-07-10
+
+### Added
+
+- `mode` argument to `getCurrentTime` to enable fetching absolute time including ad durations
+- `mode` argument to `getDuration` to enable fetching absolute duration including ad durations
+- ad immunity feature:
+
+  The user will become immune to ad breaks for a duration upon
+  fully watching an ad break.
+
+  Ad breaks played over or seeked past during immunity will be marked
+  as deactivated, making the user permanently immune to them.
+
+  Post-roll ads and ads with unknown positioning are excluded from ad immunity.
+
+  By default, pre-rolls are also excluded, since the user needs to finish
+  an ad break to enter an ad immunity period.
+
+  `setAdImmunityConfig(options: AdImmunityConfig): void;`
+
+  Returns the current ad immunity configuration.
+
+  `getAdImmunityConfig(): AdImmunityConfig;`
+
+  Returns a boolean value indicating if the user is currently immune to ad breaks
+  `isAdImmunityActive(): boolean;`
+
+  Immediately starts an ad immunity period, if ad immunity config exists. This method does nothing if ad immunity is already active.
+  `startAdImmunity(): void;`
+
+  Immediately ends an ongoing ad immunity period, before it would naturally expire
+  `endAdImmunity(): void;`
+
+- ad immunity events to `YospacePlayerEvent` enum
+
 ## [2.4.0] - 2024-06-21
 
 ### Added
@@ -334,7 +378,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - Initial yospace integration
 
-[unreleased]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/v2.4.0...HEAD
+[unreleased]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/v2.5.0...HEAD
+[2.5.0]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/v2.4.0...v2.5.0
 [2.4.0]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/v2.3.1...v2.4.0
 [2.3.1]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/v2.3.0...v2.3.1
 [2.3.0]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/v2.2.0...v2.3.0
