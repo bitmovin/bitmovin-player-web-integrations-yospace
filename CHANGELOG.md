@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Fixed
 
 - Parsing non-Yospace ID3 tags and passing those to the Yospace SDK
+- Small memory leak where player listeners were not detached
 
 ## [2.5.0] - 2024-07-10
 
