@@ -13,7 +13,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           ssh-key: ${{ secrets.RELEASE_DEPLOY_KEY }}
-          ref: develop
+          ref: main
 
       # The Yospace private npm registry seems to not support NPM token so we sadly need to use password and email
       - name: Log in to Yospace private NPM registry
@@ -66,7 +66,7 @@ jobs:
           git add .
           git commit -m "Bump version and update changelog"
           git tag -a "${{ fromJson(steps.define-release-version.outputs.result) }}" -m "v${{ fromJson(steps.define-release-version.outputs.result) }}"
-          git push origin develop
+          git push origin main
           git push origin --tags
 
       - name: build and publish
