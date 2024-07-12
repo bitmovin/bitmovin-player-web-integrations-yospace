@@ -1193,8 +1193,8 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     this.player.off(this.player.exports.PlayerEvent.StallStarted, this.onStallStarted);
     this.player.off(this.player.exports.PlayerEvent.StallEnded, this.onStallEnded);
 
-    this.player.on(this.player.exports.PlayerEvent.Muted, this.onMuted);
-    this.player.on(this.player.exports.PlayerEvent.Unmuted, this.onUnmuted);
+    this.player.off(this.player.exports.PlayerEvent.Muted, this.onMuted);
+    this.player.off(this.player.exports.PlayerEvent.Unmuted, this.onUnmuted);
 
     // To support ads in live streams we need to track metadata events
     this.player.off(this.player.exports.PlayerEvent.Metadata, this.onMetaData);
