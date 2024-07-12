@@ -103,16 +103,10 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 
     this.createPlayer();
 
-    if (
-      yospaceConfig.useTizen &&
-      !this.BitmovinPlayerStaticApi.getModules().includes(this.player.exports.ModuleName.Tizen)
-    ) {
+    if (yospaceConfig.useTizen && !this.BitmovinPlayerStaticApi.getModules().includes(this.player.exports.ModuleName.Tizen)) {
       Logger.warn('Built for WebOS usage but no BitmovinPlayer WebOS module found.');
     }
-    if (
-      yospaceConfig.useWebos &&
-      !this.BitmovinPlayerStaticApi.getModules().includes(this.player.exports.ModuleName.Webos)
-    ) {
+    if (yospaceConfig.useWebos && !this.BitmovinPlayerStaticApi.getModules().includes(this.player.exports.ModuleName.Webos)) {
       Logger.warn('Built for WebOS usage but no BitmovinPlayer WebOS module found.');
     }
   }
@@ -221,8 +215,7 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   setPolicy(policy: BitmovinYospacePlayerPolicy): void {
     if (this.getCurrentPlayerType() === YospacePlayerType.Bitmovin) {
       Logger.log(
-        '[BitmovinYospacePlayer] Policy does not apply for Bitmovin Player but is saved for further ' +
-          'BitmovinYospace Player usage'
+        '[BitmovinYospacePlayer] Policy does not apply for Bitmovin Player but is saved for further ' + 'BitmovinYospace Player usage'
       );
     }
 

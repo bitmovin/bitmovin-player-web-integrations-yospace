@@ -98,6 +98,10 @@ export class YospaceAdListenerAdapter {
   }
 
   onTrackingEvent(type: BYSTrackingEventType) {
+    // TO DO: For pre-rolls, not all ad details from Yospace might be available in the
+    // AdBreakStarted/AdStarted events. If those are needed, we might need to wait for
+    // the `onTrackingEvent` to fire.
+
     Logger.log('[listener] AnalyticsFired', type);
     const event: BYSAnalyticsFiredEvent = {
       type: BYSListenerEvent.ANALYTICS_FIRED,
@@ -105,6 +109,18 @@ export class YospaceAdListenerAdapter {
     };
 
     this.emitEvent(event);
+  }
+
+  onAdvertBreakEarlyReturn() {
+    Logger.warn('[BYP][listener] onAdvertBreakEarlyReturn not implemented');
+  }
+
+  onSessionError() {
+    Logger.warn('[BYP][listener] onSessionError not implemented');
+  }
+
+  onTrackingError() {
+    Logger.warn('[BYP][listener] onTrackingError not implemented');
   }
 
   private emitEvent(event: BYSListenerEventBase) {
