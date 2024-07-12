@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+
+- Yospace SDK to v3.6.9
+
 ### Fixed
 
 - Parsing non-Yospace ID3 tags and passing those to the Yospace SDK
