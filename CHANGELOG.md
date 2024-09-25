@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [2.6.0] - 2024-09-25
+
 ### Changed
 
 - Yospace SDK to v3.6.9
@@ -379,7 +381,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - Initial yospace integration
 
-[unreleased]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/v2.5.0...HEAD
+[unreleased]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/v2.6.0...HEAD
+[2.6.0]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/v2.5.0...v2.6.0
 [2.5.0]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/v2.4.0...v2.5.0
 [2.4.0]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/v2.3.1...v2.4.0
 [2.3.1]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/v2.3.0...v2.3.1
