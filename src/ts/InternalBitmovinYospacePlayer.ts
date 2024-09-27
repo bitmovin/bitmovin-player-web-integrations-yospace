@@ -156,6 +156,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   };
   // Ad holiday offset for discovering upcoming ad breaks before an ad frame is shown to the user
   private defaultAdBreakCheckOffset = 0.3;
+  private defaultDisablePassedAdBreaks = true;
 
   private adImmune = false;
   private adImmunityCountDown: number | null = null;
@@ -412,7 +413,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
         const breakStart = this.toMagicTime(toSeconds(adBreak.getStart()));
 
         // Check if break is being seeked past and deactivate it
-        if (breakStart > currentTime && breakStart <= time) {
+        if (breakStart > currentTime && breakStart <= time && this.adImmunityConfig.disablePassedAdBreaks) {
           Logger.log('[BitmovinYospacePlayer] Ad Immunity deactivated ad break during seek', adBreak);
           adBreak.setInactive();
         }
@@ -573,6 +574,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 
   setAdImmunityConfig(config: AdImmunityConfig) {
     this.adImmunityConfig = {
+      disablePassedAdBreaks: this.defaultDisablePassedAdBreaks,
       ...this.adImmunityConfig,
       ...config,
     };
@@ -1246,9 +1248,12 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 
       // seek past and deactivate ad breaks entered during ad immunity
       if (upcomingAdBreak && this.adImmune) {
-        upcomingAdBreak.setInactive();
-
-        Logger.log('[BitmovinYospacePlayer] - Ad Immunity pausing, seeking past and deactivating ad break');
+        if (this.adImmunityConfig.disablePassedAdBreaks) {
+          upcomingAdBreak.setInactive();
+          Logger.log('[BitmovinYospacePlayer] - Ad Immunity pausing, seeking past and deactivating ad break');
+        } else {
+          Logger.log('[BitmovinYospacePlayer] - Ad Immunity pausing, seeking past but not deactivating ad break');
+        }
 
         this.performBreakSkip(toSeconds(upcomingAdBreak.getStart() + upcomingAdBreak.getDuration()));
 

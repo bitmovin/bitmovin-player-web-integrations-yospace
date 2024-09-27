@@ -276,4 +276,11 @@ export interface AdImmunityEndedEvent extends YospaceEventBase {
 export interface AdImmunityConfig {
   duration: number;
   adBreakCheckOffset?: number;
+
+  /**
+   * Flag to set if ad breaks the user passes during active ad immunity, by playing or seeking, should be disabled
+   * or not. Disabled ad breaks won't be shown to the user again in this session.
+   * Default is true (ad breaks will be disabled).
+   */
+  disablePassedAdBreaks?: boolean;
 }
