@@ -71,17 +71,15 @@ export interface BitmovinYospacePlayerAPI extends PlayerAPI {
   forceSeek(time: number, issuer?: string): boolean;
 
   /**
-   * Provide a duration in seconds greater than 0 to enable the ad immunity feature.
-   * The user will become immune to ad breaks for the duration upon
-   * fully watching an ad break.
+   * Provide a duration in seconds greater than 0 to enable the ad immunity feature. The user will become immune to ad
+   * breaks for the duration upon fully watching an ad break.
    *
-   * Ad breaks played over or seeked past during immunity will be marked
-   * as deactivated, making the user permanently immune to those breaks.
+   * Ad breaks played over or seeked past during immunity will be marked as deactivated, making the user permanently
+   * immune to those breaks (unless `AdImmunityConfig.disablePassedAdBreaks` is set to `false`).
    *
-   * Post-rolls are excluded from ad immunity
+   * Post-rolls are excluded from ad immunity.
    *
-   * Pre-roll ads are excluded from ad immunity as at least one ad break needs to be
-   * watched completely
+   * Pre-roll ads are excluded from ad immunity as at least one ad break needs to be watched completely.
    */
   setAdImmunityConfig(options: AdImmunityConfig): void;
 
@@ -266,14 +264,16 @@ export interface AdImmunityEndedEvent extends YospaceEventBase {
   type: YospacePlayerEvent.AdImmunityEnded;
 }
 
-/**
- * @description Ad Immunity Configuration Object
- * @property duration - a number indicating the duration of the ad immunity period. 0 disables the feature.
- * @property adBreakCheckOffset - a number indicating how far ahead ad immunity should look for ad breaks
- * to skip past, in order to mitigate ad frames being displayed before they have time to be seeked past.
- */
 export interface AdImmunityConfig {
+  /**
+   * A number indicating the duration in seconds of the ad immunity period. 0 disables the feature.
+   */
   duration: number;
+
+  /**
+   * A number indicating how far ahead ad immunity should look for ad breaks to skip past, in order to mitigate ad
+   * frames being displayed before they have time to be seeked past.
+   */
   adBreakCheckOffset?: number;
 
   /**
