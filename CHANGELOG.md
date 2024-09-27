@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [2.7.0] - 2024-09-27
+
 ### Added
 
 - `AdImmunityConfig.disablePassedAdBreaks` option to only temporarily disable ad breaks during the ad immunity instead of disabling them for the whole session
@@ -385,7 +387,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - Initial yospace integration
 
-[unreleased]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/v2.6.0...HEAD
+[unreleased]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/v2.7.0...HEAD
+[2.7.0]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/v2.6.0...v2.7.0
 [2.6.0]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/v2.5.0...v2.6.0
 [2.5.0]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/v2.4.0...v2.5.0
 [2.4.0]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/v2.3.1...v2.4.0
