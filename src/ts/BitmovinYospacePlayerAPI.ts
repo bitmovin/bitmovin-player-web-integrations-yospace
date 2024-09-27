@@ -153,7 +153,6 @@ export interface YospaceConfiguration {
   debug?: boolean;
   debugYospaceSdk?: boolean;
   disableServiceWorker?: boolean;
-  disableStrictBreaks?: boolean;
   useTizen?: boolean;
   useWebos?: boolean;
 }
