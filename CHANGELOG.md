@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- `AdImmunityConfig.disablePassedAdBreaks` option to only temporarily disable ad breaks during the ad immunity instead of disabling them for the whole session
+
 ## [2.6.0] - 2024-09-25
 
 ### Changed
