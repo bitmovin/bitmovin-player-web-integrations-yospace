@@ -17,6 +17,7 @@ import {
   TimedMetadata,
   UNKNOWN_FORMAT,
   YoLog,
+  DebugFlags,
 } from '@yospace/admanagement-sdk';
 
 import type {
@@ -296,7 +297,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       properties.setUserAgent(navigator.userAgent);
 
       if (this.yospaceConfig.debug || this.yospaceConfig.debugYospaceSdk) {
-        YoLog.setDebugFlags(DEBUG_ALL);
+        YoLog.setDebugFlags(DebugFlags.DEBUG_ALL);
       }
 
       switch (source.assetType) {
