@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+
+- Yospace error on source load and session initialization not returned in `load` promise rejection as reason
+
 ## [2.7.0] - 2024-09-27
 
 ### Added
