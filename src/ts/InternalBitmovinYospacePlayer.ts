@@ -195,8 +195,9 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     return new Promise<void>((resolve, reject) => {
       if (!source.hls && !source.dash) {
         this.resetState();
-        this.handleYospaceError(new YospacePlayerError(YospaceErrorCode.SUPPORTED_SOURCE_MISSING));
-        reject();
+        const yospaceError = new YospacePlayerError(YospaceErrorCode.SUPPORTED_SOURCE_MISSING);
+        this.handleYospaceError(yospaceError);
+        reject(yospaceError);
         return;
       }
       this.resetState();
@@ -285,8 +286,9 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
           session.shutdown();
           this.session = null;
 
-          this.handleYospaceError(getYospaceError());
-          reject();
+          const yospaceError = getYospaceError();
+          this.handleYospaceError(yospaceError);
+          reject(yospaceError);
         }
       };
 
