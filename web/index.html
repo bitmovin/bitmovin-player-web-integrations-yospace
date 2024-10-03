@@ -281,19 +281,20 @@
           });
         });
 
-        ['moduleready', 'playing', 'metadata', 'metadataparsed'].forEach(function (eventName) {
+        ['moduleready', 'playing', 'metadata', 'metadataparsed', 'adimmunitystarted', 'adimmunityended'].forEach(function (eventName) {
           yospacePlayer.on(eventName, function (event) {
             log(createLogFromEvent(event));
           });
         });
 
-        ['error', 'yospaceerror', 'aderror'].forEach(function (eventName) {
+        ['error', 'yospaceerror', 'policyerror', 'aderror'].forEach(function (eventName) {
           yospacePlayer.on(eventName, function (event) {
             console.error(createLogFromEvent(event));
           });
         });
 
-        yospacePlayer.setPolicy(simplePolicy);
+        // We are using the default, built-in policy in the demo. Another policy can easily be set using this method:
+        // yospacePlayer.setPolicy(simplePolicy);
 
         yospacePlayer.on('segmentplayback', function (event) {
           if (event.mimeType === 'video/mp4') {

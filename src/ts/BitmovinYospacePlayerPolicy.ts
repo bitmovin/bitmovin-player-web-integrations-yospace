@@ -22,7 +22,7 @@ export class DefaultBitmovinYospacePlayerPolicy implements BitmovinYospacePlayer
       return adBreak.active && adBreak.scheduleTime > currentTime && adBreak.scheduleTime < seekTarget;
     });
 
-    if (skippedAdBreaks.length > 0) {
+    if (skippedAdBreaks.length > 0 && !this.player.isAdImmunityActive()) {
       const adBreakToPlay = skippedAdBreaks[skippedAdBreaks.length - 1];
       return adBreakToPlay.scheduleTime;
     }

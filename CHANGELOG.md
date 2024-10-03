@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Fixed
 
 - Yospace error on source load and session initialization not returned in `load` promise rejection as reason
+- Seeking over ad breaks during ad immunity led to wrong seek end position
+- Default policy not aware of ad immunity, sometimes leading to wrong decisions for `canSeekTo`
 
 ## [2.7.0] - 2024-09-27
 
