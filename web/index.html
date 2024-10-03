@@ -281,13 +281,13 @@
           });
         });
 
-        ['moduleready', 'playing', 'metadata', 'metadataparsed'].forEach(function (eventName) {
+        ['moduleready', 'playing', 'metadata', 'metadataparsed', 'adimmunitystarted', 'adimmunityended'].forEach(function (eventName) {
           yospacePlayer.on(eventName, function (event) {
             log(createLogFromEvent(event));
           });
         });
 
-        ['error', 'yospaceerror', 'aderror'].forEach(function (eventName) {
+        ['error', 'yospaceerror', 'policyerror', 'aderror'].forEach(function (eventName) {
           yospacePlayer.on(eventName, function (event) {
             console.error(createLogFromEvent(event));
           });
