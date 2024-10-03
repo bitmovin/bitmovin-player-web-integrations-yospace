@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [2.7.1] - 2024-10-03
+
 ### Fixed
 
 - Yospace error on source load and session initialization not returned in `load` promise rejection as reason
@@ -393,7 +395,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - Initial yospace integration
 
-[unreleased]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/v2.7.0...HEAD
+[unreleased]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/v2.7.1...HEAD
+[2.7.1]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/v2.7.0...v2.7.1
 [2.7.0]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/v2.6.0...v2.7.0
 [2.6.0]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/v2.5.0...v2.6.0
 [2.5.0]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/v2.4.0...v2.5.0
