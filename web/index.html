@@ -293,7 +293,8 @@
           });
         });
 
-        yospacePlayer.setPolicy(simplePolicy);
+        // We are using the default, built-in policy in the demo. Another policy can easily be set using this method:
+        // yospacePlayer.setPolicy(simplePolicy);
 
         yospacePlayer.on('segmentplayback', function (event) {
           if (event.mimeType === 'video/mp4') {
