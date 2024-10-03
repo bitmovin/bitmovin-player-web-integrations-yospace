@@ -813,7 +813,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 
     this.startAdImmunityPeriod();
 
-    if (this.cachedSeekTarget) {
+    if (this.cachedSeekTarget !== null) {
       this.seek(this.cachedSeekTarget, 'yospace-ad-skipping');
       this.cachedSeekTarget = null;
     }
@@ -1223,7 +1223,12 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     this.player.pause();
     this.unpauseAfterSeek = true;
 
-    this.player.seek(seekTarget);
+    if (this.cachedSeekTarget !== null) {
+      this.player.seek(this.cachedSeekTarget, 'yospace-ad-skipping');
+      this.cachedSeekTarget = null;
+    } else {
+      this.seek(seekTarget);
+    }
   }
 
   private onTimeChanged = (event: TimeChangedEvent) => {
