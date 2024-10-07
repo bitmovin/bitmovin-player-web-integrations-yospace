@@ -5,11 +5,12 @@ import {
   BreakType,
   CONNECTION_ERROR,
   CONNECTION_TIMEOUT,
-  DEBUG_ALL,
+  DebugFlags,
   MALFORMED_URL,
   PlayerEvent as YsPlayerEvent,
   ResourceType,
   Session,
+  SessionDVRLive,
   SessionLive,
   SessionProperties,
   SessionState,
@@ -17,7 +18,6 @@ import {
   TimedMetadata,
   UNKNOWN_FORMAT,
   YoLog,
-  DebugFlags,
 } from '@yospace/admanagement-sdk';
 
 import type {
@@ -53,8 +53,10 @@ import {
 import { DefaultBitmovinYospacePlayerPolicy } from './BitmovinYospacePlayerPolicy';
 import { ArrayUtils } from 'bitmovin-player-ui/dist/js/framework/arrayutils';
 import {
+  AdImmunityConfig,
   AdImmunityConfiguredEvent,
   AdImmunityEndedEvent,
+  AdImmunityStartedEvent,
   BitmovinYospacePlayerAPI,
   BitmovinYospacePlayerPolicy,
   CompanionAdType,
@@ -72,8 +74,6 @@ import {
   YospacePolicyErrorCode,
   YospacePolicyErrorEvent,
   YospaceSourceConfig,
-  AdImmunityStartedEvent,
-  AdImmunityConfig,
 } from './BitmovinYospacePlayerAPI';
 import { YospacePlayerError } from './YospaceError';
 import type {
@@ -307,6 +307,9 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
           break;
         case YospaceAssetType.VOD:
           SessionVOD.create(url, properties, onInitComplete);
+          break;
+        case YospaceAssetType.DVRLIVE:
+          SessionDVRLive.create(url, properties, onInitComplete);
           break;
         default:
           Logger.error('Undefined YospaceSourceConfig.assetType; Could not obtain session;');
