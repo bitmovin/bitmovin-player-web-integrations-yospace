@@ -23,12 +23,14 @@ var sources = {
   linear: {
     yospaceValidation: {
       title: 'Yospace Validation',
+      // dash: 'https://csm-e-sdk-validation.bln1.yospace.com/csm/extlive/yosdk02,dash-mp4.mpd?yo.br=true&yo.av=4',
       hls: 'https://csm-e-sdk-validation.bln1.yospace.com/csm/extlive/yosdk02,hls-ts.m3u8?yo.br=true&yo.av=4',
       // Yospace configuration
       assetType: bitmovin.player.ads.yospace.YospaceAssetType.LINEAR,
     },
     dvrLive: {
       title: 'DVR Live',
+      // dash: 'https://csm-e-sdk-validation.bln1.yospace.com/csm/extlive/yosdk02,dash-mp4-pre.mpd?yo.br=false&yo.av=4&yo.lp=true',
       hls: 'https://csm-e-sdk-validation.bln1.yospace.com/csm/extlive/yosdk02,hls-ts-pre.m3u8?yo.br=false&yo.av=4&yo.lp=true',
       // Yospace configuration
       assetType: bitmovin.player.ads.yospace.YospaceAssetType.DVRLIVE,
