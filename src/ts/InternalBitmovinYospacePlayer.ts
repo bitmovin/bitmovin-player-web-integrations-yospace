@@ -202,11 +202,12 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
         return;
       }
       this.resetState();
-      this.registerPlayerEvents();
 
       const url = source.hls || source.dash;
-
       this.yospaceSourceConfig = source;
+
+      this.registerPlayerEvents();
+
       const onInitComplete = (event: any) => {
         const session: Session = event.getPayload();
         const state = session.getSessionState();
@@ -1185,8 +1186,10 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     this.player.on(this.player.exports.PlayerEvent.Muted, this.onMuted);
     this.player.on(this.player.exports.PlayerEvent.Unmuted, this.onUnmuted);
 
-    // To support ads in live streams we need to track metadata events
-    this.player.on(this.player.exports.PlayerEvent.Metadata, this.onMetaData);
+    if (this.yospaceSourceConfig.assetType === YospaceAssetType.LINEAR) {
+      // To support ads in live streams we need to track metadata events
+      this.player.on(this.player.exports.PlayerEvent.Metadata, this.onMetaData);
+    }
   }
 
   private unregisterPlayerEvents(): void {
