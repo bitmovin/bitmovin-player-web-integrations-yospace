@@ -1280,7 +1280,15 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     this.lastTimeChangedTime = event.time;
 
     if (timeDifference >= 0 || timeDifference < -0.25) {
-      this.session.onPlayheadUpdate(toMilliseconds(event.time));
+      let playheadTime: number;
+
+      if (this.yospaceSourceConfig.assetType === YospaceAssetType.DVRLIVE) {
+        playheadTime = this.player.getCurrentTime('relativetime' as any);
+      } else {
+        playheadTime = event.time;
+      }
+
+      this.session.onPlayheadUpdate(toMilliseconds(playheadTime));
     } else {
       Logger.warn('Encountered a small negative TimeChanged update, not reporting to Yospace. Difference was: ' + timeDifference);
     }
