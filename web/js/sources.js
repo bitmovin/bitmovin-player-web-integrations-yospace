@@ -23,11 +23,15 @@ var sources = {
   linear: {
     yospaceValidation: {
       title: 'Yospace Validation',
-      dash: 'https://csm-e-sdk-validation.bln1.yospace.com/csm/extlive/yosdk01,t2-dash.mpd?yo.av=3', // v0 emsg
-      // dash: 'https://csm-e-sdk-validation.bln1.yospace.com/csm/extlive/yosdk01,dash.mpd?yo.av=3', // v1 emsg
-      // hls: 'https://csm-e-sdk-validation.bln1.yospace.com/csm/extlive/yospace02,hlssample42.m3u8?yo.br=true&yo.av=3',
+      hls: 'https://csm-e-sdk-validation.bln1.yospace.com/csm/extlive/yosdk02,hls-ts.m3u8?yo.br=true&yo.av=4',
       // Yospace configuration
       assetType: bitmovin.player.ads.yospace.YospaceAssetType.LINEAR,
+    },
+    dvrLive: {
+      title: 'DVR Live',
+      hls: 'https://csm-e-sdk-validation.bln1.yospace.com/csm/extlive/yosdk02,hls-ts-pre.m3u8?yo.br=false&yo.av=4&yo.lp=true',
+      // Yospace configuration
+      assetType: bitmovin.player.ads.yospace.YospaceAssetType.DVRLIVE,
     },
   },
 };
