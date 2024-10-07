@@ -15,6 +15,7 @@ import type { AdBreak, CompanionAd } from 'bitmovin-player/modules/bitmovinplaye
 export enum YospaceAssetType {
   LINEAR,
   VOD,
+  DVRLIVE,
 }
 
 export enum YospacePlayerType {
