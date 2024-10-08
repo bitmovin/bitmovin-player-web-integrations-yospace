@@ -163,6 +163,9 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   private adImmunityCountDown: number | null = null;
   private unpauseAfterSeek = false;
 
+  // Holds the first timeChangedValue in case we have a DVRLIVE asset. See onTimeChanged for details.
+  private streamStartTimeOffset = 0;
+
   constructor(containerElement: HTMLElement, player: PlayerAPI, yospaceConfig: YospaceConfiguration = {}) {
     this.yospaceConfig = yospaceConfig;
     Logger.log('[BitmovinYospacePlayer] loading YospacePlayer with config= ' + stringify(this.yospaceConfig));
@@ -956,6 +959,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     this.cachedSeekTarget = null;
     this.truexAdFree = undefined;
     this.startSent = false;
+    this.streamStartTimeOffset = 0;
   }
 
   private handleQuartileEvent(adQuartileEventName: string): void {
@@ -1286,11 +1290,22 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       let playheadTime: number;
 
       if (this.yospaceSourceConfig.assetType === YospaceAssetType.DVRLIVE) {
-        playheadTime = this.player.getCurrentTime('relativetime' as any);
+        if (!this.streamStartTimeOffset) {
+          // The `session.onPlayheadUpdate` requires to report the playback time relative from the point of joining
+          // the stream, starting with 0. However, our player does not start at 0 when joining the stream.
+          // Depending on the streaming technology (HLS vs DASH) this value is something else. Sometimes it's
+          // `getMaxTimeShift()` but also other values were observed.
+          // When we assume that the very first `timeChangeEvent` is the time of joining the stream, we can take
+          // this value and use it as the offset for subsequent calculations.
+          this.streamStartTimeOffset = this.player.getCurrentTime('relativetime' as any);
+        }
+
+        playheadTime = this.player.getCurrentTime('relativetime' as any) - this.streamStartTimeOffset;
       } else {
         playheadTime = event.time;
       }
 
+      Logger.log('[BitmovinYospacePlayer] - reporting playhead time to Yospace:', playheadTime);
       this.session.onPlayheadUpdate(toMilliseconds(playheadTime));
     } else {
       Logger.warn('Encountered a small negative TimeChanged update, not reporting to Yospace. Difference was: ' + timeDifference);
