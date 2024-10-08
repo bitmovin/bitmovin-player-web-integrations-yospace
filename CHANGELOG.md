@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- Support for the `DVRLIVE` PlaybackMode to not rely on Metadata parsing for live streams anymore
+
 ## [2.7.1] - 2024-10-03
 
 ### Fixed
