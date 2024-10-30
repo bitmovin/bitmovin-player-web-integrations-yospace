@@ -35,11 +35,35 @@ function setupTestPage() {
       customSource.assetType = bitmovin.player.ads.yospace.YospaceAssetType.VOD;
     } else if (customStreamTypeSelect.val() === '2') {
       customSource.assetType = bitmovin.player.ads.yospace.YospaceAssetType.LINEAR;
+    } else if (customStreamTypeSelect.val() === '3') {
+      customSource.assetType = bitmovin.player.ads.yospace.YospaceAssetType.DVRLIVE;
     }
 
     yospacePlayer.unload();
     yospacePlayer.load(modifySourceBeforeLoading(customSource));
   });
+
+  document.querySelector('#toggle-ad-immunity').addEventListener('click', toggleAdImmunity);
+
+  function toggleAdImmunity() {
+    if (yospacePlayer.isAdImmunityActive()) {
+      yospacePlayer.endAdImmunity();
+    } else {
+      yospacePlayer.setAdImmunityConfig({
+        duration: 60,
+        disablePassedAdBreaks: true,
+      });
+      yospacePlayer.startAdImmunity();
+    }
+  }
+}
+
+function adImmunityEndedEventHandler() {
+  document.querySelector('#toggle-ad-immunity').innerHTML = 'Enable Ad Immunity for 60sec';
+}
+
+function adImmunityStartedEventHandler() {
+  document.querySelector('#toggle-ad-immunity').innerHTML = 'Disable Ad Immunity';
 }
 
 function applyQueryParameters() {

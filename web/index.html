@@ -72,8 +72,8 @@
               <button class="btn btn-outline-secondary" type="button" data-toggle="collapse" data-target="#collapsable-customization">
                 🛠️ Customize asset
               </button>
-              <label class="btn btn-outline-secondary">
-                <input type="radio" name="options" id="option-close" autocomplete="off" checked />✖️ Close Player
+              <label class="btn btn-outline-secondary" id="option-close">
+                <input type="radio" name="options" autocomplete="off" checked />✖️ Close Player
               </label>
             </div>
           </div>
@@ -92,8 +92,9 @@
                 />
                 <select class="custom-select col-2" id="stream-type-select">
                   <option value="1">VoD</option>
-                  <option value="2">Live</option>
-                  <option value="3">None</option>
+                  <option value="2">Live (deprecated)</option>
+                  <option value="3">DVRLive</option>
+                  <option value="4">None</option>
                 </select>
                 <div class="input-group-append">
                   <button id="load-custom-steam" class="btn btn-outline-secondary" type="button">Load</button>
@@ -140,8 +141,11 @@
       </div>
 
       <div class="row">
-        <div class="col-12">
+        <div class="col-9">
           <p1 id="segmentPlaybackLabel">Playing Segment: unknown</p1>
+        </div>
+        <div class="col-3">
+          <label class="btn btn-outline-secondary" id="toggle-ad-immunity"> Enable Ad Immunity (60sec) </label>
         </div>
       </div>
 
@@ -169,13 +173,45 @@
     </div>
     <script type="text/javascript">
       /* queryParameters */
+
+      /**
+       * validation = true|false
+       *
+       * Should be used to enable Yospace SDK logs (and disable other logs) for validating the yospace integration at
+       * https://developer.yospace.com/sdk-documentation/javascript/userguide/yosdk/latest/en/validate-your-app.html
+       */
       var isValidationMode = false;
+
+      /**
+       * debug = true|false
+       */
       var debugOverride = true;
+
+      /**
+       * autoplay = true|false
+       */
       var autoplay = true;
+
+      /**
+       * aggressiveVpaid = true|false
+       */
       var aggressiveVpaid = true;
+
+      /**
+       * vpaid = true|false
+       */
       var vpaid = true;
+
+      /**
+       * autoLoadSource = <number>
+       *
+       * Automatically load a pre-defined source into the player after loading the sample page.
+       * Index starts at 1.
+       */
       var autoLoadSource = platformType !== 'web' ? 1 : -1;
+
       /* end of queryParameters */
+
 
       var bitmovinPlayerLicenseKey = 'YOUR-KEY';
 
@@ -295,6 +331,10 @@
 
         // We are using the default, built-in policy in the demo. Another policy can easily be set using this method:
         // yospacePlayer.setPolicy(simplePolicy);
+
+        yospacePlayer.on(bitmovin.player.ads.yospace.YospacePlayerEvent.AdImmunityEnded, adImmunityEndedEventHandler);
+
+        yospacePlayer.on(bitmovin.player.ads.yospace.YospacePlayerEvent.AdImmunityStarted, adImmunityStartedEventHandler);
 
         yospacePlayer.on('segmentplayback', function (event) {
           if (event.mimeType === 'video/mp4') {
