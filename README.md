@@ -190,12 +190,12 @@ const yospaceConfig = {
   1. Run `npm start`
   2. Open `localhost:8080?validation=true` in a browser
   3. Select a source from the list to start playback and the validation logs. Alternatively, you can add the URL parameter `autoLoadSource=1` (to load the first source in the list).
-  4. Save console logs and upload to the [Yospace validation tool](https://sdkvalidation.yospace.com/)
+  4. Save console logs and upload them to the [Yospace validation tool](https://sdkvalidation.yospace.com/)
 - Releasing a new version is fully automated. It can be triggered using the [Release a new version](https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/actions/workflows/release.yml) Github Action on the `main` branch. The workflow will:
   - bump the version automatically based on the current version in `package.json` and changes in the `[Unreleased]` section of the `CHANGELOG.md`
   - build the project
   - tag the new release in git
-  - create a new release on Github
+  - create a new release on GitHub
   - publish the update to [npm](https://www.npmjs.com/package/@bitmovin/player-integration-yospace)
 
 ### Principles
