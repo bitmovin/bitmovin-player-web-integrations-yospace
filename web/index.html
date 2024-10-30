@@ -175,11 +175,42 @@
       /* queryParameters */
       var isValidationMode = false;
       var debugOverride = true;
+
+      /**
+       * validation = true|false
+       *
+       * Should be used to enable Yospace SDK logs (and disable other logs) for validating the yospace integration at
+       * https://developer.yospace.com/sdk-documentation/javascript/userguide/yosdk/latest/en/validate-your-app.html
+       */
       var autoplay = true;
+
+      /**
+       * debug = true|false
+       */
       var aggressiveVpaid = true;
+
+      /**
+       * autoplay = true|false
+       */
       var vpaid = true;
+
+      /**
+       * aggressiveVpaid = true|false
+       */
       var autoLoadSource = platformType !== 'web' ? 1 : -1;
+
+      /**
+       * vpaid = true|false
+       */
       /* end of queryParameters */
+
+      /**
+       * autoLoadSource = <number>
+       *
+       * Automatically load a pre-defined source into the player after loading the sample page.
+       * Index starts at 1.
+       */
+
 
       var bitmovinPlayerLicenseKey = 'YOUR-KEY';
 
