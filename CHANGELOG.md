@@ -15,6 +15,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - Yospace SDK to v3.8.3
 
+### Fixed
+
+- Wrong playback position after skipping over ad breaks using ad immunity
+
 ## [2.7.1] - 2024-10-03
 
 ### Fixed
