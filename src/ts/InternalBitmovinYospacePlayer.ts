@@ -5,11 +5,12 @@ import {
   BreakType,
   CONNECTION_ERROR,
   CONNECTION_TIMEOUT,
-  DEBUG_ALL,
+  DebugFlags,
   MALFORMED_URL,
   PlayerEvent as YsPlayerEvent,
   ResourceType,
   Session,
+  SessionDVRLive,
   SessionLive,
   SessionProperties,
   SessionState,
@@ -17,7 +18,6 @@ import {
   TimedMetadata,
   UNKNOWN_FORMAT,
   YoLog,
-  DebugFlags,
 } from '@yospace/admanagement-sdk';
 
 import type {
@@ -53,8 +53,10 @@ import {
 import { DefaultBitmovinYospacePlayerPolicy } from './BitmovinYospacePlayerPolicy';
 import { ArrayUtils } from 'bitmovin-player-ui/dist/js/framework/arrayutils';
 import {
+  AdImmunityConfig,
   AdImmunityConfiguredEvent,
   AdImmunityEndedEvent,
+  AdImmunityStartedEvent,
   BitmovinYospacePlayerAPI,
   BitmovinYospacePlayerPolicy,
   CompanionAdType,
@@ -72,8 +74,6 @@ import {
   YospacePolicyErrorCode,
   YospacePolicyErrorEvent,
   YospaceSourceConfig,
-  AdImmunityStartedEvent,
-  AdImmunityConfig,
 } from './BitmovinYospacePlayerAPI';
 import { YospacePlayerError } from './YospaceError';
 import type {
@@ -163,6 +163,9 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   private adImmunityCountDown: number | null = null;
   private unpauseAfterSeek = false;
 
+  // Holds the first timeChangedValue in case we have a DVRLIVE asset. See onTimeChanged for details.
+  private streamStartTimeOffset = 0;
+
   constructor(containerElement: HTMLElement, player: PlayerAPI, yospaceConfig: YospaceConfiguration = {}) {
     this.yospaceConfig = yospaceConfig;
     Logger.log('[BitmovinYospacePlayer] loading YospacePlayer with config= ' + stringify(this.yospaceConfig));
@@ -202,11 +205,12 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
         return;
       }
       this.resetState();
-      this.registerPlayerEvents();
 
       const url = source.hls || source.dash;
-
       this.yospaceSourceConfig = source;
+
+      this.registerPlayerEvents();
+
       const onInitComplete = (event: any) => {
         const session: Session = event.getPayload();
         const state = session.getSessionState();
@@ -306,6 +310,9 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
           break;
         case YospaceAssetType.VOD:
           SessionVOD.create(url, properties, onInitComplete);
+          break;
+        case YospaceAssetType.DVRLIVE:
+          SessionDVRLive.create(url, properties, onInitComplete);
           break;
         default:
           Logger.error('Undefined YospaceSourceConfig.assetType; Could not obtain session;');
@@ -952,6 +959,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     this.cachedSeekTarget = null;
     this.truexAdFree = undefined;
     this.startSent = false;
+    this.streamStartTimeOffset = 0;
   }
 
   private handleQuartileEvent(adQuartileEventName: string): void {
@@ -1185,8 +1193,10 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     this.player.on(this.player.exports.PlayerEvent.Muted, this.onMuted);
     this.player.on(this.player.exports.PlayerEvent.Unmuted, this.onUnmuted);
 
-    // To support ads in live streams we need to track metadata events
-    this.player.on(this.player.exports.PlayerEvent.Metadata, this.onMetaData);
+    if (this.yospaceSourceConfig.assetType === YospaceAssetType.LINEAR) {
+      // To support ads in live streams we need to track metadata events
+      this.player.on(this.player.exports.PlayerEvent.Metadata, this.onMetaData);
+    }
   }
 
   private unregisterPlayerEvents(): void {
@@ -1277,7 +1287,26 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     this.lastTimeChangedTime = event.time;
 
     if (timeDifference >= 0 || timeDifference < -0.25) {
-      this.session.onPlayheadUpdate(toMilliseconds(event.time));
+      let playheadTime: number;
+
+      if (this.yospaceSourceConfig.assetType === YospaceAssetType.DVRLIVE) {
+        if (!this.streamStartTimeOffset) {
+          // The `session.onPlayheadUpdate` requires to report the playback time relative from the point of joining
+          // the stream, starting with 0. However, our player does not start at 0 when joining the stream.
+          // Depending on the streaming technology (HLS vs DASH) this value is something else. Sometimes it's
+          // `getMaxTimeShift()` but also other values were observed.
+          // When we assume that the very first `timeChangeEvent` is the time of joining the stream, we can take
+          // this value and use it as the offset for subsequent calculations.
+          this.streamStartTimeOffset = this.player.getCurrentTime('relativetime' as any);
+        }
+
+        playheadTime = this.player.getCurrentTime('relativetime' as any) - this.streamStartTimeOffset;
+      } else {
+        playheadTime = event.time;
+      }
+
+      Logger.log('[BitmovinYospacePlayer] - reporting playhead time to Yospace:', playheadTime);
+      this.session.onPlayheadUpdate(toMilliseconds(playheadTime));
     } else {
       Logger.warn('Encountered a small negative TimeChanged update, not reporting to Yospace. Difference was: ' + timeDifference);
     }
