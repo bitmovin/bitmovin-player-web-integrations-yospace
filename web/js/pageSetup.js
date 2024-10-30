@@ -40,6 +40,28 @@ function setupTestPage() {
     yospacePlayer.unload();
     yospacePlayer.load(modifySourceBeforeLoading(customSource));
   });
+
+  document.querySelector('#toggle-ad-immunity').addEventListener('click', toggleAdImmunity);
+
+  function toggleAdImmunity() {
+    if (yospacePlayer.isAdImmunityActive()) {
+      yospacePlayer.endAdImmunity();
+    } else {
+      yospacePlayer.setAdImmunityConfig({
+        duration: 60,
+        disablePassedAdBreaks: true,
+      });
+      yospacePlayer.startAdImmunity();
+    }
+  }
+}
+
+function adImmunityEndedEventHandler() {
+  document.querySelector('#toggle-ad-immunity').innerHTML = 'Enable Ad Immunity for 60sec';
+}
+
+function adImmunityStartedEventHandler() {
+  document.querySelector('#toggle-ad-immunity').innerHTML = 'Disable Ad Immunity';
 }
 
 function applyQueryParameters() {

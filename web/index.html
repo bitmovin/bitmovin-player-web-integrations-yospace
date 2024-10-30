@@ -140,8 +140,11 @@
       </div>
 
       <div class="row">
-        <div class="col-12">
+        <div class="col-9">
           <p1 id="segmentPlaybackLabel">Playing Segment: unknown</p1>
+        </div>
+        <div class="col-3">
+          <label class="btn btn-outline-secondary" id="toggle-ad-immunity"> Enable Ad Immunity (60sec) </label>
         </div>
       </div>
 
@@ -295,6 +298,10 @@
 
         // We are using the default, built-in policy in the demo. Another policy can easily be set using this method:
         // yospacePlayer.setPolicy(simplePolicy);
+
+        yospacePlayer.on(bitmovin.player.ads.yospace.YospacePlayerEvent.AdImmunityEnded, adImmunityEndedEventHandler);
+
+        yospacePlayer.on(bitmovin.player.ads.yospace.YospacePlayerEvent.AdImmunityStarted, adImmunityStartedEventHandler);
 
         yospacePlayer.on('segmentplayback', function (event) {
           if (event.mimeType === 'video/mp4') {
