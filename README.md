@@ -172,20 +172,31 @@ const yospaceConfig = {
 
 ## Development, Contribution, Releases
 
-### Set up environment
+### Set up dev environment
 
 1. Use node.js version specified in `.nvmrc`
 2. Set up your access to the private npm registry of Yospace
 3. Run `npm ci`
 4. Use `npm run start` to run a webpack dev server
 
-### Branching & Releasing
+### Branching & Development
 
-- This repo uses git-flow and semantic versioning
-- PRs should be made against `develop` branch
+- This repo uses semantic versioning. Features and bug fixes should be implemented in separate feature branches, branch off the `main` branch.
+- PRs should be made against `main` branch
 - PRs should always contain an update of the [CHANGELOG.md](CHANGELOG.md) file
-- New versions will be manually released into the `main` branch and tagged there
-- Tagged versions will be manually published to [npm](https://www.npmjs.com/package/@bitmovin/player-integration-yospace)
+
+### Validation & Release
+- Especially when updating the Yospace SDK, this project should be validated following https://developer.yospace.com/sdk-documentation/javascript/userguide/yosdk/latest/en/validate-your-app.html. This can be done using the sample page with the following steps:
+  1. Run `npm start`
+  2. Open `localhost:8080?validation=true` in a browser
+  3. Select a source from the list to start playback and the validation logs. Alternatively, you can add the URL parameter `autoLoadSource=1` (to load the first source in the list).
+  4. Save console logs and upload to the [Yospace validation tool](https://sdkvalidation.yospace.com/)
+- Releasing a new version is fully automated. It can be triggered using the [Release a new version](https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/actions/workflows/release.yml) Github Action on the `main` branch. The workflow will:
+  - bump the version automatically based on the current version in `package.json` and changes in the `[Unreleased]` section of the `CHANGELOG.md`
+  - build the project
+  - tag the new release in git
+  - create a new release on Github
+  - publish the update to [npm](https://www.npmjs.com/package/@bitmovin/player-integration-yospace)
 
 ### Principles
 
