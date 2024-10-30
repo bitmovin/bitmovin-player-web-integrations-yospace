@@ -35,6 +35,8 @@ function setupTestPage() {
       customSource.assetType = bitmovin.player.ads.yospace.YospaceAssetType.VOD;
     } else if (customStreamTypeSelect.val() === '2') {
       customSource.assetType = bitmovin.player.ads.yospace.YospaceAssetType.LINEAR;
+    } else if (customStreamTypeSelect.val() === '3') {
+      customSource.assetType = bitmovin.player.ads.yospace.YospaceAssetType.DVRLIVE;
     }
 
     yospacePlayer.unload();
