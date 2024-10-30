@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - Support for the `DVRLIVE` PlaybackMode to not rely on Metadata parsing for live streams anymore
 
+### Fixed
+
+- Wrong playback position after skipping over ad breaks using ad immunity
+
 ## [2.7.1] - 2024-10-03
 
 ### Fixed

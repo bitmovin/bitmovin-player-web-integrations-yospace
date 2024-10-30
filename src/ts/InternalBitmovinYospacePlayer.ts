@@ -300,7 +300,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       const properties = new SessionProperties();
       properties.setUserAgent(navigator.userAgent);
 
-      if (this.yospaceConfig.debug || this.yospaceConfig.debugYospaceSdk) {
+      if (this.yospaceConfig.debugYospaceSdk) {
         YoLog.setDebugFlags(DebugFlags.DEBUG_ALL);
       }
 
@@ -1237,7 +1237,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       this.player.seek(this.cachedSeekTarget, 'yospace-ad-skipping');
       this.cachedSeekTarget = null;
     } else {
-      this.seek(seekTarget);
+      this.player.seek(seekTarget, 'yospace-ad-skipping');
     }
   }
 
