@@ -387,19 +387,11 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   }
 
   pause(issuer?: string): void {
-    if (this.playerPolicy.canPause()) {
-      this.player.pause();
-    } else {
-      this.handleYospacePolicyEvent(YospacePolicyErrorCode.PAUSE_NOT_ALLOWED);
-    }
+    this.playerPolicy.canPause() ? this.player.pause(issuer) : this.handleYospacePolicyEvent(YospacePolicyErrorCode.PAUSE_NOT_ALLOWED);
   }
 
   mute(issuer?: string): void {
-    if (this.playerPolicy.canMute()) {
-      this.player.mute();
-    } else {
-      this.handleYospacePolicyEvent(YospacePolicyErrorCode.MUTE_NOT_ALLOWED);
-    }
+    this.playerPolicy.canMute() ? this.player.mute(issuer) : this.handleYospacePolicyEvent(YospacePolicyErrorCode.MUTE_NOT_ALLOWED);
   }
 
   /**
