@@ -559,7 +559,7 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   }
 
   unmute(issuer?: string): void {
-    return this.player.unmute();
+    return this.player.unmute(issuer);
   }
 
   setAspectRatio(aspectratio: string | number): void {
