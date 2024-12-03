@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+
+- Missing `issuer` in `Muted`, `Unmuted` and `Paused` events
+
 ## [2.8.0] - 2024-10-30
 
 ### Added
