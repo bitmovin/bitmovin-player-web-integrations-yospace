@@ -10,6 +10,7 @@ export enum BYSListenerEvent {
   ADVERT_END = 'advert_end',
   AD_BREAK_END = 'ad_break_end',
   ANALYTICS_FIRED = 'analytics_fired',
+  ANALYTIC_UPDATED = 'analytics_updated',
 }
 
 export type BYSTrackingEventType =
@@ -95,7 +96,9 @@ export class YospaceAdListenerAdapter {
   }
 
   onAnalyticUpdate() {
-    // No op
+    this.emitEvent({
+      type: BYSListenerEvent.ANALYTIC_UPDATED,
+    } as BYSListenerEventBase);
   }
 
   onTrackingEvent(type: BYSTrackingEventType) {
