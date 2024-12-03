@@ -116,11 +116,11 @@ export class YospaceAdListenerAdapter {
     Logger.warn('[BYP][listener] onAdvertBreakEarlyReturn not implemented');
   }
 
-  onSessionError() {
+  onSessionError(errorCode: SessionErrorCode) {
     Logger.warn('[BYP][listener] onSessionError not implemented');
   }
 
-  onTrackingError() {
+  onTrackingError(trackingError: TrackingError) {
     Logger.warn('[BYP][listener] onTrackingError not implemented');
   }
 
