@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+
+- Improve startup behavior for `LINEAR` and `DVRLIVE` streams according to https://developer.yospace.com/sdk-documentation/javascript/userguide/yosdk/latest/en/optimising-user-experience-at-video-start.html
+
 ### Fixed
 
 - Missing `issuer` in `Muted`, `Unmuted` and `Paused` events
