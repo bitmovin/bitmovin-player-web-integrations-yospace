@@ -1,6 +1,7 @@
-import { AdBreak, Advert } from '@yospace/admanagement-sdk';
 import { ArrayUtils } from 'bitmovin-player-ui/dist/js/framework/arrayutils';
 import { Logger } from './Logger';
+import type { AdBreak, Advert, Session, SessionErrorCode } from '@yospace/admanagement-sdk';
+import type { TrackingError } from '@yospace/admanagement-sdk/types/Public/TrackingError';
 
 /** BYS -> BitmovinYospace */
 export enum BYSListenerEvent {
@@ -9,6 +10,7 @@ export enum BYSListenerEvent {
   ADVERT_END = 'advert_end',
   AD_BREAK_END = 'ad_break_end',
   ANALYTICS_FIRED = 'analytics_fired',
+  ANALYTIC_UPDATED = 'analytics_updated',
 }
 
 export type BYSTrackingEventType =
@@ -94,7 +96,9 @@ export class YospaceAdListenerAdapter {
   }
 
   onAnalyticUpdate() {
-    // No op
+    this.emitEvent({
+      type: BYSListenerEvent.ANALYTIC_UPDATED,
+    } as BYSListenerEventBase);
   }
 
   onTrackingEvent(type: BYSTrackingEventType) {
@@ -115,11 +119,11 @@ export class YospaceAdListenerAdapter {
     Logger.warn('[BYP][listener] onAdvertBreakEarlyReturn not implemented');
   }
 
-  onSessionError() {
+  onSessionError(errorCode: SessionErrorCode) {
     Logger.warn('[BYP][listener] onSessionError not implemented');
   }
 
-  onTrackingError() {
+  onTrackingError(trackingError: TrackingError) {
     Logger.warn('[BYP][listener] onTrackingError not implemented');
   }
 

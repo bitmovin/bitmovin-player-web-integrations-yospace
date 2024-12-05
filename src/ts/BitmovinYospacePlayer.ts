@@ -483,11 +483,11 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   }
 
   mute(issuer?: string): void {
-    return this.player.mute();
+    return this.player.mute(issuer);
   }
 
   pause(issuer?: string): void {
-    return this.player.pause();
+    return this.player.pause(issuer);
   }
 
   play(issuer?: string): Promise<void> {
@@ -559,7 +559,7 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   }
 
   unmute(issuer?: string): void {
-    return this.player.unmute();
+    return this.player.unmute(issuer);
   }
 
   setAspectRatio(aspectratio: string | number): void {

@@ -286,7 +286,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
           }
 
           Logger.log('Loading Source: ' + stringify(clonedSource));
-          this.player.load(clonedSource, forceTechnology, disableSeeking).then(resolve).catch(reject);
+          this.player.load(clonedSource, forceTechnology, disableSeeking).then(this.pullYospaceAdDataForLive).then(resolve).catch(reject);
         } else {
           session.shutdown();
           this.session = null;
@@ -386,20 +386,35 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     return this.player.play(issuer);
   }
 
-  pause(issuer?: string): void {
-    if (this.playerPolicy.canPause()) {
-      this.player.pause();
-    } else {
-      this.handleYospacePolicyEvent(YospacePolicyErrorCode.PAUSE_NOT_ALLOWED);
+  private pullYospaceAdDataForLive = (): Promise<void> => {
+    if (
+      (this.yospaceSourceConfig.assetType !== YospaceAssetType.DVRLIVE && this.yospaceSourceConfig.assetType !== YospaceAssetType.LINEAR) ||
+      this.startSent
+    ) {
+      // Manually triggering the Yospace ad data update is only needed for Live and DVRLive sessions, and only the first time the stream is started.
+      return Promise.resolve();
     }
+
+    const adDataUpdatedPromise = new Promise<void>((resolve, reject) => {
+      const onAnalyticUpdate = () => {
+        this.yospaceListenerAdapter.removeListener(BYSListenerEvent.ANALYTIC_UPDATED, onAnalyticUpdate);
+        resolve();
+      };
+
+      this.yospaceListenerAdapter.addListener(BYSListenerEvent.ANALYTIC_UPDATED, onAnalyticUpdate);
+    });
+
+    this.session.onPlayerEvent(YsPlayerEvent.PLAYBACK_READY, 0);
+
+    return adDataUpdatedPromise;
+  };
+
+  pause(issuer?: string): void {
+    this.playerPolicy.canPause() ? this.player.pause(issuer) : this.handleYospacePolicyEvent(YospacePolicyErrorCode.PAUSE_NOT_ALLOWED);
   }
 
   mute(issuer?: string): void {
-    if (this.playerPolicy.canMute()) {
-      this.player.mute();
-    } else {
-      this.handleYospacePolicyEvent(YospacePolicyErrorCode.MUTE_NOT_ALLOWED);
-    }
+    this.playerPolicy.canMute() ? this.player.mute(issuer) : this.handleYospacePolicyEvent(YospacePolicyErrorCode.MUTE_NOT_ALLOWED);
   }
 
   /**
