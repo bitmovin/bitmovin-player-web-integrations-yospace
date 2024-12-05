@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [2.9.0] - 2024-12-05
+
 ### Changed
 
 - Improve startup behavior for `LINEAR` and `DVRLIVE` streams according to https://developer.yospace.com/sdk-documentation/javascript/userguide/yosdk/latest/en/optimising-user-experience-at-video-start.html
@@ -417,7 +419,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - Initial yospace integration
 
-[unreleased]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/v2.8.0...HEAD
+[unreleased]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/v2.9.0...HEAD
+[2.9.0]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/v2.8.0...v2.9.0
 [2.8.0]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/v2.7.1...v2.8.0
 [2.7.1]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/v2.7.0...v2.7.1
 [2.7.0]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/v2.6.0...v2.7.0
