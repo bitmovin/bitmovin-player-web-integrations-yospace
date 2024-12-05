@@ -399,7 +399,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       return Promise.resolve();
     }
 
-    const adBreakUpdatePromise = new Promise<void>((resolve, reject) => {
+    const adDataUpdatedPromise = new Promise<void>((resolve, reject) => {
       const onAnalyticUpdate = () => {
         this.yospaceListenerAdapter.removeListener(BYSListenerEvent.ANALYTIC_UPDATED, onAnalyticUpdate);
         resolve();
