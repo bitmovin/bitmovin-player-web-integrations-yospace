@@ -286,11 +286,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
           }
 
           Logger.log('Loading Source: ' + stringify(clonedSource));
-          this.player
-            .load(clonedSource, forceTechnology, disableSeeking)
-            .then(this.pullYospaceAdDataForLive)
-            .then(resolve)
-            .catch(reject);
+          this.player.load(clonedSource, forceTechnology, disableSeeking).then(this.pullYospaceAdDataForLive).then(resolve).catch(reject);
         } else {
           session.shutdown();
           this.session = null;
@@ -390,7 +386,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     return this.player.play(issuer);
   }
 
-  private pullYospaceAdDataForLive(): Promise<void> {
+  private pullYospaceAdDataForLive = (): Promise<void> => {
     if (
       (this.yospaceSourceConfig.assetType !== YospaceAssetType.DVRLIVE && this.yospaceSourceConfig.assetType !== YospaceAssetType.LINEAR) ||
       this.startSent
@@ -410,8 +406,8 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 
     this.session.onPlayerEvent(YsPlayerEvent.PLAYBACK_READY, 0);
 
-    return adBreakUpdatePromise;
-  }
+    return adDataUpdatedPromise;
+  };
 
   pause(issuer?: string): void {
     this.playerPolicy.canPause() ? this.player.pause(issuer) : this.handleYospacePolicyEvent(YospacePolicyErrorCode.PAUSE_NOT_ALLOWED);
