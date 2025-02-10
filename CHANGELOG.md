@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [2.9.1] - 2025-02-10
+
 ### Fixed
 
 - Calling `destroy` during an ongoing `load` process resulted in non-capturable error being thrown
@@ -423,7 +425,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - Initial yospace integration
 
-[unreleased]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/v2.9.0...HEAD
+[unreleased]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/v2.9.1...HEAD
+[2.9.1]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/v2.9.0...v2.9.1
 [2.9.0]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/v2.8.0...v2.9.0
 [2.8.0]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/v2.7.1...v2.8.0
 [2.7.1]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/v2.7.0...v2.7.1
