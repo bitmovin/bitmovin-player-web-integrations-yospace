@@ -1441,6 +1441,14 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     return this.player.unload();
   }
 
+  destroy(): Promise<void> {
+    if (this.isAdActive()) {
+      this.ads.skip();
+    }
+    this.resetState();
+    return this.player.destroy();
+  }
+
   // Needed in BitmovinYospacePlayerPolicy.ts so keep it here
   isLive(): boolean {
     return this.player.isLive();
