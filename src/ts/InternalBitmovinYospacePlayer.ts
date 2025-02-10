@@ -286,7 +286,11 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
           }
 
           Logger.log('Loading Source: ' + stringify(clonedSource));
-          this.player.load(clonedSource, forceTechnology, disableSeeking).then(this.pullYospaceAdDataForLive).then(resolve).catch(reject);
+          try {
+            this.player.load(clonedSource, forceTechnology, disableSeeking).then(this.pullYospaceAdDataForLive).then(resolve).catch(reject);
+          } catch (e) {
+            reject(e);
+          }
         } else {
           session.shutdown();
           this.session = null;
