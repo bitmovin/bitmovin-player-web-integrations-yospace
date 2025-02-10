@@ -286,7 +286,11 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
           }
 
           Logger.log('Loading Source: ' + stringify(clonedSource));
-          this.player.load(clonedSource, forceTechnology, disableSeeking).then(this.pullYospaceAdDataForLive).then(resolve).catch(reject);
+          try {
+            this.player.load(clonedSource, forceTechnology, disableSeeking).then(this.pullYospaceAdDataForLive).then(resolve).catch(reject);
+          } catch (e) {
+            reject(e);
+          }
         } else {
           session.shutdown();
           this.session = null;
@@ -1439,6 +1443,14 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     }
     this.resetState();
     return this.player.unload();
+  }
+
+  destroy(): Promise<void> {
+    if (this.isAdActive()) {
+      this.ads.skip();
+    }
+    this.resetState();
+    return this.player.destroy();
   }
 
   // Needed in BitmovinYospacePlayerPolicy.ts so keep it here

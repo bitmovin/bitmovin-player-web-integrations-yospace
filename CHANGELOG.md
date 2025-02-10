@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+
+- Calling `destroy` during an ongoing `load` process resulted in non-capturable error being thrown
+
 ## [2.9.0] - 2024-12-05
 
 ### Changed
