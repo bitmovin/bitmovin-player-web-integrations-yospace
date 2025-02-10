@@ -212,10 +212,10 @@
 
       /* end of queryParameters */
 
-
       var bitmovinPlayerLicenseKey = 'YOUR-KEY';
 
       var yospacePlayer;
+      var uiManager;
     </script>
     <script type="text/javascript" src="js/pageSetup.js"></script>
     <script type="text/javascript">
@@ -293,7 +293,7 @@
           yospaceConfig
         );
 
-        var uiManager = new bitmovin.playerui.UIFactory.buildDefaultUI(yospacePlayer);
+        uiManager = new bitmovin.playerui.UIFactory.buildDefaultUI(yospacePlayer);
 
         yospacePlayer.on('sourceloaded', function (event) {
           log(createLogFromEvent(event));
