@@ -192,6 +192,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   }
 
   forceSeek(time: number, issuer?: string): boolean {
+    console.log('force seek to', this.toAbsoluteTime(time));
     return this.player.seek(this.toAbsoluteTime(time), issuer);
   }
 
@@ -1249,6 +1250,8 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   };
 
   private performBreakSkip(seekTarget: number) {
+    console.log('seekTarget', seekTarget, 'cachedSeekTarget', this.cachedSeekTarget);
+
     this.player.pause();
     this.unpauseAfterSeek = true;
 
@@ -1256,7 +1259,13 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       this.player.seek(this.cachedSeekTarget, 'yospace-ad-skipping');
       this.cachedSeekTarget = null;
     } else {
-      this.player.seek(seekTarget, 'yospace-ad-skipping');
+      try {
+        console.log('calling player.seek with', seekTarget);
+        const seekResult = this.player.seek(seekTarget, 'yospace-ad-skipping');
+        console.log('bmplayer seek result', seekResult);
+      } catch (e) {
+        console.log('bmplayer seek error', e);
+      }
     }
   }
 
@@ -1276,12 +1285,13 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       // Seek past previously deactivated ad breaks
       if (upcomingAdBreak && !upcomingAdBreak.isActive()) {
         Logger.log('[BitmovinYospacePlayer] - Ad Immunity pausing and seeking past deactivated ad break');
-
         this.performBreakSkip(toSeconds(upcomingAdBreak.getStart() + upcomingAdBreak.getDuration()));
 
         // do not propagate time to the rest of the app, we want to seek past it
         return;
       }
+
+      console.log('is ad immune', this.adImmune, this.adImmunityConfig);
 
       // seek past and deactivate ad breaks entered during ad immunity
       if (upcomingAdBreak && this.adImmune) {

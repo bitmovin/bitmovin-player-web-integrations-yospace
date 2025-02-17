@@ -43,7 +43,12 @@ function setupTestPage() {
     yospacePlayer.load(modifySourceBeforeLoading(customSource));
   });
 
+  function seekToAd() {
+    yospacePlayer.forceSeek(314);
+  }
+
   document.querySelector('#toggle-ad-immunity').addEventListener('click', toggleAdImmunity);
+  document.querySelector('#seekToAd').addEventListener('click', seekToAd);
 
   function toggleAdImmunity() {
     if (yospacePlayer.isAdImmunityActive()) {
@@ -186,7 +191,7 @@ function setupTable() {
 function updateAdEventTable() {
   if (adBreakState.abs > 0) {
     var table = $('#adEventTable');
-    let body = $('<tbody/>');
+    var body = $('<tbody/>');
     $('#adEventTable tbody').remove();
     table.append(body);
     var row = $('<tr>');
@@ -200,12 +205,12 @@ function updateAdEventTable() {
 
 function timeChangedAdHandler(adBreak, ad, eventTime) {
   if (adBreak && ad) {
-    let duration = adBreak.duration;
-    let adCounter = 0;
-    let adDuration = 0;
-    for (let i = 0; i < adBreak.ads.length; i++) {
+    var duration = adBreak.duration;
+    var adCounter = 0;
+    var adDuration = 0;
+    for (var i = 0; i < adBreak.ads.length; i++) {
       adCounter = i + 1;
-      let a = adBreak.ads[i];
+      var a = adBreak.ads[i];
       if (a.id === ad.id && ad.sequence === a.sequence) {
         adDuration = a.duration - eventTime;
         duration = duration - eventTime;
@@ -234,10 +239,10 @@ function adStartedHandler(activeAdBreak, activeAd) {
   row2.append($('<th/>').text('Sequence'));
   header.append(row2);
   table.append(header);
-  let body = $('<tbody/>');
+  var body = $('<tbody/>');
   table.append(body);
-  for (let i = 0; i < activeAdBreak.ads.length; i++) {
-    let ad = activeAdBreak.ads[i];
+  for (var i = 0; i < activeAdBreak.ads.length; i++) {
+    var ad = activeAdBreak.ads[i];
     var row = $('<tr>');
     row.append($('<td/>').text(ad.id));
     row.append($('<td/>').text(ad.duration));

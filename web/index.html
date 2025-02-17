@@ -144,8 +144,11 @@
         <div class="col-9">
           <p1 id="segmentPlaybackLabel">Playing Segment: unknown</p1>
         </div>
-        <div class="col-3">
-          <label class="btn btn-outline-secondary" id="toggle-ad-immunity"> Enable Ad Immunity (60sec) </label>
+        <div class="col-2">
+          <label class="btn btn-outline-secondary" id="toggle-ad-immunity">Set Ad Immune</label>
+        </div>
+        <div class="col-1">
+          <label class="btn btn-outline-secondary" id="seekToAd">Seek to 314s</label>
         </div>
       </div>
 
@@ -212,7 +215,7 @@
 
       /* end of queryParameters */
 
-      var bitmovinPlayerLicenseKey = 'YOUR-KEY';
+      var bitmovinPlayerLicenseKey = 'YOUR_KEY';
 
       var yospacePlayer;
       var uiManager;
@@ -230,19 +233,38 @@
 
       var truexAdFree = false;
 
+      var APP_ID = 'com.bitmovin.bitmovinyospaceplayer';
+
       var conf = {
         key: bitmovinPlayerLicenseKey,
+        analytics: {
+          origin: APP_ID,
+          key: 'd7633d53-489f-4a91-986d-513d9ebc7f03',
+        },
         playback: {
-          muted: false,
-          autoplay: autoplay, // Fix for Pre-roll 'blip' does not work with autoplay enabled
+          autoplay: true,
+          videoCodecPriority: ['avc', 'av1', 'hevc'], // LG; for XBOX it is ['hevc','avc','av1']
+        },
+        adaptation: {
+          startupBitrate: 5000000,
+        },
+        buffer: {
+          video: {
+            forwardduration: 16,
+            backwardduration: 12,
+          },
+          audio: {
+            forwardduration: 16,
+            backwardduration: 12,
+          },
+        },
+        tweaks: {
+          startup_threshold: 0.5,
+          file_protocol: true,
+          app_id: APP_ID,
         },
         logs: {
-          level: 'none',
-          bitmovin: !isValidationMode,
-        },
-        ui: false,
-        tweaks: {
-          FAIRPLAY_IGNORE_DUPLICATE_INIT_DATA_KEY_ERRORS: true,
+          level: 'debug',
         },
       };
 
@@ -257,7 +279,7 @@
         useWebos: platformType === 'webos',
       };
 
-      platformReadyForPlayerPromise.then(() => {
+      platformReadyForPlayerPromise.then(function () {
         bitmovin.player.core.Player.addModule(window.bitmovin.player['polyfill'].default);
         bitmovin.player.core.Player.addModule(window.bitmovin.player['style'].default);
         bitmovin.player.core.Player.addModule(window.bitmovin.player['xml'].default);
@@ -338,8 +360,8 @@
 
         yospacePlayer.on('segmentplayback', function (event) {
           if (event.mimeType === 'video/mp4') {
-            let segmentUrl = event.url;
-            let fileNameIndex = segmentUrl.lastIndexOf('/') + 1;
+            var segmentUrl = event.url;
+            var fileNameIndex = segmentUrl.lastIndexOf('/') + 1;
 
             var filename = segmentUrl.substr(fileNameIndex);
             $('#segmentPlaybackLabel').text(
@@ -373,8 +395,8 @@
 
           displayCompanionAd(event);
 
-          let activeAdBreak = yospacePlayer.ads.getActiveAdBreak();
-          let activeAd = yospacePlayer.ads.getActiveAd();
+          var activeAdBreak = yospacePlayer.ads.getActiveAdBreak();
+          var activeAd = yospacePlayer.ads.getActiveAd();
 
           debug('[BYP] Active Ad Break: ', cloneDeepSimple(activeAdBreak));
           adStartedHandler(activeAdBreak, activeAd);

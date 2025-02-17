@@ -66,9 +66,7 @@ export class DateRangeEmitter {
         return;
       } else {
         this.processedDateRangeEvents[dateRangeData.clientAttributes.comYospaceYmid] = startTime;
-        Logger.log(
-          '[BitmovinYospacePlayer] - currentTime=' + this.player.getCurrentTime() + ' metadata=' + stringify(event)
-        );
+        Logger.log('[BitmovinYospacePlayer] - currentTime=' + this.player.getCurrentTime() + ' metadata=' + stringify(event));
       }
 
       // create an S metadata event 0.1 seconds into the start of the EXT-X-DATERANGE
@@ -82,7 +80,7 @@ export class DateRangeEmitter {
       };
 
       this.emsgEvents.push(metadataStart);
-      let val = 2.1;
+      var val = 2.1;
       const duration = dateRangeData.duration;
 
       // create M metadata events every 2 seconds throughout the asset
@@ -127,12 +125,7 @@ export class DateRangeEmitter {
       const emsg = this.emsgEvents.shift();
 
       Logger.log(
-        '[BitmovinYospacePlayer] Sending: timestamp=' +
-          event.timestamp +
-          ' currentTime=' +
-          event.time +
-          ' emsg: ' +
-          stringify(emsg)
+        '[BitmovinYospacePlayer] Sending: timestamp=' + event.timestamp + ' currentTime=' + event.time + ' emsg: ' + stringify(emsg)
       );
 
       this.emitMetadataEvent(event.timestamp, emsg);

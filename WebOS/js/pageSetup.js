@@ -12,8 +12,9 @@ function setupTestPage() {
     yospacePlayer.unload();
     deselectCustomLoadButton();
   });
-  createSourceList('vod', 'predefined-sources');
-  createSourceList('linear', 'predefined-sources');
+  var startIndex = 1;
+  var nextIndex = createSourceList('vod', 'predefined-sources', startIndex);
+  createSourceList('linear', 'predefined-sources', nextIndex);
 
   setupTable();
 
@@ -34,11 +35,40 @@ function setupTestPage() {
       customSource.assetType = bitmovin.player.ads.yospace.YospaceAssetType.VOD;
     } else if (customStreamTypeSelect.val() === '2') {
       customSource.assetType = bitmovin.player.ads.yospace.YospaceAssetType.LINEAR;
+    } else if (customStreamTypeSelect.val() === '3') {
+      customSource.assetType = bitmovin.player.ads.yospace.YospaceAssetType.DVRLIVE;
     }
 
     yospacePlayer.unload();
     yospacePlayer.load(modifySourceBeforeLoading(customSource));
   });
+
+  function seekToAd() {
+    yospacePlayer.forceSeek(314);
+  }
+
+  document.querySelector('#toggle-ad-immunity').addEventListener('click', toggleAdImmunity);
+  document.querySelector('#seekToAd').addEventListener('click', seekToAd);
+
+  function toggleAdImmunity() {
+    if (yospacePlayer.isAdImmunityActive()) {
+      yospacePlayer.endAdImmunity();
+    } else {
+      yospacePlayer.setAdImmunityConfig({
+        duration: 60,
+        disablePassedAdBreaks: true,
+      });
+      yospacePlayer.startAdImmunity();
+    }
+  }
+}
+
+function adImmunityEndedEventHandler() {
+  document.querySelector('#toggle-ad-immunity').innerHTML = 'Enable Ad Immunity for 60sec';
+}
+
+function adImmunityStartedEventHandler() {
+  document.querySelector('#toggle-ad-immunity').innerHTML = 'Disable Ad Immunity';
 }
 
 function applyQueryParameters() {
@@ -92,7 +122,7 @@ function modifySourceBeforeLoading(source) {
   return updateWithPlatformSpecificSourceConfig(source);
 }
 
-function createSourceList(streamType, containerId) {
+function createSourceList(streamType, containerId, index) {
   var sourceList = document.querySelector('#' + containerId);
   Object.keys(sources[streamType]).forEach(function (source) {
     var input = document.createElement('input');
@@ -104,9 +134,12 @@ function createSourceList(streamType, containerId) {
     var label = document.createElement('label');
     label.classList.add('btn');
     label.classList.add('btn-outline-secondary');
-    label.innerText = streamType.toUpperCase() + ': ' + (sources[streamType][source].title ? sources[streamType][source].title : source);
+    label.innerText =
+      index + ': ' + streamType.toUpperCase() + ': ' + (sources[streamType][source].title ? sources[streamType][source].title : source);
+    index++;
     label.onclick = function (event) {
-      yospacePlayer.load(modifySourceBeforeLoading(sources[streamType][source]));
+      var sourceId = source.substring(source.indexOf(': '));
+      yospacePlayer.load(modifySourceBeforeLoading(sources[streamType][sourceId]));
       deselectCustomLoadButton();
     };
 
@@ -114,6 +147,8 @@ function createSourceList(streamType, containerId) {
 
     sourceList.appendChild(label);
   });
+
+  return index;
 }
 
 function log(message) {
@@ -156,7 +191,7 @@ function setupTable() {
 function updateAdEventTable() {
   if (adBreakState.abs > 0) {
     var table = $('#adEventTable');
-    let body = $('<tbody/>');
+    var body = $('<tbody/>');
     $('#adEventTable tbody').remove();
     table.append(body);
     var row = $('<tr>');
@@ -170,12 +205,12 @@ function updateAdEventTable() {
 
 function timeChangedAdHandler(adBreak, ad, eventTime) {
   if (adBreak && ad) {
-    let duration = adBreak.duration;
-    let adCounter = 0;
-    let adDuration = 0;
-    for (let i = 0; i < adBreak.ads.length; i++) {
+    var duration = adBreak.duration;
+    var adCounter = 0;
+    var adDuration = 0;
+    for (var i = 0; i < adBreak.ads.length; i++) {
       adCounter = i + 1;
-      let a = adBreak.ads[i];
+      var a = adBreak.ads[i];
       if (a.id === ad.id && ad.sequence === a.sequence) {
         adDuration = a.duration - eventTime;
         duration = duration - eventTime;
@@ -204,10 +239,10 @@ function adStartedHandler(activeAdBreak, activeAd) {
   row2.append($('<th/>').text('Sequence'));
   header.append(row2);
   table.append(header);
-  let body = $('<tbody/>');
+  var body = $('<tbody/>');
   table.append(body);
-  for (let i = 0; i < activeAdBreak.ads.length; i++) {
-    let ad = activeAdBreak.ads[i];
+  for (var i = 0; i < activeAdBreak.ads.length; i++) {
+    var ad = activeAdBreak.ads[i];
     var row = $('<tr>');
     row.append($('<td/>').text(ad.id));
     row.append($('<td/>').text(ad.duration));

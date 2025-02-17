@@ -56,15 +56,15 @@ export class BitmovinId3FramesExtractor {
 
   private readBytes(buffer: Uint8Array, noOfBytes: number): Uint8Array {
     const data = new Uint8Array(noOfBytes);
-    for (let i = 0; i < noOfBytes; i++) {
+    for (var i = 0; i < noOfBytes; i++) {
       data[i] = buffer[this.offset++];
     }
     return data;
   }
 
   private readBytesAsNumber(buffer: Uint8Array, noOfBytes: number): number {
-    let value = 0;
-    for (let i = 0; i < noOfBytes; i++) {
+    var value = 0;
+    for (var i = 0; i < noOfBytes; i++) {
       value = value | (buffer[this.offset++] << (8 * (noOfBytes - i - 1)));
     }
 
@@ -72,8 +72,8 @@ export class BitmovinId3FramesExtractor {
   }
 
   private readBytesAsSyncSafeNumber(buffer: Uint8Array, noOfBytes: number): number {
-    let size = 0;
-    for (let i = noOfBytes - 1; i >= 0; i--) {
+    var size = 0;
+    for (var i = noOfBytes - 1; i >= 0; i--) {
       size += (this.readBytesAsNumber(buffer, 1) & SYNCSAFE_BIT) << (7 * i);
     }
     return size;
@@ -82,7 +82,7 @@ export class BitmovinId3FramesExtractor {
   private readBytesAsNumberArray(buffer: Uint8Array, noOfBytes: number): number[] {
     const numberArray: number[] = [];
 
-    for (let i = 0; i < noOfBytes; i++) {
+    for (var i = 0; i < noOfBytes; i++) {
       numberArray.push(this.readBytesAsNumber(buffer, 1));
     }
 
@@ -90,8 +90,8 @@ export class BitmovinId3FramesExtractor {
   }
 
   private readBytesAsString(buffer: Uint8Array, noOfBytes: number): string {
-    let value = '';
-    for (let i = 0; i < noOfBytes; i++) {
+    var value = '';
+    for (var i = 0; i < noOfBytes; i++) {
       value += String.fromCharCode(this.readBytesAsNumber(buffer, 1));
     }
     return value;
@@ -103,7 +103,7 @@ export class BitmovinId3FramesExtractor {
     // file identifier; first 3 bytes.
     id3Tag.header.fileIdentifier = this.readBytesAsNumber(source, 3);
 
-    /* Excerpt from spec: 
+    /* Excerpt from spec:
      * ID3v2/file identifier      "ID3"
        The first three bytes of the tag are always "ID3", to indicate that
        this is an ID3v2 tag.
@@ -115,7 +115,7 @@ export class BitmovinId3FramesExtractor {
     // version; next two bytes
     id3Tag.header.version = this.readBytesAsNumber(source, 2);
 
-    /* Excerpt from spec: 
+    /* Excerpt from spec:
      * ID3v2 version              $04 00
        If software with ID3v2.4.0 and below support should encounter version
        five or higher it should simply ignore the whole tag.
@@ -133,7 +133,7 @@ export class BitmovinId3FramesExtractor {
     }
 
     // LSF 4 bits MUST be unset
-    /* Excerpt from spec: 
+    /* Excerpt from spec:
      * ID3v2 flags                %abcd0000
        All the other flags MUST be cleared. If one of these undefined flags
        are set, the tag might not be readable for a parser that does not
