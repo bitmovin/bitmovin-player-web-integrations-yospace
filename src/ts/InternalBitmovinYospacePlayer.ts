@@ -674,6 +674,10 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     return Boolean(this.getCurrentAd());
   }
 
+  private isAdBreakActive(): boolean {
+    return Boolean(this.getCurrentAdBreak());
+  }
+
   private getCurrentAdDuration(): number {
     if (this.isAdActive()) {
       return this.getAdDuration(this.getCurrentAd());
@@ -1111,7 +1115,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     },
 
     getActiveAdBreak: () => {
-      if (!this.isAdActive()) {
+      if (!this.isAdBreakActive()) {
         return undefined;
       }
 

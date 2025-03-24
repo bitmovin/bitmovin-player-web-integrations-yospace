@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+
+- Calling AdvertisingApi.getActiveAdBreak() when player is briefly in-between adFinished and adStarted events resulted in undefined being returned
+
 ## [2.9.1] - 2025-02-10
 
 ### Fixed
