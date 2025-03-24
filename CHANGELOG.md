@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [2.9.2] - 2025-03-24
+
 ### Fixed
 
 - Calling AdvertisingApi.getActiveAdBreak() when player is briefly in-between adFinished and adStarted events resulted in undefined being returned
@@ -429,7 +431,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - Initial yospace integration
 
-[unreleased]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/v2.9.1...HEAD
+[unreleased]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/v2.9.2...HEAD
+[2.9.2]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/v2.9.1...v2.9.2
 [2.9.1]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/v2.9.0...v2.9.1
 [2.9.0]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/v2.8.0...v2.9.0
 [2.8.0]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/v2.7.1...v2.8.0
