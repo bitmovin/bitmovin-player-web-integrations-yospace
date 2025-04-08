@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+BREAKING CHANGES:
+The adBreak property on the payload of the YospaceAdBreakEvent can now be null.
+
+### Fixed
+
+- Prevent Yospace integration crashing internally when the AdBreak for an even raised by the Yospace SDK is null
+
+### Changed
+
+- AdBreaks can now be null, which aligns with the Yospace SDK API. It is possible that the Yospace SDK has not had time to parse the metadata by the time the ad break triggers, which can cause the ad break to be null by the time the break starts.
+
 ## [2.9.2] - 2025-03-24
 
 ### Fixed
