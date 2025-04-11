@@ -16,15 +16,19 @@ import { Session } from '@yospace/admanagement-sdk';
 
 export class DateRangeEmitter {
   private player: PlayerAPI;
-  private eventHandlers: { [eventType: string]: YospacePlayerEventCallback[] } = {};
-  private _session: Session;
-  private emsgEvents: any[] = [];
+  private eventHandlers: { [eventType: string]: YospacePlayerEventCallback[] };
+  private _session: Session | null;
+  private emsgEvents: any[];
   private processedDateRangeEvents: { [key: string]: number };
-  private currentTimeBase = 0;
 
-  constructor(player: PlayerAPI, eventHandlers?: { [eventType: string]: YospacePlayerEventCallback[] }) {
+  constructor(player: PlayerAPI, eventHandlers: { [eventType: string]: YospacePlayerEventCallback[] } = {}) {
     this.player = player;
+
     this.eventHandlers = eventHandlers;
+
+    this._session = null;
+    this.emsgEvents = [];
+    this.processedDateRangeEvents = {};
 
     this.player.on(this.player.exports.PlayerEvent.Metadata, this.onMetadata);
     this.player.on(this.player.exports.PlayerEvent.TimeChanged, this.onTimeChanged);
@@ -34,11 +38,11 @@ export class DateRangeEmitter {
     this.player.on(this.player.exports.PlayerEvent.AdBreakFinished, this.onAdBreakFinished);
   }
 
-  get session(): Session {
+  get session(): Session | null {
     return this._session;
   }
 
-  set session(value: Session) {
+  set session(value: Session | null) {
     this._session = value;
   }
 
@@ -48,27 +52,29 @@ export class DateRangeEmitter {
     this.processedDateRangeEvents = {};
   }
 
-  private onMetadata = (event: MetadataEvent): void => {
-    if (event.metadataType === 'DATERANGE') {
-      const dateRangeData: any = event.metadata;
+  private onMetadata = (event: PlayerEventBase): void => {
+    const metadataEvent = event as MetadataEvent;
+
+    if (metadataEvent.metadataType === 'DATERANGE') {
+      const dateRangeData: any = metadataEvent.metadata;
       const previousDateRange: number = this.processedDateRangeEvents[dateRangeData.clientAttributes.comYospaceYmid];
-      const startTime = event.start;
+      const startTime = metadataEvent.start;
       const currentTime = this.player.getCurrentTime();
 
-      // check for duplicate due to a bug in the Bitmovin Player that fires duplicate date range tags
-      if (previousDateRange && Math.abs(previousDateRange - startTime) < 10) {
-        Logger.log(
-          '[BitmovinYospacePlayer] - Duplicate DateRange detected ymid=' +
-            dateRangeData.clientAttributes.comYospaceYmid +
-            'currentTime=' +
-            this.player.getCurrentTime()
-        );
-        return;
-      } else {
-        this.processedDateRangeEvents[dateRangeData.clientAttributes.comYospaceYmid] = startTime;
-        Logger.log(
-          '[BitmovinYospacePlayer] - currentTime=' + this.player.getCurrentTime() + ' metadata=' + stringify(event)
-        );
+      if (typeof startTime === 'number') {
+        // check for duplicate due to a bug in the Bitmovin Player that fires duplicate date range tags
+        if (previousDateRange && Math.abs(previousDateRange - startTime) < 10) {
+          Logger.log(
+            '[BitmovinYospacePlayer] - Duplicate DateRange detected ymid=' +
+              dateRangeData.clientAttributes.comYospaceYmid +
+              'currentTime=' +
+              this.player.getCurrentTime(),
+          );
+          return;
+        } else {
+          this.processedDateRangeEvents[dateRangeData.clientAttributes.comYospaceYmid] = startTime;
+          Logger.log('[BitmovinYospacePlayer] - currentTime=' + this.player.getCurrentTime() + ' metadata=' + stringify(metadataEvent));
+        }
       }
 
       // create an S metadata event 0.1 seconds into the start of the EXT-X-DATERANGE
@@ -115,27 +121,29 @@ export class DateRangeEmitter {
       Logger.table(
         this.emsgEvents.map(({ startTime, YTYP, YDUR }) => {
           return { Type: YTYP, 'Start Time': startTime, Duration: YDUR };
-        })
+        }),
       );
 
-      this.emitMetadataParsedEvents(event.timestamp);
+      this.emitMetadataParsedEvents(metadataEvent.timestamp);
     }
   };
 
-  private onTimeChanged = (event: TimeChangedEvent): void => {
-    while (this.emsgEvents.length > 0 && this.emsgEvents[0].startTime <= event.time) {
+  private onTimeChanged = (event: PlayerEventBase): void => {
+    const timeChangedEvent = event as TimeChangedEvent;
+
+    while (this.emsgEvents.length > 0 && this.emsgEvents[0].startTime <= timeChangedEvent.time) {
       const emsg = this.emsgEvents.shift();
 
       Logger.log(
         '[BitmovinYospacePlayer] Sending: timestamp=' +
-          event.timestamp +
+          timeChangedEvent.timestamp +
           ' currentTime=' +
-          event.time +
+          timeChangedEvent.time +
           ' emsg: ' +
-          stringify(emsg)
+          stringify(emsg),
       );
 
-      this.emitMetadataEvent(event.timestamp, emsg);
+      this.emitMetadataEvent(timeChangedEvent.timestamp, emsg);
 
       if (this.session) {
         emsg.startTime = '';
@@ -183,12 +191,14 @@ export class DateRangeEmitter {
     return result;
   }
 
-  private onAdStarted = (event: AdEvent): void => {
-    const yospaceAd = event.ad as YospaceLinearAd;
+  private onAdStarted = (event: PlayerEventBase): void => {
+    const adEvent = event as AdEvent;
+
+    const yospaceAd = adEvent.ad as YospaceLinearAd;
     Logger.log('[BitmovinYospacePlayer] Ad Started for id=' + stringify(yospaceAd));
 
     // if we are not a VPAID ad
-    if (!yospaceAd.uiConfig.requestsUi) {
+    if (!yospaceAd.uiConfig?.requestsUi) {
       while (this.emsgEvents.length > 0 && (this.emsgEvents[0].YTYP === 'M' || this.emsgEvents[0].YTYP === 'E')) {
         const emsg = this.emsgEvents.shift();
         Logger.log('[BitmovinYospacePlayer] Removing emsg due to VPAID starting: ' + stringify(emsg));
@@ -196,16 +206,18 @@ export class DateRangeEmitter {
     }
   };
 
-  private onAdFinished = (event: AdEvent): void => {
-    const yospaceAd = event.ad as YospaceLinearAd;
+  private onAdFinished = (event: PlayerEventBase): void => {
+    const adFinishedEvent = event as AdEvent;
+
+    const yospaceAd = adFinishedEvent.ad as YospaceLinearAd;
     Logger.log('[BitmovinYospacePlayer] Ad Finished for id');
   };
 
-  private onAdBreakStarted = (event: AdBreakEvent): void => {
+  private onAdBreakStarted = (): void => {
     Logger.log('[BitmovinYospacePlayer] Ad Break Started for id');
   };
 
-  private onAdBreakFinished = (event: AdBreakEvent): void => {
+  private onAdBreakFinished = (): void => {
     Logger.log('[BitmovinYospacePlayer] Ad Break Finished for id');
   };
 

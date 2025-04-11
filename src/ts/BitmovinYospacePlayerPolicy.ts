@@ -34,14 +34,17 @@ export class DefaultBitmovinYospacePlayerPolicy implements BitmovinYospacePlayer
     const currentAd = this.player.ads.getActiveAd();
     if (currentAd && currentAd.isLinear && !this.player.isLive()) {
       const currentTime = this.player.getCurrentTime();
-      if ((currentAd as LinearAd).skippableAfter < 0) {
+
+      const skippableAfter = (currentAd as LinearAd).skippableAfter;
+
+      if (typeof skippableAfter === 'undefined' || skippableAfter < 0) {
         return -1;
       }
 
-      if (currentTime >= (currentAd as LinearAd).skippableAfter) {
+      if (currentTime >= skippableAfter) {
         return 0;
       } else {
-        return (currentAd as LinearAd).skippableAfter - currentTime;
+        return skippableAfter - currentTime;
       }
     }
 

@@ -29,7 +29,7 @@ export type BYSTrackingEventType =
   | 'ClickTracking'
   | 'acceptInvitation';
 
-interface BYSListenerEventBase {
+export interface BYSListenerEventBase {
   type: BYSListenerEvent;
 }
 
@@ -45,7 +45,7 @@ export interface BYSAnalyticsFiredEvent extends BYSListenerEventBase {
   call_id: BYSTrackingEventType;
 }
 
-interface BYSListenerCallbackFunction {
+export interface BYSListenerCallbackFunction {
   (event: BYSListenerEventBase): void;
 }
 
