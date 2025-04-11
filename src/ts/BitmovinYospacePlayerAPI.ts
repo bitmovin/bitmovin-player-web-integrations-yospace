@@ -111,12 +111,6 @@ export interface BitmovinYospacePlayerAPI extends PlayerAPI {
 
 export interface YospaceSourceConfig extends SourceConfig {
   assetType: YospaceAssetType;
-  truexConfiguration?: TruexConfiguration;
-}
-
-export interface TruexConfiguration {
-  userId: string;
-  vastConfigUrl: string;
 }
 
 export interface YospaceAdBreak extends AdBreak {
@@ -200,8 +194,6 @@ export interface BitmovinYospacePlayerPolicy {
 export enum YospacePlayerEvent {
   YospaceError = 'yospaceerror',
   PolicyError = 'policyerror',
-  TruexAdFree = 'truexadfree',
-  TruexAdBreakFinished = 'truexadbreakfinished',
   AdImmunityConfigured = 'adimmunityconfigured',
   AdImmunityStarted = 'adimmunitystarted',
   AdImmunityEnded = 'adimmunityended',

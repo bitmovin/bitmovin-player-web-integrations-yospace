@@ -146,9 +146,6 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   // convert EXT-X-DATERANGE tags to EMSG events
   private dateRangeEmitter: DateRangeEmitter;
 
-  // save the truexAdFree state
-  private truexAdFree: boolean;
-
   private startSent: boolean;
 
   private lastTimeChangedTime = 0;
@@ -747,9 +744,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   private handleAdStart = (currentAd: Advert) => {
     // We no longer support TrueX, guarding against potential TrueX
     // ads which may still get trafficked.
-    const isTruexAd = currentAd.getProperty('AdSystem')?.getValue() === 'trueX';
-
-    if (isTruexAd) {
+    if (currentAd.getProperty('AdSystem')?.getValue() === 'trueX') {
       Logger.warn('TrueX is no longer supported, all ads and configuration will be ignored');
     }
 
@@ -980,7 +975,6 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     this.adParts = [];
     this.adStartedTimestamp = null;
     this.cachedSeekTarget = null;
-    this.truexAdFree = undefined;
     this.startSent = false;
     this.streamStartTimeOffset = 0;
   }
