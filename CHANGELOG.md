@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+
+- Prevent errors relating to method calls on undefined when starting non-VOD content
+
 ## [2.9.2] - 2025-03-24
 
 ### Fixed
