@@ -493,7 +493,11 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       return this.player.getDuration();
     }
 
-    return toSeconds((this.session as SessionVOD).getContentPositionForPlayhead(toMilliseconds(this.player.getDuration())));
+    if (!(this.session instanceof SessionVOD)) {
+      return this.player.getDuration();
+    }
+
+    return toSeconds(this.session.getContentPositionForPlayhead(toMilliseconds(this.player.getDuration())));
   }
 
   /**
@@ -917,6 +921,10 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     if (this.isLive()) return playbackTime;
     if (!this.session) return playbackTime;
 
+    if (!(this.session instanceof SessionVOD)) {
+      return playbackTime;
+    }
+
     /**
      * Provides a relative content playhead position to the client,
      * discounting the sum of all ad break durations prior to the
@@ -924,12 +932,16 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
      * to return to the same content position if a VOD stream is
      * stopped before playback ends.
      */
-    return toSeconds((this.session as SessionVOD).getContentPositionForPlayhead(toMilliseconds(playbackTime)));
+    return toSeconds(this.session.getContentPositionForPlayhead(toMilliseconds(playbackTime)));
   }
 
   private toAbsoluteTime(relativeTime: number): number {
     if (this.yospaceSourceConfig.assetType === YospaceAssetType.VOD) {
       if (!this.session) return relativeTime;
+
+      if (!(this.session instanceof SessionVOD)) {
+        return relativeTime;
+      }
 
       /**
        * Provides an absolute playhead position to the client
@@ -939,7 +951,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
        * the same content position if a VOD stream is stopped
        * before playback ends.
        */
-      return toSeconds((this.session as SessionVOD).getPlayheadForContentPosition(toMilliseconds(relativeTime)));
+      return toSeconds(this.session.getPlayheadForContentPosition(toMilliseconds(relativeTime)));
     } else {
       return relativeTime;
     }
