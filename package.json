@@ -49,7 +49,7 @@
     "bitmovin-analytics": "^2.27.0",
     "bitmovin-player-ui": "^3.37.0",
     "changelog-parser": "^3.0.1",
-    "eslint": "^9.24.0",
+    "eslint": "^8.57.1",
     "husky": "^8.0.1",
     "kacl": "^1.1.1",
     "lint-staged": "^13.0.1",
