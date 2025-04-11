@@ -9,6 +9,7 @@ module.exports = {
       rules: {
         // using rest parameters can lead to problems on ES5 targets
         'prefer-rest-params': 'off',
+        '@typescript-eslint/no-explicit-any': 'warn',
       },
     },
   ],
