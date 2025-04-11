@@ -502,7 +502,11 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       return this.player.getDuration();
     }
 
-    return toSeconds((this.session as SessionVOD).getContentPositionForPlayhead(toMilliseconds(this.player.getDuration())));
+    if (!(this.session instanceof SessionVOD)) {
+      return this.player.getDuration();
+    }
+
+    return toSeconds(this.session.getContentPositionForPlayhead(toMilliseconds(this.player.getDuration())));
   }
 
   /**
@@ -746,8 +750,11 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     Logger.log('[BitmovinYospacePlayer] yospaceListenerAdapter.AD_BREAK_START');
     this.player.setPlaybackSpeed(1);
 
-    const adBreak = this.mapAdBreak(event.adBreak);
-    const playerEvent = AdEventsFactory.createAdBreakEvent(this.player.exports.PlayerEvent.AdBreakStarted, adBreak);
+    const playerEvent = AdEventsFactory.createAdBreakEvent(
+      this.player.exports.PlayerEvent.AdBreakStarted,
+      event.adBreak ? this.mapAdBreak(event.adBreak) : null,
+    );
+
     this.fireEvent<YospaceAdBreakEvent>(playerEvent);
   };
 
@@ -844,9 +851,12 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   };
 
   private onAdBreakFinished = () => {
-    const adBreak = this.mapAdBreak(this.getCurrentAdBreak());
+    const adBreak = this.getCurrentAdBreak();
 
-    const playerEvent = AdEventsFactory.createAdBreakEvent(this.player.exports.PlayerEvent.AdBreakFinished, adBreak);
+    const playerEvent = AdEventsFactory.createAdBreakEvent(
+      this.player.exports.PlayerEvent.AdBreakFinished,
+      adBreak ? this.mapAdBreak(adBreak) : null,
+    );
 
     this.fireEvent<YospaceAdBreakEvent>(playerEvent);
 
@@ -931,6 +941,10 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     if (this.isLive()) return playbackTime;
     if (!this.session) return playbackTime;
 
+    if (!(this.session instanceof SessionVOD)) {
+      return playbackTime;
+    }
+
     /**
      * Provides a relative content playhead position to the client,
      * discounting the sum of all ad break durations prior to the
@@ -938,12 +952,16 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
      * to return to the same content position if a VOD stream is
      * stopped before playback ends.
      */
-    return toSeconds((this.session as SessionVOD).getContentPositionForPlayhead(toMilliseconds(playbackTime)));
+    return toSeconds(this.session.getContentPositionForPlayhead(toMilliseconds(playbackTime)));
   }
 
   private toAbsoluteTime(relativeTime: number): number {
     if (this.yospaceSourceConfig?.assetType === YospaceAssetType.VOD) {
       if (!this.session) {
+        return relativeTime;
+      }
+
+      if (!(this.session instanceof SessionVOD)) {
         return relativeTime;
       }
 
@@ -955,7 +973,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
        * the same content position if a VOD stream is stopped
        * before playback ends.
        */
-      return toSeconds((this.session as SessionVOD).getPlayheadForContentPosition(toMilliseconds(relativeTime)));
+      return toSeconds(this.session.getPlayheadForContentPosition(toMilliseconds(relativeTime)));
     } else {
       return relativeTime;
     }
@@ -1641,7 +1659,7 @@ class AdTranslator {
 }
 
 class AdEventsFactory {
-  static createAdBreakEvent(type: PlayerEvent, adBreak: YospaceAdBreak): YospaceAdBreakEvent {
+  static createAdBreakEvent(type: PlayerEvent, adBreak: YospaceAdBreak | null): YospaceAdBreakEvent {
     return {
       timestamp: Date.now(),
       type: type,

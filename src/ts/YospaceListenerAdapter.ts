@@ -1,7 +1,8 @@
 import { ArrayUtils } from 'bitmovin-player-ui/dist/js/framework/arrayutils';
 import { Logger } from './Logger';
-import type { AdBreak, Advert, Session, SessionErrorCode } from '@yospace/admanagement-sdk';
+import type { AdBreak, Advert, SessionErrorCode } from '@yospace/admanagement-sdk';
 import type { TrackingError } from '@yospace/admanagement-sdk/types/Public/TrackingError';
+import { AnalyticEventObserver } from '@yospace/admanagement-sdk';
 
 /** BYS -> BitmovinYospace */
 export enum BYSListenerEvent {
@@ -38,7 +39,7 @@ export interface BYSAdEvent extends BYSListenerEventBase {
 }
 
 export interface BYSAdBreakEvent extends BYSListenerEventBase {
-  adBreak: AdBreak;
+  adBreak: AdBreak | null;
 }
 
 export interface BYSAnalyticsFiredEvent extends BYSListenerEventBase {
@@ -54,7 +55,7 @@ export interface BYSListenerCallbackFunction {
  * The default way would be to pass an object to Yospace with the structure of this class.
  * To simplify the Yospace callbacks handling this Adapter was introduced.
  */
-export class YospaceAdListenerAdapter {
+export class YospaceAdListenerAdapter extends AnalyticEventObserver {
   private listeners: { [eventType: string]: BYSListenerCallbackFunction[] } = {};
 
   addListener(event: BYSListenerEvent, callback: BYSListenerCallbackFunction): void {
@@ -69,7 +70,7 @@ export class YospaceAdListenerAdapter {
     ArrayUtils.remove(this.listeners[event], callback);
   }
 
-  onAdvertBreakStart(brk: AdBreak): void {
+  onAdvertBreakStart(brk: AdBreak | null): void {
     this.emitEvent({
       type: BYSListenerEvent.AD_BREAK_START,
       adBreak: brk,

@@ -120,7 +120,7 @@ export interface YospaceAdBreak extends AdBreak {
 }
 
 export interface YospaceAdBreakEvent extends PlayerEventBase {
-  adBreak: YospaceAdBreak;
+  adBreak: YospaceAdBreak | null;
 }
 
 export interface YospaceCompanionAd extends CompanionAd {
