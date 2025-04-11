@@ -7,9 +7,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+
+- `AdBreak`s can now be null, which aligns with reality. It is possible for the Yospace SDK to not have had time to parse the metadata by the time the ad break triggers, which can cause the ad break to be null by the time the break starts. Note: the yospace documentation is wrongly indicating that this shouldn't be the case
+
 ### Fixed
 
-- Prevent errors relating to method calls on undefined when starting non-VOD content
+- Errors relating to method calls on `undefined` when starting non-VOD content
+- Yospace integration crashing internally when the `AdBreak` for an event raised by the Yospace SDK is `null`
 
 ## [2.9.2] - 2025-03-24
 

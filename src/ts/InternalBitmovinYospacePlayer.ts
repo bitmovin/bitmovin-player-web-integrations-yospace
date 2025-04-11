@@ -739,8 +739,11 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     Logger.log('[BitmovinYospacePlayer] yospaceListenerAdapter.AD_BREAK_START');
     this.player.setPlaybackSpeed(1);
 
-    const adBreak = this.mapAdBreak(event.adBreak);
-    const playerEvent = AdEventsFactory.createAdBreakEvent(this.player.exports.PlayerEvent.AdBreakStarted, adBreak);
+    const playerEvent = AdEventsFactory.createAdBreakEvent(
+      this.player.exports.PlayerEvent.AdBreakStarted,
+      event.adBreak ? this.mapAdBreak(event.adBreak) : null
+    );
+
     this.fireEvent<YospaceAdBreakEvent>(playerEvent);
   };
 
@@ -839,9 +842,12 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   };
 
   private onAdBreakFinished = () => {
-    const adBreak = this.mapAdBreak(this.getCurrentAdBreak());
+    const adBreak = this.getCurrentAdBreak();
 
-    const playerEvent = AdEventsFactory.createAdBreakEvent(this.player.exports.PlayerEvent.AdBreakFinished, adBreak);
+    const playerEvent = AdEventsFactory.createAdBreakEvent(
+      this.player.exports.PlayerEvent.AdBreakFinished,
+      adBreak ? this.mapAdBreak(adBreak) : null
+    );
 
     this.fireEvent<YospaceAdBreakEvent>(playerEvent);
 
@@ -1131,7 +1137,9 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
         return undefined;
       }
 
-      return this.mapAdBreak(this.getCurrentAdBreak());
+      const adBreak = this.getCurrentAdBreak();
+
+      return adBreak ? this.mapAdBreak(adBreak) : null;
     },
 
     getActiveAd: () => {
@@ -1534,7 +1542,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 }
 
 class AdTranslator {
-  static mapYsAdvert(ysAd: Advert): LinearAd {
+  static mapYsAdvert(ysAd: Advert): LinearAd | null {
     if (!ysAd || ysAd.isNonLinear()) {
       return null;
     }
@@ -1597,7 +1605,7 @@ class AdTranslator {
 }
 
 class AdEventsFactory {
-  static createAdBreakEvent(type: PlayerEvent, adBreak: YospaceAdBreak): YospaceAdBreakEvent {
+  static createAdBreakEvent(type: PlayerEvent, adBreak: YospaceAdBreak | null): YospaceAdBreakEvent {
     return {
       timestamp: Date.now(),
       type: type,
