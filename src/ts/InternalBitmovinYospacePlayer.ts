@@ -6,6 +6,7 @@ import {
   CONNECTION_ERROR,
   CONNECTION_TIMEOUT,
   DebugFlags,
+  Event as YospaceInitEvent,
   MALFORMED_URL,
   PlayerEvent as YsPlayerEvent,
   ResourceType,
@@ -39,7 +40,6 @@ import type {
   TimeChangedEvent,
   TimeMode,
   TimeRange,
-  UserInteractionEvent,
 } from 'bitmovin-player/modules/bitmovinplayer-core';
 
 import {
@@ -78,7 +78,6 @@ import {
 } from './BitmovinYospacePlayerAPI';
 import { YospacePlayerError } from './YospaceError';
 import type {
-  AdConfig,
   CompanionAd,
   LinearAd,
   PlayerAdvertisingAPI,
@@ -112,7 +111,7 @@ export interface YospaceLinearAd extends LinearAd {
   sequence: number;
   creativeId: string;
   advertiser: string;
-  lineage: any[];
+  lineage: unknown[];
 }
 
 // It is expected that this does not implement all members of the PlayerAPI cause they will be added dynamically.
@@ -214,7 +213,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 
       this.registerPlayerEvents();
 
-      const onInitComplete = (event: any) => {
+      const onInitComplete = (event: YospaceInitEvent) => {
         const session: Session = event.getPayload();
         const state = session.getSessionState();
         const code = session.getResultCode();
@@ -287,7 +286,8 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 
           // Initialize policy
           if (!this.playerPolicy) {
-            this.playerPolicy = new DefaultBitmovinYospacePlayerPolicy(this as any as BitmovinYospacePlayerAPI);
+            // TODO: Check if we can fix the type to avoid the unknown casting
+            this.playerPolicy = new DefaultBitmovinYospacePlayerPolicy(this as unknown as BitmovinYospacePlayerAPI);
           }
 
           Logger.log('Loading Source: ' + stringify(clonedSource));
@@ -406,7 +406,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       return Promise.resolve();
     }
 
-    const adDataUpdatedPromise = new Promise<void>((resolve, reject) => {
+    const adDataUpdatedPromise = new Promise<void>((resolve) => {
       const onAnalyticUpdate = () => {
         this.yospaceListenerAdapter?.removeListener(BYSListenerEvent.ANALYTIC_UPDATED, onAnalyticUpdate);
         resolve();
@@ -421,11 +421,19 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   };
 
   pause(issuer?: string): void {
-    this.playerPolicy?.canPause() ? this.player.pause(issuer) : this.handleYospacePolicyEvent(YospacePolicyErrorCode.PAUSE_NOT_ALLOWED);
+    if (this.playerPolicy?.canPause()) {
+      this.player.pause(issuer);
+    } else {
+      this.handleYospacePolicyEvent(YospacePolicyErrorCode.PAUSE_NOT_ALLOWED);
+    }
   }
 
   mute(issuer?: string): void {
-    this.playerPolicy?.canMute() ? this.player.mute(issuer) : this.handleYospacePolicyEvent(YospacePolicyErrorCode.MUTE_NOT_ALLOWED);
+    if (this.playerPolicy?.canMute()) {
+      this.player.mute(issuer);
+    } else {
+      this.handleYospacePolicyEvent(YospacePolicyErrorCode.MUTE_NOT_ALLOWED);
+    }
   }
 
   /**
@@ -1159,7 +1167,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 
   // Custom advertising module with overwritten methods
   private advertisingApi: PlayerAdvertisingAPI = {
-    discardAdBreak: (adBreakId: string) => {
+    discardAdBreak: () => {
       Logger.warn('CSAI is not supported for yospace stream');
       return;
     },
@@ -1204,7 +1212,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       );
     },
 
-    schedule: (adConfig: AdConfig) => {
+    schedule: () => {
       return Promise.reject('CSAI is not supported for yospace stream');
     },
 

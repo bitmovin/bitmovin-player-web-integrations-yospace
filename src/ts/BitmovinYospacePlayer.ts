@@ -139,7 +139,7 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       this.containerElement,
       this.bitmovinPlayer,
       this.yospaceConfig,
-    ) as any as BitmovinYospacePlayerAPI;
+    ) as unknown as BitmovinYospacePlayerAPI; // TODO check if we can fix the BYS Player to avoid the unknown cast
 
     this.player = this.bitmovinYospacePlayer;
   }
@@ -238,10 +238,10 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   }
 
   destroy(): Promise<void> {
-    (this.BitmovinPlayerStaticApi as any) = null;
-    (this.containerElement as any) = null;
-    (this.config as any) = null;
-    (this.yospaceConfig as any) = null;
+    (this.BitmovinPlayerStaticApi as unknown) = null;
+    (this.containerElement as unknown) = null;
+    (this.config as unknown) = null;
+    (this.yospaceConfig as unknown) = null;
 
     return this.player.destroy();
   }
@@ -286,7 +286,7 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     return this.player.manifest;
   }
 
-  addMetadata(metadataType: MetadataType.CAST, metadata: any): boolean {
+  addMetadata(metadataType: MetadataType.CAST, metadata: unknown): boolean {
     return this.player.addMetadata(metadataType, metadata);
   }
 
@@ -335,7 +335,7 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   }
 
   getConfig(mergedConfig?: boolean): PlayerConfig {
-    return this.player.getConfig();
+    return this.player.getConfig(mergedConfig);
   }
 
   getContainer(): HTMLElement {
@@ -395,7 +395,7 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   }
 
   getSnapshot(type?: string, quality?: number): Snapshot | undefined {
-    return this.player.getSnapshot();
+    return this.player.getSnapshot(type, quality);
   }
 
   getSource(): SourceConfig | null {
@@ -411,7 +411,7 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   }
 
   getSupportedTech(mode?: SupportedTechnologyMode): Technology[] {
-    return this.player.getSupportedTech();
+    return this.player.getSupportedTech(mode);
   }
 
   getThumbnail(time: number): Thumbnail | null {
@@ -522,7 +522,7 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     return this.player.setAudioQuality(audioQualityID);
   }
 
-  setAuthentication(customData: any): void {
+  setAuthentication(customData: unknown): void {
     return this.player.setAuthentication(customData);
   }
 

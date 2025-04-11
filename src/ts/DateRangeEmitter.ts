@@ -1,24 +1,24 @@
-import {
-  AdBreakEvent,
-  AdEvent,
-  MetadataEvent,
-  PlayerAPI,
-  TimeChangedEvent,
-  PlayerEventBase,
-  MetadataType,
-  MetadataParsedEvent,
-} from 'bitmovin-player';
+import { AdEvent, MetadataEvent, PlayerAPI, TimeChangedEvent, PlayerEventBase, MetadataType, MetadataParsedEvent } from 'bitmovin-player';
 import { Logger } from './Logger';
 import { YospacePlayerEventCallback } from './BitmovinYospacePlayerAPI';
 import { YospaceLinearAd } from './InternalBitmovinYospacePlayer';
 import stringify from 'fast-safe-stringify';
 import { Session } from '@yospace/admanagement-sdk';
 
+interface YsMetadata {
+  startTime: string;
+  YMID: string;
+  YSCP: string;
+  YSEQ: string;
+  YTYP: string;
+  YDUR: string;
+}
+
 export class DateRangeEmitter {
   private player: PlayerAPI;
   private eventHandlers: { [eventType: string]: YospacePlayerEventCallback[] };
   private _session: Session | null;
-  private emsgEvents: any[];
+  private emsgEvents: YsMetadata[];
   private processedDateRangeEvents: { [key: string]: number };
 
   constructor(player: PlayerAPI, eventHandlers: { [eventType: string]: YospacePlayerEventCallback[] } = {}) {
@@ -78,7 +78,7 @@ export class DateRangeEmitter {
       }
 
       // create an S metadata event 0.1 seconds into the start of the EXT-X-DATERANGE
-      const metadataStart = {
+      const metadataStart: YsMetadata = {
         startTime: String(currentTime + 0.1),
         YMID: dateRangeData.clientAttributes.comYospaceYmid,
         YSCP: dateRangeData.clientAttributes.comYospaceYmid,
@@ -93,7 +93,7 @@ export class DateRangeEmitter {
 
       // create M metadata events every 2 seconds throughout the asset
       while (val <= duration) {
-        const metadataMid = {
+        const metadataMid: YsMetadata = {
           startTime: String(currentTime + val),
           YMID: dateRangeData.clientAttributes.comYospaceYmid,
           YSCP: dateRangeData.clientAttributes.comYospaceYmid,
@@ -106,7 +106,7 @@ export class DateRangeEmitter {
       }
 
       // create the E event 0.1 seconds before the end of the EXT-X-DATERANGE
-      const metadataEnd = {
+      const metadataEnd: YsMetadata = {
         startTime: String(currentTime + duration - 0.1),
         YMID: dateRangeData.clientAttributes.comYospaceYmid,
         YSCP: dateRangeData.clientAttributes.comYospaceYmid,
@@ -131,8 +131,11 @@ export class DateRangeEmitter {
   private onTimeChanged = (event: PlayerEventBase): void => {
     const timeChangedEvent = event as TimeChangedEvent;
 
-    while (this.emsgEvents.length > 0 && this.emsgEvents[0].startTime <= timeChangedEvent.time) {
+    while (this.emsgEvents.length > 0 && parseFloat(this.emsgEvents[0].startTime) <= timeChangedEvent.time) {
       const emsg = this.emsgEvents.shift();
+      if (!emsg) {
+        return;
+      }
 
       Logger.log(
         '[BitmovinYospacePlayer] Sending: timestamp=' +
@@ -206,19 +209,16 @@ export class DateRangeEmitter {
     }
   };
 
-  private onAdFinished = (event: PlayerEventBase): void => {
-    const adFinishedEvent = event as AdEvent;
-
-    const yospaceAd = adFinishedEvent.ad as YospaceLinearAd;
-    Logger.log('[BitmovinYospacePlayer] Ad Finished for id');
+  private onAdFinished = (): void => {
+    Logger.log('[BitmovinYospacePlayer] Ad Finished');
   };
 
   private onAdBreakStarted = (): void => {
-    Logger.log('[BitmovinYospacePlayer] Ad Break Started for id');
+    Logger.log('[BitmovinYospacePlayer] Ad Break Started');
   };
 
   private onAdBreakFinished = (): void => {
-    Logger.log('[BitmovinYospacePlayer] Ad Break Finished for id');
+    Logger.log('[BitmovinYospacePlayer] Ad Break Finished');
   };
 
   private fireEvent<E extends PlayerEventBase>(event: E): void {
