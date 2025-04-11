@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+
+- Use strict type checks in build tools to improve type safety
+
 ## [2.9.2] - 2025-03-24
 
 ### Fixed
