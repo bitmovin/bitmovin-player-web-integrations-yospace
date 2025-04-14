@@ -605,4 +605,8 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   get drm(): DrmAPI {
     return this.player.drm;
   }
+
+  get analytics() {
+    return this.player.analytics;
+  }
 }
