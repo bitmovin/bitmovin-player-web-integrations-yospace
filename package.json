@@ -41,7 +41,7 @@
     "stream-browserify": "^3.0.0"
   },
   "peerDependencies": {
-    "bitmovin-player": "^8.157.0"
+    "bitmovin-player": "^8.206.0"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^8.29.1",
