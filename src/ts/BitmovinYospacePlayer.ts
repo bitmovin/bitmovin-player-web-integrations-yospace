@@ -366,7 +366,7 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     return this.player.adaptation;
   }
 
-  getManifest(): string {
+  getManifest(): string | null {
     return this.player.getManifest();
   }
 
