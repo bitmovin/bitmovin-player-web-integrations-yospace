@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [2.10.0] - 2025-04-17
+
 ### Changed
 
 - `AdBreak`s can now be null, which aligns with reality. It is possible for the Yospace SDK to not have had time to parse the metadata by the time the ad break triggers, which can cause the ad break to be null by the time the break starts. Note: the yospace documentation is wrongly indicating that this shouldn't be the case
@@ -440,7 +442,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - Initial yospace integration
 
-[unreleased]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/v2.9.2...HEAD
+[unreleased]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/v2.10.0...HEAD
+[2.10.0]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/v2.9.2...v2.10.0
 [2.9.2]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/v2.9.1...v2.9.2
 [2.9.1]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/v2.9.0...v2.9.1
 [2.9.0]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/v2.8.0...v2.9.0
