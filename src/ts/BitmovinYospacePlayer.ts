@@ -32,7 +32,7 @@ import type {
 } from 'bitmovin-player/modules/bitmovinplayer-core';
 import { InternalBitmovinYospacePlayer } from './InternalBitmovinYospacePlayer';
 
-import { Bitmovin8Adapter } from 'bitmovin-analytics';
+import { Bitmovin8Adapter } from 'bitmovin-analytics/bitmovin-analytics-bitmovin-player';
 
 import { ArrayUtils } from 'bitmovin-player-ui/dist/js/framework/arrayutils';
 import type { PlayerAdvertisingAPI } from 'bitmovin-player/modules/bitmovinplayer-advertising-core';

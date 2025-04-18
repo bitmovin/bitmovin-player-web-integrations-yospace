@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - `AdBreak`s can now be null, which aligns with reality. It is possible for the Yospace SDK to not have had time to parse the metadata by the time the ad break triggers, which can cause the ad break to be null by the time the break starts. Note: the yospace documentation is wrongly indicating that this shouldn't be the case
 - Use strict type checks in build tools to improve type safety
+- Bump Bitmovin-Analytics to `2.43.3` and use Player-specific build
 
 ### Fixed
 
