@@ -57,9 +57,9 @@ import { BitmovinYospaceHelper } from './BitmovinYospaceHelper';
 import stringify from 'fast-safe-stringify';
 
 export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
-  private player!: BitmovinYospacePlayerAPI; // Is initialized in the constructor via createPlayer()
-  private bitmovinYospacePlayer!: BitmovinYospacePlayerAPI; // Is initialized in the constructor via createPlayer()
-  private bitmovinPlayer!: PlayerAPI; // Is initialized in the constructor via createPlayer()
+  private player: BitmovinYospacePlayerAPI; // Is initialized in the constructor via createPlayer()
+  private bitmovinYospacePlayer: BitmovinYospacePlayerAPI; // Is initialized in the constructor via createPlayer()
+  private bitmovinPlayer: PlayerAPI; // Is initialized in the constructor via createPlayer()
   private currentPlayerType: YospacePlayerType = YospacePlayerType.BitmovinYospace;
 
   private BitmovinPlayerStaticApi: StaticPlayerAPI;
@@ -99,19 +99,29 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       config.ui = false;
     }
 
+    this.updateConfig();
+
     Logger.log('[BitmovinYospacePlayer] creating BitmovinPlayer with configuration ' + stringify(this.config));
 
-    this.createPlayer();
+    this.bitmovinPlayer = new this.BitmovinPlayerStaticApi(this.containerElement, this.config);
+
+    this.bitmovinYospacePlayer = new InternalBitmovinYospacePlayer(
+      this.containerElement,
+      this.bitmovinPlayer,
+      this.yospaceConfig,
+    ) as unknown as BitmovinYospacePlayerAPI; // TODO check if we can fix the BYS Player to avoid the unknown cast
+
+    this.player = this.bitmovinYospacePlayer;
 
     if (yospaceConfig.useTizen && !this.BitmovinPlayerStaticApi.getModules().includes(this.player.exports.ModuleName.Tizen)) {
-      Logger.warn('Built for Tizen usage but no BitmovinPlayer Tizen module found.');
+      Logger.warn('[BitmovinYospacePlayer] Built for Tizen usage but no BitmovinPlayer Tizen module found.');
     }
     if (yospaceConfig.useWebos && !this.BitmovinPlayerStaticApi.getModules().includes(this.player.exports.ModuleName.Webos)) {
-      Logger.warn('Built for WebOS usage but no BitmovinPlayer WebOS module found.');
+      Logger.warn('[BitmovinYospacePlayer] Built for WebOS usage but no BitmovinPlayer WebOS module found.');
     }
   }
 
-  private createPlayer(): void {
+  private updateConfig(): void {
     if (BitmovinYospaceHelper.isSafari() || BitmovinYospaceHelper.isSafariIOS()) {
       if (!this.config.location) {
         this.config.location = {};
@@ -124,24 +134,17 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       if (!this.yospaceConfig.disableServiceWorker) {
         if (!this.config.location.serviceworker) {
           this.config.location.serviceworker = './sw.js';
+          Logger.log('[BitmovinYospacePlayer] Setting servierworker location to `./sw.js`');
         }
 
         if (!this.config.tweaks.native_hls_parsing) {
           this.config.tweaks.native_hls_parsing = true;
+          Logger.log('[BitmovinYospacePlayer] Setting config.tweaks.native_hls_parsing = true');
         }
       }
 
-      Logger.log('Loading the ServiceWorkerModule');
+      Logger.log('[BitmovinYospacePlayer] Loading the ServiceWorkerModule');
     }
-    this.bitmovinPlayer = new this.BitmovinPlayerStaticApi(this.containerElement, this.config);
-
-    this.bitmovinYospacePlayer = new InternalBitmovinYospacePlayer(
-      this.containerElement,
-      this.bitmovinPlayer,
-      this.yospaceConfig,
-    ) as unknown as BitmovinYospacePlayerAPI; // TODO check if we can fix the BYS Player to avoid the unknown cast
-
-    this.player = this.bitmovinYospacePlayer;
   }
 
   load(source: SourceConfig | YospaceSourceConfig, forceTechnology?: string, disableSeeking?: boolean): Promise<void> {
