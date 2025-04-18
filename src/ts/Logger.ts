@@ -9,7 +9,7 @@ export class Logger {
     this.enabled = false;
   }
 
-  public static log(message?: any, ...optionalParams: any[]): void {
+  public static log(message?: unknown, ...optionalParams: unknown[]): void {
     if (typeof console === 'undefined') {
       return;
     }
@@ -39,7 +39,7 @@ export class Logger {
     }
   }
 
-  public static table(message: any): void {
+  public static table(message: unknown): void {
     if (typeof console === 'undefined') {
       return;
     }
@@ -57,13 +57,7 @@ export class Logger {
   private static printDate(): string {
     const temp = new Date();
     const dateStr =
-      '[' +
-      this.padString(temp.getHours()) +
-      ':' +
-      this.padString(temp.getMinutes()) +
-      ':' +
-      this.padString(temp.getSeconds()) +
-      ']';
+      '[' + this.padString(temp.getHours()) + ':' + this.padString(temp.getMinutes()) + ':' + this.padString(temp.getSeconds()) + ']';
     return dateStr;
   }
 

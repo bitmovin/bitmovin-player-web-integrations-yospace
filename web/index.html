@@ -228,8 +228,6 @@
         ad: null,
       };
 
-      var truexAdFree = false;
-
       var conf = {
         key: bitmovinPlayerLicenseKey,
         playback: {
@@ -355,14 +353,6 @@
                 event.discontinuitySequenceNumber
             );
           }
-        });
-
-        yospacePlayer.on('truexadfree', function (event) {
-          truexAdFree = true;
-          debug(createLogFromEvent(event));
-          const seekPosition = adBreakState.ab.scheduleTime + 1;
-          console.warn('TrueXAdFree Seeking to ' + seekPosition);
-          yospacePlayer.forceSeek(seekPosition);
         });
 
         yospacePlayer.on('adstarted', function (event) {

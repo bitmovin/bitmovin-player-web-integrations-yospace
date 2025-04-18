@@ -57,9 +57,9 @@ import { BitmovinYospaceHelper } from './BitmovinYospaceHelper';
 import stringify from 'fast-safe-stringify';
 
 export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
-  private player: BitmovinYospacePlayerAPI;
-  private bitmovinYospacePlayer: BitmovinYospacePlayerAPI;
-  private bitmovinPlayer: PlayerAPI;
+  private player: BitmovinYospacePlayerAPI; // Is initialized in the constructor via createPlayer()
+  private bitmovinYospacePlayer: BitmovinYospacePlayerAPI; // Is initialized in the constructor via createPlayer()
+  private bitmovinPlayer: PlayerAPI; // Is initialized in the constructor via createPlayer()
   private currentPlayerType: YospacePlayerType = YospacePlayerType.BitmovinYospace;
 
   private BitmovinPlayerStaticApi: StaticPlayerAPI;
@@ -67,13 +67,13 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   private config: PlayerConfig;
   private yospaceConfig: YospaceConfiguration;
   // Collect all eventHandlers to reattach them to the current used player
-  private eventHandlers: { [eventType: string]: YospacePlayerEventCallback[] } = {};
+  private eventHandlers: { [eventType: string]: YospacePlayerEventCallback[] | PlayerEventCallback[] } = {};
 
   constructor(
     BitmovinPlayerStaticApi: StaticPlayerAPI,
     containerElement: HTMLElement,
     config: PlayerConfig,
-    yospaceConfig: YospaceConfiguration = {}
+    yospaceConfig: YospaceConfiguration = {},
   ) {
     this.BitmovinPlayerStaticApi = BitmovinPlayerStaticApi;
     this.containerElement = containerElement;
@@ -88,7 +88,7 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     if (config.advertising) {
       Logger.warn(
         'Client side advertising config is not supported. If you are using the BitmovinPlayer as' +
-          'fallback please use player.ads.schedule'
+          'fallback please use player.ads.schedule',
       );
     }
     // add advertising again to load ads module
@@ -99,19 +99,29 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       config.ui = false;
     }
 
+    this.updateConfig();
+
     Logger.log('[BitmovinYospacePlayer] creating BitmovinPlayer with configuration ' + stringify(this.config));
 
-    this.createPlayer();
+    this.bitmovinPlayer = new this.BitmovinPlayerStaticApi(this.containerElement, this.config);
+
+    this.bitmovinYospacePlayer = new InternalBitmovinYospacePlayer(
+      this.containerElement,
+      this.bitmovinPlayer,
+      this.yospaceConfig,
+    ) as unknown as BitmovinYospacePlayerAPI; // TODO check if we can fix the BYS Player to avoid the unknown cast
+
+    this.player = this.bitmovinYospacePlayer;
 
     if (yospaceConfig.useTizen && !this.BitmovinPlayerStaticApi.getModules().includes(this.player.exports.ModuleName.Tizen)) {
-      Logger.warn('Built for Tizen usage but no BitmovinPlayer Tizen module found.');
+      Logger.warn('[BitmovinYospacePlayer] Built for Tizen usage but no BitmovinPlayer Tizen module found.');
     }
     if (yospaceConfig.useWebos && !this.BitmovinPlayerStaticApi.getModules().includes(this.player.exports.ModuleName.Webos)) {
-      Logger.warn('Built for WebOS usage but no BitmovinPlayer WebOS module found.');
+      Logger.warn('[BitmovinYospacePlayer] Built for WebOS usage but no BitmovinPlayer WebOS module found.');
     }
   }
 
-  private createPlayer(): void {
+  private updateConfig(): void {
     if (BitmovinYospaceHelper.isSafari() || BitmovinYospaceHelper.isSafariIOS()) {
       if (!this.config.location) {
         this.config.location = {};
@@ -124,24 +134,17 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       if (!this.yospaceConfig.disableServiceWorker) {
         if (!this.config.location.serviceworker) {
           this.config.location.serviceworker = './sw.js';
+          Logger.log('[BitmovinYospacePlayer] Setting servierworker location to `./sw.js`');
         }
 
         if (!this.config.tweaks.native_hls_parsing) {
           this.config.tweaks.native_hls_parsing = true;
+          Logger.log('[BitmovinYospacePlayer] Setting config.tweaks.native_hls_parsing = true');
         }
       }
 
-      Logger.log('Loading the ServiceWorkerModule');
+      Logger.log('[BitmovinYospacePlayer] Loading the ServiceWorkerModule');
     }
-    this.bitmovinPlayer = new this.BitmovinPlayerStaticApi(this.containerElement, this.config);
-
-    this.bitmovinYospacePlayer = new InternalBitmovinYospacePlayer(
-      this.containerElement,
-      this.bitmovinPlayer,
-      this.yospaceConfig
-    ) as any as BitmovinYospacePlayerAPI;
-
-    this.player = this.bitmovinYospacePlayer;
   }
 
   load(source: SourceConfig | YospaceSourceConfig, forceTechnology?: string, disableSeeking?: boolean): Promise<void> {
@@ -198,8 +201,15 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     if (!this.eventHandlers[eventType]) {
       this.eventHandlers[eventType] = [];
     }
-    this.eventHandlers[eventType].push(callback);
 
+    // Ensure the callback is compatible with both PlayerEventCallback and YospacePlayerEventCallback
+    if (typeof callback === 'function') {
+      if (eventType in YospacePlayerEvent) {
+        this.player.on(eventType as YospacePlayerEvent, callback as YospacePlayerEventCallback);
+      } else {
+        this.player.on(eventType as PlayerEvent, callback as PlayerEventCallback);
+      }
+    }
     this.player.on(eventType, callback);
   }
 
@@ -215,7 +225,7 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   setPolicy(policy: BitmovinYospacePlayerPolicy): void {
     if (this.getCurrentPlayerType() === YospacePlayerType.Bitmovin) {
       Logger.log(
-        '[BitmovinYospacePlayer] Policy does not apply for Bitmovin Player but is saved for further ' + 'BitmovinYospace Player usage'
+        '[BitmovinYospacePlayer] Policy does not apply for Bitmovin Player but is saved for further ' + 'BitmovinYospace Player usage',
       );
     }
 
@@ -231,10 +241,10 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   }
 
   destroy(): Promise<void> {
-    this.BitmovinPlayerStaticApi = null;
-    this.containerElement = null;
-    this.config = null;
-    this.yospaceConfig = null;
+    (this.BitmovinPlayerStaticApi as unknown) = null;
+    (this.containerElement as unknown) = null;
+    (this.config as unknown) = null;
+    (this.yospaceConfig as unknown) = null;
 
     return this.player.destroy();
   }
@@ -279,7 +289,7 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     return this.player.manifest;
   }
 
-  addMetadata(metadataType: MetadataType.CAST, metadata: any): boolean {
+  addMetadata(metadataType: MetadataType.CAST, metadata: unknown): boolean {
     return this.player.addMetadata(metadataType, metadata);
   }
 
@@ -295,7 +305,7 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     return this.player.clearQueryParameters();
   }
 
-  getAudio(): AudioTrack {
+  getAudio(): AudioTrack | null {
     return this.player.getAudio();
   }
 
@@ -328,7 +338,7 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   }
 
   getConfig(mergedConfig?: boolean): PlayerConfig {
-    return this.player.getConfig();
+    return this.player.getConfig(mergedConfig);
   }
 
   getContainer(): HTMLElement {
@@ -359,7 +369,7 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     return this.player.adaptation;
   }
 
-  getManifest(): string {
+  getManifest(): string | null {
     return this.player.getManifest();
   }
 
@@ -387,8 +397,8 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     return this.player.getSeekableRange();
   }
 
-  getSnapshot(type?: string, quality?: number): Snapshot {
-    return this.player.getSnapshot();
+  getSnapshot(type?: string, quality?: number): Snapshot | undefined {
+    return this.player.getSnapshot(type, quality);
   }
 
   getSource(): SourceConfig | null {
@@ -404,10 +414,10 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   }
 
   getSupportedTech(mode?: SupportedTechnologyMode): Technology[] {
-    return this.player.getSupportedTech();
+    return this.player.getSupportedTech(mode);
   }
 
-  getThumbnail(time: number): Thumbnail {
+  getThumbnail(time: number): Thumbnail | null {
     return this.player.getThumbnail(time);
   }
 
@@ -515,7 +525,7 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     return this.player.setAudioQuality(audioQualityID);
   }
 
-  setAuthentication(customData: any): void {
+  setAuthentication(customData: unknown): void {
     return this.player.setAuthentication(customData);
   }
 
@@ -595,5 +605,11 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     this.player.setAdImmunityConfig(options);
   }
 
-  readonly drm: DrmAPI;
+  get drm(): DrmAPI {
+    return this.player.drm;
+  }
+
+  get analytics() {
+    return this.player.analytics;
+  }
 }

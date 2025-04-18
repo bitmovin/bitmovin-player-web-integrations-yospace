@@ -30,7 +30,7 @@ export type BYSTrackingEventType =
   | 'ClickTracking'
   | 'acceptInvitation';
 
-interface BYSListenerEventBase {
+export interface BYSListenerEventBase {
   type: BYSListenerEvent;
 }
 
@@ -46,7 +46,7 @@ export interface BYSAnalyticsFiredEvent extends BYSListenerEventBase {
   call_id: BYSTrackingEventType;
 }
 
-interface BYSListenerCallbackFunction {
+export interface BYSListenerCallbackFunction {
   (event: BYSListenerEventBase): void;
 }
 
@@ -121,11 +121,11 @@ export class YospaceAdListenerAdapter extends AnalyticEventObserver {
   }
 
   onSessionError(errorCode: SessionErrorCode) {
-    Logger.warn('[BYP][listener] onSessionError not implemented');
+    Logger.warn('[BYP][listener] onSessionError not implemented. Error code:' + errorCode);
   }
 
   onTrackingError(trackingError: TrackingError) {
-    Logger.warn('[BYP][listener] onTrackingError not implemented');
+    Logger.warn('[BYP][listener] onTrackingError not implemented. Error code:' + trackingError?.errorCode);
   }
 
   private emitEvent(event: BYSListenerEventBase) {

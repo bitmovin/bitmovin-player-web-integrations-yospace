@@ -4,10 +4,10 @@ export class YospacePlayerError implements Error {
   public readonly code: YospaceErrorCode;
   public readonly message: string;
   public readonly name: string;
-  public readonly stack: string;
-  public readonly data: { [key: string]: any };
+  public readonly stack?: string;
+  public readonly data?: { [key: string]: unknown };
 
-  constructor(code: YospaceErrorCode, data?: { [key: string]: any }, message?: string) {
+  constructor(code: YospaceErrorCode, data?: { [key: string]: unknown }, message?: string) {
     this.code = code;
     this.name = YospaceErrorCode[code];
 

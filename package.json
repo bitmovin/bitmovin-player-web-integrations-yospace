@@ -41,23 +41,23 @@
     "stream-browserify": "^3.0.0"
   },
   "peerDependencies": {
-    "bitmovin-player": "^8.157.0"
+    "bitmovin-player": "^8.206.0"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^5.27.1",
-    "@typescript-eslint/parser": "^5.27.1",
+    "@typescript-eslint/eslint-plugin": "^8.29.1",
+    "@typescript-eslint/parser": "^8.29.1",
     "bitmovin-analytics": "^2.27.0",
     "bitmovin-player-ui": "^3.37.0",
     "changelog-parser": "^3.0.1",
-    "eslint": "^8.17.0",
+    "eslint": "^8.57.1",
     "husky": "^8.0.1",
     "kacl": "^1.1.1",
     "lint-staged": "^13.0.1",
-    "prettier": "2.6.2",
+    "prettier": "^3.5.3",
     "replace-in-file": "^8.0.2",
     "semver": "^7.6.0",
-    "ts-loader": "^9.3.0",
-    "typescript": "^3.9.10",
+    "ts-loader": "^9.5.2",
+    "typescript": "^5.8.3",
     "webpack": "^5.73.0",
     "webpack-cli": "^4.9.2",
     "webpack-dev-middleware": "^5.3.3",
