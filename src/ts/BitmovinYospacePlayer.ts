@@ -209,8 +209,8 @@ export class BitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       } else {
         this.player.on(eventType as PlayerEvent, callback as PlayerEventCallback);
       }
+      this.eventHandlers[eventType].push(callback as YospacePlayerEventCallback);
     }
-    this.player.on(eventType, callback);
   }
 
   off(eventType: PlayerEvent, callback: PlayerEventCallback): void;
