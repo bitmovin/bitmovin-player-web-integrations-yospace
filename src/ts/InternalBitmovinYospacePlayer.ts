@@ -89,7 +89,6 @@ import { DateRangeEmitter } from './DateRangeEmitter';
 import { BitmovinYospaceHelper, EmsgSchemeIdUri } from './BitmovinYospaceHelper';
 import stringify from 'fast-safe-stringify';
 import type { XmlNode } from '@yospace/admanagement-sdk';
-('@yospace/admanagement-sdk/dist/types/src/Core');
 
 import { BitmovinId3FramesExtractor, Frame } from './BitmovinId3FramesExtractor';
 

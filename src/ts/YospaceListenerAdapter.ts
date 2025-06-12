@@ -1,8 +1,8 @@
 import { ArrayUtils } from 'bitmovin-player-ui/dist/js/framework/arrayutils';
 import { Logger } from './Logger';
 import type { AdBreak, Advert, SessionErrorCode } from '@yospace/admanagement-sdk';
-import TrackingError from '@yospace/admanagement-sdk/dist/types/src/Public/TrackingError';
-import { AnalyticEventObserver } from '@yospace/admanagement-sdk';
+import type { TrackingError } from '@yospace/admanagement-sdk/';
+import { AnalyticEventObserver } from '@yospace/admanagement-sdk/';
 
 /** BYS -> BitmovinYospace */
 export enum BYSListenerEvent {
