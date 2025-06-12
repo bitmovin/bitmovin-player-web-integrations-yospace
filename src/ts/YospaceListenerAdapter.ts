@@ -1,7 +1,7 @@
 import { ArrayUtils } from 'bitmovin-player-ui/dist/js/framework/arrayutils';
 import { Logger } from './Logger';
 import type { AdBreak, Advert, SessionErrorCode } from '@yospace/admanagement-sdk';
-import type { TrackingError } from '@yospace/admanagement-sdk/types/Public/TrackingError';
+import TrackingError from '@yospace/admanagement-sdk/dist/types/src/Public/TrackingError';
 import { AnalyticEventObserver } from '@yospace/admanagement-sdk';
 
 /** BYS -> BitmovinYospace */
@@ -125,7 +125,7 @@ export class YospaceAdListenerAdapter extends AnalyticEventObserver {
   }
 
   onTrackingError(trackingError: TrackingError) {
-    Logger.warn('[BYP][listener] onTrackingError not implemented. Error code:' + trackingError?.errorCode);
+    Logger.warn('[BYP][listener] onTrackingError not implemented. Error code:' + trackingError.getErrorCode());
   }
 
   private emitEvent(event: BYSListenerEventBase) {
