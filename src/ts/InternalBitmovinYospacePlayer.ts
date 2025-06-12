@@ -353,6 +353,10 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
   on(eventType: YospacePlayerEvent, callback: YospacePlayerEventCallback): void;
   on(eventType: PlayerEvent, callback: PlayerEventCallback): void;
   on(eventType: PlayerEvent | YospacePlayerEvent, callback: YospacePlayerEventCallback | PlayerEventCallback): void {
+    if (!this.eventHandlers[eventType]) {
+      this.eventHandlers[eventType] = [];
+    }
+
     if (!EnumHelper.isYospaceEvent(eventType)) {
       // we need to suppress some events because they need to be modified first. so don't add it to the actual player
       const suppressedEventTypes = [
@@ -376,12 +380,10 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       const event = eventType as PlayerEvent;
       if (!suppressedEventTypes.includes(event)) {
         this.player.on(event, callback);
+      } else {
+        this.eventHandlers[event].push(callback as YospacePlayerEventCallback);
       }
     } else {
-      if (!this.eventHandlers[eventType]) {
-        this.eventHandlers[eventType] = [];
-      }
-
       this.eventHandlers[eventType as YospacePlayerEvent].push(callback as YospacePlayerEventCallback);
     }
   }
@@ -1718,7 +1720,7 @@ class EventSuppressController {
 }
 
 class EnumHelper {
-  static isYospaceEvent(eventType: PlayerEvent | YospacePlayerEvent) {
-    return (<any>Object).values(YospacePlayerEvent).includes(eventType);
+  static isYospaceEvent(eventType: PlayerEvent | YospacePlayerEvent): boolean {
+    return Boolean((<any>Object).values(YospacePlayerEvent).includes(eventType));
   }
 }
