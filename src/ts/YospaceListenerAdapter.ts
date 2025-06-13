@@ -54,8 +54,12 @@ export interface BYSListenerCallbackFunction {
  * Adapter for the listener passed to Yospace.
  * The default way would be to pass an object to Yospace with the structure of this class.
  * To simplify the Yospace callbacks handling this Adapter was introduced.
+ *
+ * Extending the Yospace SDK's AnalyticEventObserver as usual leads to runtime errors as of Yospace SDK 3.10.0, so we
+ * are implementing it as interface instead. The Yospace documentation also suggests that it is an interface but the
+ * type definitions in the SDK defines it as an abstract class.
  */
-export class YospaceAdListenerAdapter extends AnalyticEventObserver {
+export class YospaceAdListenerAdapter implements AnalyticEventObserver {
   private listeners: { [eventType: string]: BYSListenerCallbackFunction[] } = {};
 
   addListener(event: BYSListenerEvent, callback: BYSListenerCallbackFunction): void {
