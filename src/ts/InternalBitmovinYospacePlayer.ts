@@ -265,12 +265,12 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
           const clonedSource: SourceConfig = source.hls
             ? {
                 ...source,
-                hls: this.session?.getPlaybackUrl() === null ? undefined : this.session?.getPlaybackUrl()!, // use received url from yospace
+                hls: this.session?.getPlaybackUrl() ?? undefined, // use received url from yospace
                 dash: undefined,
               }
             : {
                 ...source,
-                dash: this.session?.getPlaybackUrl() === null ? undefined : this.session?.getPlaybackUrl()!, // use received url from yospace
+                dash: this.session?.getPlaybackUrl() ?? undefined, // use received url from yospace
                 hls: undefined,
               };
 
