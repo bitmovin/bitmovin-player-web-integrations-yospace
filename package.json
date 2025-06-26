@@ -36,7 +36,7 @@
   "author": "Bitmovin",
   "license": "MIT",
   "dependencies": {
-    "@yospace/admanagement-sdk": "3.8.3",
+    "@yospace/admanagement-sdk": "3.10.0",
     "fast-safe-stringify": "^2.0.7",
     "process": "^0.11.10",
     "stream-browserify": "^3.0.0"

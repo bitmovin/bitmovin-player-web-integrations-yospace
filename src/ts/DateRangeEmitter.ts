@@ -150,7 +150,8 @@ export class DateRangeEmitter {
 
       if (this.session) {
         emsg.startTime = '';
-        this.session.onTimedMetadata(emsg);
+        // this.session.onTimedMetadata(emsg); onTimedMetadata is deprecated
+        this.session.onPlayheadUpdate(timeChangedEvent.timestamp);
       }
     }
   };

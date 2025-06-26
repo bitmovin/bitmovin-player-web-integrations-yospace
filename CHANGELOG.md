@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+
+- Yospace SDK to v3.10.0
+
 ## [2.10.0] - 2025-04-17
 
 ### Changed
