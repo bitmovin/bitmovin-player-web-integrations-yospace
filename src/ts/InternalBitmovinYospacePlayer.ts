@@ -456,17 +456,15 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       const currentTime = this.player.getCurrentTime();
 
       const linearAdBreaks = this.session?.getAdBreaksByType(BreakType.LINEAR);
-      if (linearAdBreaks !== null) {
-        linearAdBreaks?.forEach((adBreak) => {
-          const breakStart = this.toMagicTime(toSeconds(adBreak.getStart()));
+      linearAdBreaks?.forEach((adBreak) => {
+        const breakStart = this.toMagicTime(toSeconds(adBreak.getStart()));
 
-          // Check if break is being seeked past and deactivate it
-          if (breakStart > currentTime && breakStart <= time && this.adImmunityConfig.disablePassedAdBreaks) {
-            Logger.log('[BitmovinYospacePlayer] Ad Immunity deactivated ad break during seek', adBreak);
-            adBreak.setInactive();
-          }
-        });
-      }
+        // Check if break is being seeked past and deactivate it
+        if (breakStart > currentTime && breakStart <= time && this.adImmunityConfig.disablePassedAdBreaks) {
+          Logger.log('[BitmovinYospacePlayer] Ad Immunity deactivated ad break during seek', adBreak);
+          adBreak.setInactive();
+        }
+      });
     }
 
     const allowedSeekTarget = this.playerPolicy.canSeekTo(time);
@@ -900,13 +898,24 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
     }
   };
 
+  private generateAdBreakId(ysAdBreak: AdBreak): string {
+    const ysAdBreakId = ysAdBreak.getIdentifier();
+    if (ysAdBreakId) {
+      return ysAdBreakId;
+    }
+
+    // The Bitmovin Player API defines that the ad break id is generated if non is available, doing the same for
+    // Yospace ads.
+    return `${ysAdBreak.getPosition()}-${toSeconds(ysAdBreak.getStart())}-${toSeconds(ysAdBreak.getDuration())}`;
+  }
+
   private mapAdBreak(ysAdBreak: AdBreak | null): YospaceAdBreak {
     if (!ysAdBreak) {
       Logger.log('[BitmovinYospacePlayer] - AdBreak is null, using default AdBreak template object');
       return DEFAULT_AD_BREAK_TEMPLATE_OBJECT;
     }
     return {
-      id: ysAdBreak.getIdentifier() === null ? '' : ysAdBreak.getIdentifier()!, // WARNING: is this logic correct? i.e returning "" id if null
+      id: this.generateAdBreakId(ysAdBreak),
       // -0.001 offset required to not seek to after ad break using default canSeekTo policy
       scheduleTime: this.toMagicTime(toSeconds(ysAdBreak.getStart())) - 0.001,
       ads: ysAdBreak
@@ -914,7 +923,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
         .map(AdTranslator.mapYsAdvert)
         .filter((ad) => ad !== null) as YospaceLinearAd[],
       duration: toSeconds(ysAdBreak.getDuration()),
-      position: ysAdBreak.getPosition() as unknown as YospaceAdBreakPosition, // WARNING is this logic correct please
+      position: ysAdBreak.getPosition() as unknown as YospaceAdBreakPosition, // YS SDK doesn't simply export a string enum hence this workaround
       active: ysAdBreak.isActive(),
     };
   }
@@ -1511,15 +1520,14 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
 
   private calculateAdParts(): void {
     const linearAdBreaks = this.session?.getAdBreaksByType(BreakType.LINEAR);
-    if (linearAdBreaks !== null) {
-      const adParts = linearAdBreaks!.map((adBreak) => ({
+    if (linearAdBreaks) {
+      const adParts = linearAdBreaks.map((adBreak) => ({
         start: toSeconds(adBreak.getStart()),
         end: toSeconds(adBreak.getStart()) + toSeconds(adBreak.getDuration()),
         adBreak: adBreak,
       }));
-      if (adParts) {
-        this.adParts = adParts;
-      }
+
+      this.adParts = adParts;
     }
   }
 
