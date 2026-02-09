@@ -30,8 +30,8 @@ var sources = {
     },
     dvrLive: {
       title: 'DVR Live',
-      // dash: 'https://csm-e-sdk-validation.bln1.yospace.com/csm/extlive/yosdk02,dash-mp4-pre.mpd?yo.br=false&yo.av=4&yo.lp=true',
-      hls: 'https://csm-e-sdk-validation.bln1.yospace.com/csm/extlive/yosdk02,hls-ts-pre.m3u8?yo.br=false&yo.av=4&yo.lp=true',
+      // dash: 'https://csm-e-sdk-validation.bln1.yospace.com/csm/extlive/yosdk02,dash-mp4-pre.mpd?yo.br=false&yo.av=4&yo.lp=true&yo.pdt=true&yo.lpa=dur',
+      hls: 'https://csm-e-sdk-validation.bln1.yospace.com/csm/extlive/yosdk02,hls-ts-pre.m3u8?yo.br=false&yo.av=4&yo.lp=true&yo.pdt=true&yo.lpa=dur',
       // Yospace configuration
       assetType: bitmovin.player.ads.yospace.YospaceAssetType.DVRLIVE,
     },
