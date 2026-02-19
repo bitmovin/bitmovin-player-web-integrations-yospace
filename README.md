@@ -166,6 +166,15 @@ const yospaceConfig = {
 - Run `npm run build-tv`
 - Open the `WebOS` folder in Visual Studio Code with the WebOS TV extension, or use the WebOS CLI directly.
 
+## Recommended YoSpace DVRLive Stream Query Parameters
+
+- **Recommended**: `yo.pdt=true` and `yo.lpa=dur`
+  The ad server generates a continuous timeline based on the actual segment durations, calculating PDT tags that match the sum of those durations. This ensures full compatibility with the latest Bitmovin Player’s behavior and expectations.
+- **Not Recommended**: `yo.pdt=sync` and `yo.lpa=true`
+  The ad server aligns Program Date Time tags with the scheduled wall-clock timeline of the source, prioritizing schedule alignment over actual ad duration. If an ad break exceeds its planned length (for example, 34s in a 30s slot), the manifest enforces a timeline reset causing recent player versions (`v8.184.0+`) to skip content to realign.
+- **Deprecated**: `yo.pdt=false` (or omitting `yo.pdt`)
+  No Program Date Time tags are generated. This mode is deprecated and no longer recommended.
+
 ## Limitations
 
 - No support for ad tracking during live streams in Safari if EMSG tags are used. (EMSG tags are not supported by Safari)
@@ -186,6 +195,7 @@ const yospaceConfig = {
 - PRs should always contain an update of the [CHANGELOG.md](CHANGELOG.md) file
 
 ### Validation & Release
+
 - Especially when updating the Yospace SDK, this project should be validated following https://developer.yospace.com/sdk-documentation/javascript/userguide/yosdk/latest/en/validate-your-app.html. This can be done using the sample page with the following steps:
   1. Run `npm start`
   2. Open `localhost:8080?validation=true` in a browser
