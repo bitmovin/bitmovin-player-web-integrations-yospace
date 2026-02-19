@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+
+- Update `index.html` to use UIv4
+- Update `DVRLive` sample source to use recommended YoSpace stream parameters
+
 ## [2.10.0] - 2025-04-17
 
 ### Changed
