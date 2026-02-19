@@ -169,10 +169,15 @@ const yospaceConfig = {
 ## Recommended YoSpace DVRLive Stream Query Parameters
 
 - **Recommended**: `yo.pdt=true` and `yo.lpa=dur`
+
   The ad server generates a continuous timeline based on the actual segment durations, calculating PDT tags that match the sum of those durations. This ensures full compatibility with the latest Bitmovin Player’s behavior and expectations.
+
 - **Not Recommended**: `yo.pdt=sync` and `yo.lpa=true`
+
   The ad server aligns Program Date Time tags with the scheduled wall-clock timeline of the source, prioritizing schedule alignment over actual ad duration. If an ad break exceeds its planned length (for example, 34s in a 30s slot), the manifest enforces a timeline reset causing recent player versions (`v8.184.0+`) to skip content to realign.
+
 - **Deprecated**: `yo.pdt=false` (or omitting `yo.pdt`)
+
   No Program Date Time tags are generated. This mode is deprecated and no longer recommended.
 
 ## Limitations
