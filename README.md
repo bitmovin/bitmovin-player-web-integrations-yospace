@@ -39,7 +39,13 @@ This integration completely encapsulates the usage of Yospace. After creating th
 #### With NPM
 
 1. Install the Yospace Ad Management SDK: `npm i -S @yospace/admanagement-sdk`
-   - Hint: Yospace uses a private NPM registry and you need log in credentials provided by Yospace. Please refer to the [Yospace Developer docs](https://developer.yospace.com/sdk-documentation/javascript/userguide/latest/en/downloads.html#running-a-sample-app) for details.
+   - Hint: Yospace uses a private NPM registry and you need log in using an `authToken` specific to your user account. Instructions:
+   1. Go to https://yospacerepo.jfrog.io/
+   2. Click on the User Menu at the very top right
+   3. Click `Set Me Up` in the menu
+   4. Choose `NPM`
+   5. Click `Search for Repository` and select `javascript-sdk` or `javascript-sdk-release`
+   6. Click the `Generate Token & Create Instructions` button. This will show you all the required details.
 2. Install the Bitmovin Player Yospace Integration: `npm i -S @bitmovin/player-integration-yospace`
 3. Import the `BitmovinYospacePlayer` into your code: `import { BitmovinYospacePlayer } from '@bitmovin/player-integration-yospace';`
 4. Import the Bitmovin `Player` core into your code: `import { Player } from 'bitmovin-player/modules/bitmovinplayer-core';`
@@ -186,6 +192,7 @@ const yospaceConfig = {
 - PRs should always contain an update of the [CHANGELOG.md](CHANGELOG.md) file
 
 ### Validation & Release
+
 - Especially when updating the Yospace SDK, this project should be validated following https://developer.yospace.com/sdk-documentation/javascript/userguide/yosdk/latest/en/validate-your-app.html. This can be done using the sample page with the following steps:
   1. Run `npm start`
   2. Open `localhost:8080?validation=true` in a browser
