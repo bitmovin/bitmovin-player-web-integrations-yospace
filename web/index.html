@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <title>Bitmovin Player Yospace Integration Test Page</title>
@@ -288,10 +288,10 @@
           bitmovin.player.core.Player,
           playerContainer,
           conf,
-          yospaceConfig
+          yospaceConfig,
         );
 
-        uiManager = new bitmovin.playerui.UIFactory.buildDefaultUI(yospacePlayer);
+        uiManager = bitmovin.playerui.UIFactory.buildUI(yospacePlayer);
 
         yospacePlayer.on('sourceloaded', function (event) {
           log(createLogFromEvent(event));
@@ -350,7 +350,7 @@
                 ' mediaSequenceNumber=' +
                 event.mediaSequenceNumber +
                 ' discontinuitySequenceNumber=' +
-                event.discontinuitySequenceNumber
+                event.discontinuitySequenceNumber,
             );
           }
         });
