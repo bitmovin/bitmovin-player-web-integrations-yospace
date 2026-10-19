@@ -11,6 +11,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - Update `index.html` to use UIv4
 - Update `DVRLive` sample source to use recommended YoSpace stream parameters
+- Update Yospace Ad Management SDK to `3.11.3`
+
+### Fixed
+
+- Timed metadata from `EXT-X-DATERANGE` tags is now passed to the Yospace SDK as a `TimedMetadata` instance (Live session mode)
 
 ## [2.10.0] - 2025-04-17
 

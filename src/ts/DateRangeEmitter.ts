@@ -3,7 +3,7 @@ import { Logger } from './Logger';
 import { YospacePlayerEventCallback } from './BitmovinYospacePlayerAPI';
 import { YospaceLinearAd } from './InternalBitmovinYospacePlayer';
 import stringify from 'fast-safe-stringify';
-import { Session } from '@yospace/admanagement-sdk';
+import { Session, TimedMetadata } from '@yospace/admanagement-sdk';
 
 interface YsMetadata {
   startTime: string;
@@ -150,7 +150,10 @@ export class DateRangeEmitter {
 
       if (this.session) {
         emsg.startTime = '';
-        this.session.onTimedMetadata(emsg);
+        const timedMetadata = TimedMetadata.createFromMetadata(emsg.YMID, emsg.YSEQ, emsg.YTYP, emsg.YDUR, timeChangedEvent.time * 1000);
+        if (timedMetadata) {
+          this.session.onTimedMetadata(timedMetadata);
+        }
       }
     }
   };
