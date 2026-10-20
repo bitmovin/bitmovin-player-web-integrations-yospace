@@ -265,12 +265,12 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
           const clonedSource: SourceConfig = source.hls
             ? {
                 ...source,
-                hls: this.session.getPlaybackUrl() as string, // use received url from yospace
+                hls: this.session.getPlaybackUrl() ?? undefined, // use received url from yospace
                 dash: undefined,
               }
             : {
                 ...source,
-                dash: this.session.getPlaybackUrl() as string, // use received url from yospace
+                dash: this.session.getPlaybackUrl() ?? undefined, // use received url from yospace
                 hls: undefined,
               };
 
@@ -903,7 +903,7 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       return DEFAULT_AD_BREAK_TEMPLATE_OBJECT;
     }
     return {
-      id: ysAdBreak.getIdentifier() as string, // can be null
+      id: this.generateAdBreakId(ysAdBreak),
       // -0.001 offset required to not seek to after ad break using default canSeekTo policy
       scheduleTime: this.toMagicTime(toSeconds(ysAdBreak.getStart())) - 0.001,
       ads: ysAdBreak
@@ -911,9 +911,19 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
         .map(AdTranslator.mapYsAdvert)
         .filter((ad) => ad !== null) as YospaceLinearAd[],
       duration: toSeconds(ysAdBreak.getDuration()),
-      position: ysAdBreak.getPosition() as unknown as YospaceAdBreakPosition,
+      position: ysAdBreak.getPosition() as unknown as YospaceAdBreakPosition, // YS SDK doesn't simply export a string enum hence this workaround
       active: ysAdBreak.isActive(),
     };
+  }
+
+  private generateAdBreakId(ysAdBreak: AdBreak): string {
+    const ysAdBreakId = ysAdBreak.getIdentifier();
+    if (ysAdBreakId) {
+      return ysAdBreakId;
+    }
+    // The Bitmovin Player API defines that the ad break id is generated if none is available, doing the same for
+    // Yospace ads.
+    return `${ysAdBreak.getPosition()}-${toSeconds(ysAdBreak.getStart())}-${toSeconds(ysAdBreak.getDuration())}`;
   }
 
   private mapAdQuartile(quartileEvent: string): AdQuartile | null {
