@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - Timed metadata from `EXT-X-DATERANGE` tags is now passed to the Yospace SDK as a `TimedMetadata` instance (Live session mode)
 - `YospaceAdBreak.id` is now generated if the Yospace SDK provides none, aligning with the Bitmovin Player API
+- `player.ads.list()` no longer includes the currently active ad break, aligning with the Bitmovin Player API. This fixes a doubled or growing "Ad X of Y" count in recent Bitmovin Player UI versions
 
 ## [2.10.0] - 2025-04-17
 
