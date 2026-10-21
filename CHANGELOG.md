@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Update `index.html` to use UIv4
 - Update `DVRLive` sample source to use recommended YoSpace stream parameters
 - Update Yospace Ad Management SDK to `3.11.3`
+  - The Yospace SDK now ships modern JavaScript syntax and relies on newer built-ins (e.g. `Array.prototype.at`, `Object.hasOwn`). Depending on the target platforms (e.g. older Smart TVs), integrators may need to transpile the SDK and/or add polyfills
 
 ### Fixed
 

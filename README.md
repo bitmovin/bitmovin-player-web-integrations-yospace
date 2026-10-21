@@ -36,6 +36,10 @@ This integration completely encapsulates the usage of Yospace. After creating th
 
 ### Basic Setup
 
+#### Platform Requirements
+
+The Yospace Ad Management SDK (`3.10.0` and newer) ships modern JavaScript syntax and requires the following features in the runtime environment: `fetch`, `Headers`, `URL`, `Promise`, `Number.isNaN`, `Map`, `Array.from`, `Array.prototype.at`, `Object.hasOwn`, `setTimeout` and `setInterval`. Yospace does not provide polyfills. When targeting platforms without full support (e.g. older Tizen or WebOS devices), make sure to transpile the Yospace SDK as part of your build and add the required polyfills.
+
 #### With NPM
 
 1. Install the Yospace Ad Management SDK: `npm i -S @yospace/admanagement-sdk`

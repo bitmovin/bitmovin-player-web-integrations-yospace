@@ -149,7 +149,6 @@ export class DateRangeEmitter {
       this.emitMetadataEvent(timeChangedEvent.timestamp, emsg);
 
       if (this.session) {
-        emsg.startTime = '';
         const timedMetadata = TimedMetadata.createFromMetadata(emsg.YMID, emsg.YSEQ, emsg.YTYP, emsg.YDUR, timeChangedEvent.time * 1000);
         if (timedMetadata) {
           this.session.onTimedMetadata(timedMetadata);
