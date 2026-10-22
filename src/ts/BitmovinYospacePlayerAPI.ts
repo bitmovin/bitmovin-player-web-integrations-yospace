@@ -151,6 +151,11 @@ export interface YospaceConfiguration {
   disableServiceWorker?: boolean;
   useTizen?: boolean;
   useWebos?: boolean;
+  /**
+   * Timeout in seconds for HTTP requests of the Yospace SDK that fire analytics beacons and fetch resources.
+   * The Yospace SDK default is 5s.
+   */
+  resourceTimeout?: number;
 }
 
 export interface BitmovinYospacePlayerExports extends PlayerExports {
@@ -267,8 +272,8 @@ export interface AdImmunityConfig {
   duration: number;
 
   /**
-   * A number indicating how far ahead ad immunity should look for ad breaks to skip past, in order to mitigate ad
-   * frames being displayed before they have time to be seeked past.
+   * A number indicating how far ahead, in seconds, ad immunity should look for ad breaks to skip past, in order to
+   * mitigate ad frames being displayed before they have time to be seeked past.
    */
   adBreakCheckOffset?: number;
 
