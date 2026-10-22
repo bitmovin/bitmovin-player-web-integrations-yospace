@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- `YospaceConfiguration.resourceTimeout` to set the timeout in seconds of the Yospace SDK for analytics beacons and resource requests
+
 ### Changed
 
 - Update `index.html` to use UIv4
