@@ -11,6 +11,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - Update `index.html` to use UIv4
 - Update `DVRLive` sample source to use recommended YoSpace stream parameters
+- Update Yospace Ad Management SDK to `3.11.3`
+  - The Yospace SDK now ships modern JavaScript syntax and relies on newer built-ins (e.g. `Array.prototype.at`, `Object.hasOwn`). Depending on the target platforms (e.g. older Smart TVs), integrators may need to transpile the SDK and/or add polyfills
+
+### Fixed
+
+- Timed metadata from `EXT-X-DATERANGE` tags is now passed to the Yospace SDK as a `TimedMetadata` instance (Live session mode)
+- `YospaceAdBreak.id` is now generated if the Yospace SDK provides none, aligning with the Bitmovin Player API
 
 ## [2.10.0] - 2025-04-17
 

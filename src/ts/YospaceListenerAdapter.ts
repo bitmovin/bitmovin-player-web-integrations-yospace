@@ -1,8 +1,8 @@
 import { ArrayUtils } from 'bitmovin-player-ui/dist/js/framework/arrayutils';
 import { Logger } from './Logger';
 import type { AdBreak, Advert, SessionErrorCode } from '@yospace/admanagement-sdk';
-import type { TrackingError } from '@yospace/admanagement-sdk/types/Public/TrackingError';
-import { AnalyticEventObserver } from '@yospace/admanagement-sdk';
+import type { TrackingError } from '@yospace/admanagement-sdk';
+import type { AnalyticEventObserver } from '@yospace/admanagement-sdk';
 
 /** BYS -> BitmovinYospace */
 export enum BYSListenerEvent {
@@ -54,8 +54,11 @@ export interface BYSListenerCallbackFunction {
  * Adapter for the listener passed to Yospace.
  * The default way would be to pass an object to Yospace with the structure of this class.
  * To simplify the Yospace callbacks handling this Adapter was introduced.
+ *
+ * As of Yospace SDK 3.10.0, extending the SDK's AnalyticEventObserver fails at runtime because the SDK ships native
+ * ES classes while this project compiles to ES5. It contains no logic, so we implement it as an interface instead.
  */
-export class YospaceAdListenerAdapter extends AnalyticEventObserver {
+export class YospaceAdListenerAdapter implements AnalyticEventObserver {
   private listeners: { [eventType: string]: BYSListenerCallbackFunction[] } = {};
 
   addListener(event: BYSListenerEvent, callback: BYSListenerCallbackFunction): void {
@@ -125,7 +128,7 @@ export class YospaceAdListenerAdapter extends AnalyticEventObserver {
   }
 
   onTrackingError(trackingError: TrackingError) {
-    Logger.warn('[BYP][listener] onTrackingError not implemented. Error code:' + trackingError?.errorCode);
+    Logger.warn('[BYP][listener] onTrackingError not implemented. Error code:' + trackingError?.getErrorCode());
   }
 
   private emitEvent(event: BYSListenerEventBase) {
