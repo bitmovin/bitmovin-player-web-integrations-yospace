@@ -309,6 +309,11 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       const properties = new SessionProperties();
       properties.setUserAgent(navigator.userAgent);
 
+      const { resourceTimeout } = this.yospaceConfig;
+      if (typeof resourceTimeout === 'number' && Number.isFinite(resourceTimeout) && resourceTimeout > 0) {
+        properties.setResourceTimeout(toMilliseconds(resourceTimeout));
+      }
+
       if (this.yospaceConfig.debugYospaceSdk) {
         YoLog.setDebugFlags(DebugFlags.DEBUG_ALL);
       }

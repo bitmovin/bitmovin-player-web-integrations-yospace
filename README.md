@@ -107,6 +107,7 @@ You can pass a third optional parameter to the player constructor:
 ```js
 const yospaceConfig: YospaceConfiguration = {
   debug: true,
+  resourceTimeout: 10, // Timeout in seconds for Yospace analytics beacons and resource requests (Yospace SDK default: 5)
 };
 // ...
 const bitmovinYospacePlayer = new BitmovinYospacePlayer(Player, playerContainer, conf, yospaceConfig);
