@@ -7,8 +7,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
-## [2.11.0] - 2026-10-23
-
 ### Added
 
 - `YospaceConfiguration.resourceTimeout` to set the timeout in seconds of the Yospace SDK for analytics beacons and resource requests
@@ -463,8 +461,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - Initial yospace integration
 
-[Unreleased]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/v2.11.0...HEAD
-[2.11.0]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/v2.10.0...v2.11.0
+[unreleased]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/v2.10.0...HEAD
 [2.10.0]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/v2.9.2...v2.10.0
 [2.9.2]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/v2.9.1...v2.9.2
 [2.9.1]: https://github.com/bitmovin/bitmovin-player-web-integrations-yospace/compare/v2.9.0...v2.9.1
