@@ -1,0 +1,28 @@
+name: Set up npm
+description: Log in to the Yospace private npm registry, set up node.js and install dependencies
+
+inputs:
+  yospace-auth-token:
+    description: Auth token for the Yospace private npm registry
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Log in to Yospace private NPM registry
+      shell: bash
+      env:
+        YOSPACE_AUTH_TOKEN: ${{ inputs.yospace-auth-token }}
+      run: |
+        cp .npmrc ~/.npmrc
+        echo "//yospacerepo.jfrog.io/artifactory/api/npm/javascript-sdk/:_authToken=${YOSPACE_AUTH_TOKEN}" >> ~/.npmrc
+
+    - name: Set up node.js
+      uses: actions/setup-node@v6
+      with:
+        node-version-file: .nvmrc
+        package-manager-cache: false # never use caching in release builds
+
+    - name: Install dependencies
+      shell: bash
+      run: npm ci
