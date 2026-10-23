@@ -31,7 +31,7 @@ jobs:
           echo "//yospacerepo.jfrog.io/artifactory/api/npm/javascript-sdk/:_authToken=${{ secrets.NPM_YOSPACE_AUTH_TOKEN }}" >> ~/.npmrc
 
       - name: Set up node.js
-        uses: actions/setup-node@v3.3.0
+        uses: actions/setup-node@v6
         with:
           node-version-file: .nvmrc
 
