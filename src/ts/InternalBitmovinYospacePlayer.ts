@@ -1222,6 +1222,8 @@ export class InternalBitmovinYospacePlayer implements BitmovinYospacePlayerAPI {
       // is to filter out ads with duration = 0.
       return (
         (this.session.getAdBreaksByType(BreakType.LINEAR) ?? [])
+          // The Player API defines that list() only returns upcoming ad breaks, so the currently active one is excluded.
+          .filter((adBreak: AdBreak) => adBreak !== this.getCurrentAdBreak())
           .map((adBreak: AdBreak) => this.mapAdBreak(adBreak))
           // filter out ad breaks deactivated by ad immunity
           .filter((adBreak: YospaceAdBreak) => adBreak.active && adBreak.duration > 0)
